@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-yellow: #F9D960;
+  --color-brand-teal: #042C45;
+  --color-brand-orange: #FF7D05;
+  --color-brand-brown: #66623C;
+}
+
+@layer base {
+  body {
+    font-family: var(--font-spartan);
+    @apply text-gray-900;
+    min-height: 100vh;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-fredoka);
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply font-semibold px-6 py-3 rounded-lg transition-all duration-200;
+    background-color: var(--color-brand-yellow);
+    color: var(--color-brand-teal);
+  }
+  
+  .btn-primary:hover {
+    background-color: #f4d03f;
+  }
+
+  .btn-secondary {
+    @apply text-white font-semibold px-6 py-3 rounded-lg transition-all duration-200;
+    background-color: var(--color-brand-orange);
+  }
+  
+  .btn-secondary:hover {
+    background-color: #e66a00;
+  }
+
+  .section-gradient {
+    background: linear-gradient(to bottom right, var(--color-brand-teal), #1e3a8a);
+  }
+}
