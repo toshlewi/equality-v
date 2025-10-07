@@ -10,24 +10,21 @@ export default function KnowledgePortalSnippet() {
       title: 'Digital Health Rights in Africa',
       author: 'Dr. Sarah Mwangi',
       date: 'Dec 15, 2024',
-      image: '/images/knowledge-blog.svg',
-      color: 'from-brand-yellow to-brand-orange'
+      image: '/images/place1 (6).jpg'
     },
     {
       type: 'Article',
       title: 'Economic Justice & Women\'s Labor',
       author: 'Prof. Aisha Hassan',
       date: 'Dec 10, 2024',
-      image: '/images/knowledge-article.svg',
-      color: 'from-brand-teal to-brand-brown'
+      image: '/images/place1 (7).jpg'
     },
     {
       type: 'Publication',
       title: 'SRHR Policy Framework 2024',
       author: 'Equality Vanguard Research Team',
       date: 'Dec 5, 2024',
-      image: '/images/knowledge-publication.svg',
-      color: 'from-brand-orange to-brand-yellow'
+      image: '/images/place1 (8).jpg'
     }
   ];
 
@@ -66,13 +63,6 @@ export default function KnowledgePortalSnippet() {
                     fill
                     className="object-cover"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent flex items-end">
-                    <div className="p-4 text-white">
-                      <div className="text-sm font-semibold text-brand-yellow uppercase tracking-wide">
-                        {publication.type}
-                      </div>
-                    </div>
-                  </div>
                 </div>
                 
                 <div className="p-6 space-y-3">
@@ -98,10 +88,10 @@ export default function KnowledgePortalSnippet() {
           className="text-center"
         >
           <Link 
-            href="/knowledge-portal"
+            href="/our-voices"
             className="btn-secondary text-lg px-8 py-4 hover:bg-brand-teal hover:text-white transition-all duration-300 transform hover:scale-105"
           >
-            Explore Knowledge Portal
+            Explore Our Voices
           </Link>
         </motion.div>
       </div>

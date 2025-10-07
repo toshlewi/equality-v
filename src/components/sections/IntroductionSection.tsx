@@ -18,17 +18,11 @@ export default function IntroductionSection() {
           >
             <div className="relative w-full h-96 rounded-2xl overflow-hidden shadow-xl">
               <Image
-                src="/images/journey-education.svg"
+                src="/images/place1 (12).jpg"
                 alt="The Journey - From law school to liberation"
                 fill
                 className="object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent flex items-end">
-                <div className="text-white p-6">
-                  <h3 className="font-fredoka text-xl font-bold mb-2">The Journey</h3>
-                  <p className="font-spartan text-sm">From law school to liberation</p>
-                </div>
-              </div>
             </div>
           </motion.div>
 

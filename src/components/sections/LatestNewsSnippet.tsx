@@ -70,7 +70,7 @@ export default function LatestNewsSnippet() {
                 
                 <div className="pt-4">
                   <Link 
-                    href="/events" 
+                    href="/our-voices" 
                     className="text-brand-orange font-semibold hover:text-brand-teal transition-colors duration-300 inline-flex items-center"
                   >
                     Read more
@@ -92,7 +92,7 @@ export default function LatestNewsSnippet() {
           className="text-center"
         >
           <Link 
-            href="/events"
+            href="/our-voices"
             className="btn-primary text-lg px-8 py-4 hover:bg-brand-orange hover:text-white transition-all duration-300 transform hover:scale-105"
           >
             See All News

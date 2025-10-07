@@ -8,36 +8,36 @@ export default function SocialHighlights() {
   const [isPaused, setIsPaused] = useState(false);
   
   const instagramPosts = [
-    { id: 1, image: '📸', caption: 'ALKAH Book Club session on "Purple Hibiscus"', likes: 42, type: 'post' },
-    { id: 2, image: '🎥', caption: 'Behind the scenes: Legal Vanguard workshop', likes: 38, type: 'reel' },
-    { id: 3, image: '📚', caption: 'New addition to our feminist library', likes: 29, type: 'post' },
-    { id: 4, image: '✊', caption: 'Marching for women\'s rights in Nairobi', likes: 156, type: 'reel' },
-    { id: 5, image: '🎤', caption: 'Podcast recording: Voices of Resistance', likes: 67, type: 'post' },
-    { id: 6, image: '🌍', caption: 'Pan-African feminist solidarity', likes: 89, type: 'story' },
-    { id: 7, image: '📝', caption: 'Writing workshop: Telling our stories', likes: 34, type: 'post' },
-    { id: 8, image: '🎨', caption: 'Art as resistance: Community mural project', likes: 78, type: 'reel' },
-    { id: 9, image: '💪', caption: 'Economic justice advocacy in action', likes: 45, type: 'post' },
-    { id: 10, image: '🔊', caption: 'Digital rights awareness campaign', likes: 92, type: 'reel' },
-    { id: 11, image: '📖', caption: 'Sylvia Tamale book discussion highlights', likes: 51, type: 'post' },
-    { id: 12, image: '🌟', caption: 'Celebrating our community achievements', likes: 103, type: 'story' },
-    { id: 13, image: '🎭', caption: 'Theater performance: "Breaking the Silence"', likes: 87, type: 'reel' },
-    { id: 14, image: '📊', caption: 'Research findings: Gender pay gap in tech', likes: 73, type: 'post' },
-    { id: 15, image: '🎪', caption: 'Community festival: Celebrating diversity', likes: 124, type: 'reel' },
-    { id: 16, image: '📱', caption: 'Digital literacy workshop for women', likes: 56, type: 'story' },
-    { id: 17, image: '🏛️', caption: 'Policy advocacy at Parliament', likes: 91, type: 'post' },
-    { id: 18, image: '🎵', caption: 'Feminist poetry night highlights', likes: 68, type: 'reel' },
-    { id: 19, image: '📺', caption: 'TV interview: Discussing SRHR rights', likes: 145, type: 'post' },
-    { id: 20, image: '🎓', caption: 'Graduation ceremony: Legal Vanguard cohort', likes: 112, type: 'story' },
-    { id: 21, image: '🌱', caption: 'Environmental justice: Women and climate', likes: 79, type: 'reel' },
-    { id: 22, image: '📰', caption: 'Media training: Amplifying our voices', likes: 63, type: 'post' },
-    { id: 23, image: '🎨', caption: 'Art therapy session: Healing through creativity', likes: 84, type: 'story' },
-    { id: 24, image: '🏃‍♀️', caption: '5K run for women\'s health awareness', likes: 97, type: 'reel' },
-    { id: 25, image: '📚', caption: 'New research: Intersectionality in African feminism', likes: 71, type: 'post' },
-    { id: 26, image: '🎪', caption: 'Youth summit: Next generation leaders', likes: 108, type: 'story' },
-    { id: 27, image: '🎭', caption: 'Drama workshop: Role-playing for change', likes: 52, type: 'reel' },
-    { id: 28, image: '📱', caption: 'App launch: Digital safety for women', likes: 89, type: 'post' },
-    { id: 29, image: '🎵', caption: 'Music video: "Rise Up Sisters"', likes: 156, type: 'reel' },
-    { id: 30, image: '📊', caption: 'Data visualization: Women in leadership', likes: 67, type: 'post' }
+    { id: 1, image: '/images/place1 (9).jpg', caption: 'ALKAH Book Club session on "Purple Hibiscus"', likes: 42, type: 'post' },
+    { id: 2, image: '/images/place1 (10).jpg', caption: 'Behind the scenes: Legal Vanguard workshop', likes: 38, type: 'reel' },
+    { id: 3, image: '/images/place1 (11).jpg', caption: 'New addition to our feminist library', likes: 29, type: 'post' },
+    { id: 4, image: '/images/place1 (12).jpg', caption: 'Marching for women\'s rights in Nairobi', likes: 156, type: 'reel' },
+    { id: 5, image: '/images/place1 (13).jpg', caption: 'Podcast recording: Voices of Resistance', likes: 67, type: 'post' },
+    { id: 6, image: '/images/place1 (14).jpg', caption: 'Pan-African feminist solidarity', likes: 89, type: 'story' },
+    { id: 7, image: '/images/place1 (15).jpg', caption: 'Writing workshop: Telling our stories', likes: 34, type: 'post' },
+    { id: 8, image: '/images/place1 (16).jpg', caption: 'Art as resistance: Community mural project', likes: 78, type: 'reel' },
+    { id: 9, image: '/images/place1 (17).jpg', caption: 'Economic justice advocacy in action', likes: 45, type: 'post' },
+    { id: 10, image: '/images/place1 (18).jpg', caption: 'Digital rights awareness campaign', likes: 92, type: 'reel' },
+    { id: 11, image: '/images/place1 (19).jpg', caption: 'Sylvia Tamale book discussion highlights', likes: 51, type: 'post' },
+    { id: 12, image: '/images/place1 (20).jpg', caption: 'Celebrating our community achievements', likes: 103, type: 'story' },
+    { id: 13, image: '/images/place1 (21).jpg', caption: 'Theater performance: "Breaking the Silence"', likes: 87, type: 'reel' },
+    { id: 14, image: '/images/place1 (22).jpg', caption: 'Research findings: Gender pay gap in tech', likes: 73, type: 'post' },
+    { id: 15, image: '/images/place1 (1).jpg', caption: 'Community festival: Celebrating diversity', likes: 124, type: 'reel' },
+    { id: 16, image: '/images/place1 (2).jpg', caption: 'Digital literacy workshop for women', likes: 56, type: 'story' },
+    { id: 17, image: '/images/place1 (3).jpg', caption: 'Policy advocacy at Parliament', likes: 91, type: 'post' },
+    { id: 18, image: '/images/place1 (4).jpg', caption: 'Feminist poetry night highlights', likes: 68, type: 'reel' },
+    { id: 19, image: '/images/place1 (5).jpg', caption: 'TV interview: Discussing SRHR rights', likes: 145, type: 'post' },
+    { id: 20, image: '/images/place1 (6).jpg', caption: 'Graduation ceremony: Legal Vanguard cohort', likes: 112, type: 'story' },
+    { id: 21, image: '/images/place1 (7).jpg', caption: 'Environmental justice: Women and climate', likes: 79, type: 'reel' },
+    { id: 22, image: '/images/place1 (8).jpg', caption: 'Media training: Amplifying our voices', likes: 63, type: 'post' },
+    { id: 23, image: '/images/place1 (9).jpg', caption: 'Art therapy session: Healing through creativity', likes: 84, type: 'story' },
+    { id: 24, image: '/images/place1 (10).jpg', caption: '5K run for women\'s health awareness', likes: 97, type: 'reel' },
+    { id: 25, image: '/images/place1 (11).jpg', caption: 'New research: Intersectionality in African feminism', likes: 71, type: 'post' },
+    { id: 26, image: '/images/place1 (12).jpg', caption: 'Youth summit: Next generation leaders', likes: 108, type: 'story' },
+    { id: 27, image: '/images/place1 (13).jpg', caption: 'Drama workshop: Role-playing for change', likes: 52, type: 'reel' },
+    { id: 28, image: '/images/place1 (14).jpg', caption: 'App launch: Digital safety for women', likes: 89, type: 'post' },
+    { id: 29, image: '/images/place1 (15).jpg', caption: 'Music video: "Rise Up Sisters"', likes: 156, type: 'reel' },
+    { id: 30, image: '/images/place1 (16).jpg', caption: 'Data visualization: Women in leadership', likes: 67, type: 'post' }
   ];
 
   const nextSlide = () => {
@@ -53,7 +53,11 @@ export default function SocialHighlights() {
     if (isPaused) return;
     
     const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % instagramPosts.length);
+      setCurrentIndex((prev) => {
+        const next = (prev + 1) % instagramPosts.length;
+        console.log('Auto-scroll: currentIndex =', next);
+        return next;
+      });
     }, 3000); // Change slide every 3 seconds
 
     return () => clearInterval(interval);
@@ -79,14 +83,16 @@ export default function SocialHighlights() {
 
         {/* Instagram Carousel */}
         <div 
-          className="relative"
+          className="relative overflow-hidden"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
+          style={{ height: '400px' }}
         >
           <motion.div
-            className="flex space-x-4 overflow-hidden"
-            animate={{ x: -currentIndex * 320 }}
+            className="flex space-x-4"
+            animate={{ x: -currentIndex * 336 }}
             transition={{ duration: 0.5, ease: "easeInOut" }}
+            style={{ width: `${instagramPosts.length * 336}px` }}
           >
             {instagramPosts.map((post, index) => (
               <motion.div
@@ -95,15 +101,20 @@ export default function SocialHighlights() {
                 whileInView={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 viewport={{ once: true }}
-                className="flex-shrink-0 w-80 relative group cursor-pointer"
+                className="flex-shrink-0 w-80 h-80 relative group cursor-pointer"
               >
                 {/* Media placeholder */}
-                <div className="aspect-square rounded-2xl overflow-hidden group-hover:scale-105 transition-transform duration-300 relative">
+                <div className="aspect-square rounded-2xl overflow-hidden group-hover:scale-105 transition-transform duration-300 relative bg-gradient-to-br from-brand-teal/20 to-brand-orange/20">
                   <Image
-                    src={post.type === 'reel' ? '/images/social-reel.svg' : post.type === 'story' ? '/images/social-story.svg' : '/images/social-post.svg'}
+                    src={post.image}
                     alt={`${post.type} - ${post.caption}`}
                     fill
                     className="object-cover"
+                    onLoad={() => console.log('Image loaded:', post.image)}
+                    onError={(e) => {
+                      console.error('Image failed to load:', post.image);
+                      e.currentTarget.src = '/images/place1 (1).jpg'; // fallback
+                    }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent flex items-end">
                     <div className="p-4 text-white">
@@ -188,12 +199,12 @@ export default function SocialHighlights() {
 
         {/* Progress indicator */}
         <div className="flex justify-center mt-8 space-x-2">
-          {Array.from({ length: Math.ceil(instagramPosts.length / 3) }, (_, i) => (
+          {Array.from({ length: Math.min(10, instagramPosts.length) }, (_, i) => (
             <button
               key={i}
-              onClick={() => setCurrentIndex(i * 3)}
+              onClick={() => setCurrentIndex(i)}
               className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                Math.floor(currentIndex / 3) === i 
+                currentIndex === i 
                   ? 'bg-brand-yellow scale-125' 
                   : 'bg-white/30 hover:bg-white/50'
               }`}
@@ -206,6 +217,9 @@ export default function SocialHighlights() {
           <span className="text-sm text-white/70">
             {currentIndex + 1} of {instagramPosts.length} posts
           </span>
+          <div className="text-xs text-white/50 mt-1">
+            Debug: currentIndex = {currentIndex}, translateX = {-currentIndex * 336}px
+          </div>
         </div>
 
         <motion.div

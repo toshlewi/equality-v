@@ -9,27 +9,21 @@ export default function ResourcesSnippet() {
       type: 'Articles',
       title: 'Digital Rights & Gender Justice',
       description: 'Exploring the intersection of technology and women\'s rights in Africa',
-      icon: '📄',
-      color: 'from-brand-yellow to-brand-orange',
-      image: '/images/resources-articles.svg',
+      image: '/images/place1 (3).jpg',
       link: '/our-voices'
     },
     {
       type: 'Videos',
       title: 'Our Voices Documentary',
       description: 'Stories of resilience and resistance from across the continent',
-      icon: '🎥',
-      color: 'from-brand-teal to-brand-brown',
-      image: '/images/resources-videos.svg',
+      image: '/images/place1 (4).jpg',
       link: '/our-voices'
     },
     {
       type: 'Podcasts & Audio',
       title: 'ALKAH Book Club Sessions',
       description: 'Deep conversations on feminist literature and Pan-African thought',
-      icon: '🎧',
-      color: 'from-brand-orange to-brand-yellow',
-      image: '/images/resources-podcasts.svg',
+      image: '/images/place1 (5).jpg',
       link: '/our-voices'
     }
   ];
@@ -70,13 +64,6 @@ export default function ResourcesSnippet() {
                     fill
                     className="object-cover"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent flex items-end">
-                    <div className="p-4 text-white">
-                      <div className={`w-12 h-12 rounded-full bg-gradient-to-r ${resource.color} flex items-center justify-center text-xl mb-3 group-hover:scale-110 transition-transform duration-300`}>
-                        {resource.icon}
-                      </div>
-                    </div>
-                  </div>
                 </div>
                 
                 <div className="p-6">

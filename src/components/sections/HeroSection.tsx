@@ -59,17 +59,12 @@ export default function HeroSection() {
           >
              <div className="relative w-full h-96 lg:h-[500px] rounded-2xl overflow-hidden shadow-2xl">
                <Image
-                 src="/images/hero-africa-woman.svg"
+                 src="/images/place1 (15).jpg"
                  alt="Equality Vanguard - Pan-African feminist collective"
                  fill
                  className="object-cover"
+                 priority
                />
-               <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent flex items-end">
-                 <div className="text-white p-8">
-                   <h3 className="font-fredoka text-2xl font-bold mb-2">Justice & Liberation</h3>
-                   <p className="font-spartan">Through law, art, and community</p>
-                 </div>
-               </div>
              </div>
           </motion.div>
         </div>
