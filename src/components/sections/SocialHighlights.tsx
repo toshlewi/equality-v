@@ -110,6 +110,7 @@ export default function SocialHighlights() {
                     alt={`${post.type} - ${post.caption}`}
                     fill
                     className="object-cover"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                     onLoad={() => console.log('Image loaded:', post.image)}
                     onError={(e) => {
                       console.error('Image failed to load:', post.image);
@@ -217,9 +218,6 @@ export default function SocialHighlights() {
           <span className="text-sm text-white/70">
             {currentIndex + 1} of {instagramPosts.length} posts
           </span>
-          <div className="text-xs text-white/50 mt-1">
-            Debug: currentIndex = {currentIndex}, translateX = {-currentIndex * 336}px
-          </div>
         </div>
 
         <motion.div

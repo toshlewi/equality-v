@@ -57,15 +57,15 @@ export default function HeroSection() {
             transition={{ duration: 0.8, delay: 0.3 }}
             className="relative"
           >
-             <div className="relative w-full h-96 lg:h-[500px] rounded-2xl overflow-hidden shadow-2xl">
-               <Image
-                 src="/images/place1 (15).jpg"
-                 alt="Equality Vanguard - Pan-African feminist collective"
-                 fill
-                 className="object-cover"
-                 priority
-               />
-             </div>
+             <Image
+               src="/images/hero-5.png"
+               alt="Equality Vanguard - Pan-African feminist collective"
+               width={600}
+               height={500}
+               className="w-full h-auto object-cover"
+               priority
+               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+             />
           </motion.div>
         </div>
       </div>

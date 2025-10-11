@@ -22,6 +22,7 @@ export default function IntroductionSection() {
                 alt="The Journey - From law school to liberation"
                 fill
                 className="object-cover"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 50vw"
               />
             </div>
           </motion.div>

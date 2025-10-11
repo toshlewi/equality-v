@@ -9,7 +9,7 @@ export default function ResourcesSnippet() {
       type: 'Articles',
       title: 'Digital Rights & Gender Justice',
       description: 'Exploring the intersection of technology and women\'s rights in Africa',
-      image: '/images/place1 (3).jpg',
+      image: '/images/hero-3.png',
       link: '/our-voices'
     },
     {
