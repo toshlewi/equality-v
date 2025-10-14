@@ -2,6 +2,13 @@ import mongoose from 'mongoose';
 
 const MONGODB_URI = process.env.MONGODB_URI!;
 
+declare global {
+  var mongoose: {
+    conn: typeof mongoose | null;
+    promise: Promise<typeof mongoose> | null;
+  };
+}
+
 if (!MONGODB_URI) {
   throw new Error('Please define MONGODB_URI in .env.local');
 }
@@ -12,7 +19,7 @@ if (!cached) {
   cached = global.mongoose = { conn: null, promise: null };
 }
 
-async function dbConnect() {
+export const connectDB = async () => {
   if (cached.conn) {
     return cached.conn;
   }
@@ -25,6 +32,6 @@ async function dbConnect() {
 
   cached.conn = await cached.promise;
   return cached.conn;
-}
+};
 
-export default dbConnect;
+export default connectDB;

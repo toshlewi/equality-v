@@ -10,7 +10,7 @@ export default function Navbar() {
     { href: '/', label: 'Home' },
     { href: '/about', label: 'About' },
     { href: '/our-work', label: 'Our Work' },
-    { href: '/knowledge-portal', label: 'Knowledge Portal' },
+    { href: '/matriarchive', label: 'MatriArchive' },
     { href: '/our-voices', label: 'Our Voices' },
     { href: '/events', label: 'Events/News' },
     { href: '/get-involved', label: 'Get Involved' },

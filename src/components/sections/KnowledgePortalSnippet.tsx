@@ -39,7 +39,7 @@ export default function KnowledgePortalSnippet() {
           className="text-center mb-16"
         >
           <h2 className="font-fredoka text-4xl font-bold text-brand-teal mb-4">
-            Knowledge Portal
+            MatriArchive
           </h2>
           <p className="font-spartan text-lg text-gray-600 max-w-2xl mx-auto">
             Access our latest research, publications, and resources on gender justice and Pan-African feminism
@@ -48,7 +48,7 @@ export default function KnowledgePortalSnippet() {
 
         <div className="grid md:grid-cols-3 gap-8 mb-12">
           {publications.map((publication, index) => (
-            <Link key={publication.title} href="/knowledge-portal">
+            <Link key={publication.title} href="/matriarchive">
               <motion.div
                 initial={{ opacity: 0, y: 50 }}
                 whileInView={{ opacity: 1, y: 0 }}

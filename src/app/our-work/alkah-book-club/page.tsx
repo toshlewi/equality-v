@@ -93,7 +93,7 @@ export default function ALKAHBookClubPage() {
                   Join Our Next Session
                 </Button>
               </Link>
-              <Link href="/knowledge-portal/book-suggestions">
+              <Link href="/matriarchive/book-suggestions">
                 <Button 
                   size="lg" 
                   variant="outline"
@@ -141,7 +141,7 @@ export default function ALKAHBookClubPage() {
               Our Book Club is also connected to our library repository, a living archive of recommended readings in our focus areas: sexual and reproductive health and rights (SRHR), economic justice, gender justice, and digital rights. It is a resource and a reminder that justice begins with learning, and that learning is most powerful when shared.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/knowledge-portal/alkah-library">
+              <Link href="/matriarchive/alkah-library">
                 <Button 
                   size="lg" 
                   className="bg-brand-yellow text-brand-teal hover:bg-brand-orange hover:text-white px-8 py-4 text-lg"
@@ -220,12 +220,12 @@ export default function ALKAHBookClubPage() {
                   Join Our Next Session
                 </Button>
               </Link>
-              <Link href="/knowledge-portal/book-suggestions">
+              <Link href="/matriarchive/book-suggestions">
                 <Button variant="outline" className="w-full border-brand-teal text-brand-teal hover:bg-brand-teal hover:text-white">
                   Suggest a Book
                 </Button>
               </Link>
-              <Link href="/knowledge-portal/alkah-library">
+              <Link href="/matriarchive/alkah-library">
                 <Button variant="outline" className="w-full border-brand-teal text-brand-teal hover:bg-brand-teal hover:text-white">
                   Browse Our Library
                 </Button>
@@ -249,7 +249,7 @@ export default function ALKAHBookClubPage() {
                 Join ALKAH
               </Button>
             </Link>
-            <Link href="/knowledge-portal/alkah-library">
+            <Link href="/matriarchive/alkah-library">
               <Button 
                 size="lg" 
                 variant="outline"

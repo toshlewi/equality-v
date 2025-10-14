@@ -42,4 +42,13 @@
   .section-gradient {
     background: linear-gradient(to bottom right, var(--color-brand-teal), #1e3a8a);
   }
+
+  /* Hide scrollbar while keeping scroll behavior */
+  .scrollbar-none {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
 }

@@ -5,7 +5,7 @@ Homepage
 o	Home
 o	About
 o	Our Work
-o	Knowledge Portal
+o	MatriArhive
 o	Our Voices
 o	Events/News
 o	Get Involved
@@ -14,7 +14,7 @@ INTRODUCTORY SUMMARY
 Equality Vanguard is a Pan-African feminist collective dismantling oppression through law, art, and radical community. We fuse legal advocacy with creative expression using film, storytelling, music, poetry and more to decolonize knowledge and reimagine justice that is accessible, intersectional, transformative, and rooted in liberation.
 •	Section 2: Resources Snippet
 o	4 stories from Our Voice page (with image description and link to respective pages)
-o	4 items from the Knowledge Portal page (each with image, description, and link)
+o	4 items from the MatriArhive page (each with image, description, and link)
 •	Section 3: Latest Updates
 o	Showcase recent publications, campaigns, highlights
 o	Tagline, photos, and links to the actual pages and files
@@ -137,7 +137,7 @@ Together, we are building communities where reproductive justice is recognized a
 ________________________________________
 Coming Soon: Mental Health
 (Section heading included here since you listed it, but no full text was provided. If you want, I can insert the raw draft or leave this blank until you finalize content.)
-Knowledge Portal
+MatriArhive
 •	Navbar Subpages
 o	Equality Vanguard Publications
 o	ALKAH Library
@@ -349,7 +349,7 @@ Homepage
 •	Hero Section (intro summary)
 o	Motion: Fade-in + slight upward move for headline and text.
 o	Background: Gradient background with slow animated shift or a subtle feminist-themed pattern (abstract lines, woven textures).
-•	Resources Snippet (Our Voices + Knowledge Portal teasers)
+•	Resources Snippet (Our Voices + MatriArhive teasers)
 o	Motion: Cards fade-in on scroll, hover zoom effect on images.
 o	Background: Clean white or very light patterned grid.
 •	Latest Updates
@@ -399,7 +399,7 @@ o	Background: Gradient with soft organic shapes.
 o	Motion: Placeholder card fades-in.
 o	Background: Calming pastel gradient.
 ________________________________________
-Knowledge Portal
+MatriArhive
 •	Publications
 o	Motion: Cards grid fade-in staggered, hover lift with shadow.
 o	Background: Clean white.
@@ -461,7 +461,7 @@ Admin Portal Structure
 1. Dashboard (Home)
 •	Overview cards:
 o	Total published content (blogs, articles, reports, toolkits, guides, stories, videos, podcasts)
-o	Pending submissions (Knowledge Portal, Our Voices)
+o	Pending submissions (MatriArhive, Our Voices)
 o	Events (upcoming, registrations, payments)
 o	Donations, Store orders, Memberships
 o	Volunteer/Job applications
@@ -472,7 +472,7 @@ ________________________________________
 Homepage Content
 •	CRUD hero text and images
 •	CRUD featured stories (Our Voices teasers)
-•	CRUD featured Knowledge Portal items
+•	CRUD featured MatriArhive items
 •	CRUD CTA buttons and banners
 About Page
 •	CRUD story/mission/vision text
@@ -492,7 +492,7 @@ o	Legal Vanguard (content + Ruth Kamande case images)
 o	SRHR
 o	Mental Health (future expansion)
 ________________________________________
-3. Knowledge Portal
+3. MatriArhive
 Content Types
 •	Blogs
 •	Articles
@@ -560,7 +560,7 @@ Merch Store (E-commerce)
 •	Shipping management
 ________________________________________
 7. Notifications Center
-•	New submissions (Knowledge Portal, Our Voices)
+•	New submissions (MatriArhive, Our Voices)
 •	New events registration
 •	New donation
 •	New membership subscription
@@ -700,7 +700,7 @@ API endpoints
 •	POST /api/admin/submissions/:id/publish — change status to published, create a Publication record on site, notify submitter, add author attribution, add to Mailchimp if opted
 •	POST /api/admin/submissions/:id/reject — set status=rejected, send rejection email with reason
 Admin workflow
-•	Admin views pending queue, opens PDF preview, reads metadata, choose Approve and Publish or Reject with notes. Approve triggers publication creation and schedules (immediate or future publish date). Publishing creates a content record in Knowledge Portal.
+•	Admin views pending queue, opens PDF preview, reads metadata, choose Approve and Publish or Reject with notes. Approve triggers publication creation and schedules (immediate or future publish date). Publishing creates a content record in MatriArhive.
 Notifications
 •	Submitter receives email: submission received (pending) and later approved/published or rejected (with reviewer notes).
 •	Admin receives email and in-app notification for new submission.
@@ -999,7 +999,7 @@ Deliverables for dev handoff
 Tech Stack with MongoDB
 1. Frontend (User-facing site)
 •	Framework: Next.js (React-based)
-o	Pages for Home, About, Our Work, Knowledge Portal, Our Voices, Events & News, Get Involved, Shop, Legal, Admin.
+o	Pages for Home, About, Our Work, MatriArhive, Our Voices, Events & News, Get Involved, Shop, Legal, Admin.
 o	Server-Side Rendering (SSR) for SEO on public pages.
 o	Static Site Generation (SSG) for content that doesn’t change often (e.g., About, Team).
 o	Client-side navigation for fast, app-like experience.
@@ -1044,7 +1044,7 @@ o	Stores all data models:
 o	Schema validation, hooks (e.g., pre-save, post-save).
 o	Relationships via references or embedded docs depending on use case.
 •	Search Layer: MongoDB Atlas Search
-o	Full-text search for Knowledge Portal content, blogs, and resources.
+o	Full-text search for MatriArhive content, blogs, and resources.
 o	Tag-based filtering and relevance ranking.
 ________________________________________
 4. Storage (Files, Media, Docs)
@@ -1259,7 +1259,7 @@ ________________________________________
 •	✅ Blog/article/story submission flow → admin review → publish.
 •	✅ Donations (Stripe + M-Pesa) working securely.
 •	✅ Events: registration, payment, email tickets + calendar invites.
-•	✅ Knowledge Portal CRUD tested in admin.
+•	✅ MatriArhive CRUD tested in admin.
 •	✅ Notifications reach admin dashboard + email.
 •	✅ Mailchimp integration tested.
 •	✅ Accessibility check (contrast, screen reader compatibility).
@@ -1291,7 +1291,7 @@ Roadmap
 Day 1–2: Initial Setup + Frontend Shell
 •	Frontend:
 o	Create Next.js app with Tailwind + Framer Motion.
-o	Build key routes: Home, Our Work, Knowledge Portal, Our Voices, Events & News, Get Involved, Contact.
+o	Build key routes: Home, Our Work, MatriArhive, Our Voices, Events & News, Get Involved, Contact.
 o	Add navigation, footer, global styles, and page layouts.
 o	Use real content you provided (Our Work full text, team bios, etc.) so client sees meaningful content from Day 1.
 o	Deploy immediately to Vercel for client feedback.

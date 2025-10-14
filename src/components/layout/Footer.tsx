@@ -17,8 +17,8 @@ export default function Footer() {
           <div>
             <h3 className="font-fredoka text-xl mb-4 text-brand-yellow">Resources</h3>
             <ul className="space-y-2">
-              <li><Link href="/knowledge-portal">Publications</Link></li>
-              <li><Link href="/knowledge-portal/library">ALKAH Library</Link></li>
+              <li><Link href="/matriarchive/publications">Publications</Link></li>
+              <li><Link href="/matriarchive/alkah-library">ALKAH Library</Link></li>
             </ul>
           </div>
           <div>

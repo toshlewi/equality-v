@@ -1,0 +1,8 @@
+This directory contains placeholder images for the MatriArhive section.
+
+Placeholder images should be added to:
+- /public/image/books/ - for book covers
+- /public/image/publications/ - for publication covers
+- /public/image/logo.png - for the site logo
+
+For now, the application will use placeholder divs with background colors.
