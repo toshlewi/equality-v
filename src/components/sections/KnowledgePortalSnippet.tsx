@@ -88,10 +88,10 @@ export default function KnowledgePortalSnippet() {
           className="text-center"
         >
           <Link 
-            href="/our-voices"
+            href="/matriarchive"
             className="btn-secondary text-lg px-8 py-4 hover:bg-brand-teal hover:text-white transition-all duration-300 transform hover:scale-105"
           >
-            Explore Our Voices
+            Explore MatriArchive
           </Link>
         </motion.div>
       </div>

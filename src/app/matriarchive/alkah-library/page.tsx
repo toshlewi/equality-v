@@ -26,7 +26,7 @@ export default function AlkahLibraryPage() {
     {
       title: "Books Covered",
       description: "Discover the books we've discussed in our book club sessions with detailed notes and insights.",
-      href: "/matriarchive/alkah-library/books-covered",
+      href: "/matriarchive/alkah-library/book-library",
       icon: <BookMarked className="w-8 h-8" />,
       stats: "25+ Discussions",
       color: "bg-green-500"

@@ -215,7 +215,7 @@ export default function PublicationsPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: index * 0.1 }}
                 >
-                  <Link href={`/matriarchive/publications/${publication.slug}`}>
+                  <Link href={`/matriarchive/publications/${publication._id}`}>
                     <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 group cursor-pointer border-l-4 border-brand-yellow overflow-hidden">
                       {/* Cover Image */}
                       <div className="relative h-48 bg-gray-200">
@@ -281,10 +281,10 @@ export default function PublicationsPage() {
                           </div>
                         )}
 
-                        <div className="flex items-center text-brand-teal font-medium group-hover:text-brand-orange transition-colors">
-                          <span className="text-sm">Read More</span>
-                          <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                        </div>
+                      <div className="flex items-center text-brand-teal font-medium group-hover:text-brand-orange transition-colors">
+                        <span className="text-sm">Read More</span>
+                        <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                      </div>
                       </div>
                     </div>
                   </Link>

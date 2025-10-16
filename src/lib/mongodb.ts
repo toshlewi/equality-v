@@ -4,9 +4,9 @@ const MONGODB_URI = process.env.MONGODB_URI!;
 
 declare global {
   var mongoose: {
-    conn: typeof mongoose | null;
-    promise: Promise<typeof mongoose> | null;
-  };
+    conn: mongoose.Connection | null;
+    promise: Promise<mongoose.Connection> | null;
+  } | undefined;
 }
 
 if (!MONGODB_URI) {
@@ -26,7 +26,7 @@ export const connectDB = async () => {
 
   if (!cached.promise) {
     cached.promise = mongoose.connect(MONGODB_URI).then((mongoose) => {
-      return mongoose;
+      return mongoose.connection;
     });
   }
 

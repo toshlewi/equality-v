@@ -124,7 +124,7 @@ export default function ToolkitsGuidesPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Header Section */}
-      <section className="bg-gradient-to-r from-brand-teal to-blue-700 text-white py-16">
+      <section className="bg-[#042C45] text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -144,7 +144,7 @@ export default function ToolkitsGuidesPage() {
       </section>
 
       {/* Filters and Search */}
-      <section className="py-8 bg-gray-50 border-b">
+      <section className="py-8 bg-gray-50 border-b-2 border-[#FF7D05]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
             {/* Search */}
@@ -155,7 +155,7 @@ export default function ToolkitsGuidesPage() {
                 placeholder="Search toolkits..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-teal focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border-2 border-[#FF7D05]/30 rounded-lg focus:ring-2 focus:ring-[#FF7D05] focus:border-[#FF7D05]"
               />
             </div>
 
@@ -166,7 +166,7 @@ export default function ToolkitsGuidesPage() {
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-brand-teal focus:border-transparent"
+                  className="border-2 border-[#FF7D05]/30 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#FF7D05] focus:border-[#FF7D05]"
                 >
                   {categories.map((category) => (
                     <option key={category} value={category}>
@@ -179,7 +179,7 @@ export default function ToolkitsGuidesPage() {
               <select
                 value={selectedAudience}
                 onChange={(e) => setSelectedAudience(e.target.value)}
-                className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-brand-teal focus:border-transparent"
+                className="border-2 border-[#FF7D05]/30 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#FF7D05] focus:border-[#FF7D05]"
               >
                 {audiences.map((audience) => (
                   <option key={audience} value={audience}>
@@ -191,7 +191,7 @@ export default function ToolkitsGuidesPage() {
               <select
                 value={selectedDifficulty}
                 onChange={(e) => setSelectedDifficulty(e.target.value)}
-                className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-brand-teal focus:border-transparent"
+                className="border-2 border-[#FF7D05]/30 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#FF7D05] focus:border-[#FF7D05]"
               >
                 {difficulties.map((difficulty) => (
                   <option key={difficulty} value={difficulty}>
@@ -203,7 +203,7 @@ export default function ToolkitsGuidesPage() {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-brand-teal focus:border-transparent"
+                className="border-2 border-[#FF7D05]/30 rounded-lg px-3 py-2 focus:ring-2 focus:ring-[#FF7D05] focus:border-[#FF7D05]"
               >
                 <option value="newest">Newest First</option>
                 <option value="oldest">Oldest First</option>
@@ -240,7 +240,8 @@ export default function ToolkitsGuidesPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: index * 0.1 }}
                 >
-                  <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 group cursor-pointer border-l-4 border-brand-yellow overflow-hidden">
+                  <Link href={`/matriarchive/toolkits-guides/${toolkit._id}`}>
+                    <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 group cursor-pointer border-l-4 border-[#FF7D05] overflow-hidden">
                     {/* Cover Image */}
                     <div className="relative h-48 bg-gray-200">
                       {toolkit.coverImage ? (
@@ -329,7 +330,8 @@ export default function ToolkitsGuidesPage() {
                         <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                       </div>
                     </div>
-                  </div>
+                    </div>
+                  </Link>
                 </motion.div>
               ))}
             </div>
