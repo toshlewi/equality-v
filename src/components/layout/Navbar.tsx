@@ -12,7 +12,7 @@ export default function Navbar() {
     { href: '/our-work', label: 'Our Work' },
     { href: '/matriarchive', label: 'MatriArchive' },
     { href: '/our-voices', label: 'Our Voices' },
-    { href: '/events', label: 'Events/News' },
+    { href: '/events-news', label: 'Events & News' },
     { href: '/get-involved', label: 'Get Involved' },
   ];
 

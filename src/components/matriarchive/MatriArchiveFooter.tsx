@@ -47,7 +47,7 @@ export default function MatriArchiveFooter() {
                 </Link>
               </li>
               <li>
-                <Link href="/events" className="text-sm text-gray-600 hover:text-brand-yellow transition-colors font-spartan">
+                <Link href="/events-news" className="text-sm text-gray-600 hover:text-brand-yellow transition-colors font-spartan">
                   Events & News
                 </Link>
               </li>
