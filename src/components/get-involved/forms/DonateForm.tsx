@@ -54,7 +54,7 @@ export function DonateForm({ onClose }: DonateFormProps) {
     >
       <div className="text-center mb-8">
         <h2 className="text-3xl font-bold text-[#042C45] mb-4 font-fredoka">
-          Support Our Work
+          Donate and Support Our Work
         </h2>
         <p className="text-gray-600 font-league-spartan">
           Help fund our initiatives and campaigns. Every contribution makes a difference.
@@ -135,7 +135,7 @@ export function DonateForm({ onClose }: DonateFormProps) {
           <>
             <div>
               <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-2 font-league-spartan">
-                Donation Amount (USD) *
+                 Donation Amount (KSh) *
               </label>
               <input
                 type="number"
@@ -144,10 +144,10 @@ export function DonateForm({ onClose }: DonateFormProps) {
                 value={formData.amount}
                 onChange={handleInputChange}
                 required
-                min="1"
-                step="0.01"
+                 min="1000"
+                 step="1000"
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F9D960] focus:border-transparent transition-colors font-league-spartan"
-                placeholder="Enter donation amount"
+                 placeholder="Enter donation amount in KSh"
               />
             </div>
 

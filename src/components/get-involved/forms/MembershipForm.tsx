@@ -12,7 +12,7 @@ export function MembershipForm({ onClose }: MembershipFormProps) {
     fullName: '',
     email: '',
     phone: '',
-    membershipTier: '1-year',
+    membershipYears: '1',
     paymentMethod: 'stripe',
     couponCode: '',
     acceptTerms: false
@@ -51,10 +51,10 @@ export function MembershipForm({ onClose }: MembershipFormProps) {
     >
       <div className="text-center mb-8">
         <h2 className="text-3xl font-bold text-[#042C45] mb-4 font-fredoka">
-          Join the Sisterhood
+          Make a Change, Join the Sisterhood
         </h2>
         <p className="text-gray-600 font-league-spartan">
-          Become a member of Equality Vanguard and help drive gender justice forward.
+          Become a member of our community and help drive gender justice forward. Your voice matters.
         </p>
       </div>
 
@@ -111,19 +111,44 @@ export function MembershipForm({ onClose }: MembershipFormProps) {
           </div>
 
           <div>
-            <label htmlFor="membershipTier" className="block text-sm font-medium text-gray-700 mb-2 font-league-spartan">
-              Membership Tier *
+            <label htmlFor="membershipYears" className="block text-sm font-medium text-gray-700 mb-2 font-league-spartan">
+              Number of Years *
             </label>
             <select
-              id="membershipTier"
-              name="membershipTier"
-              value={formData.membershipTier}
+              id="membershipYears"
+              name="membershipYears"
+              value={formData.membershipYears}
               onChange={handleInputChange}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F9D960] focus:border-transparent transition-colors font-league-spartan"
             >
-              <option value="1-year">1 Year Membership</option>
-              <option value="lifetime">Lifetime Membership</option>
+              <option value="1">1 Year</option>
+              <option value="2">2 Years</option>
+              <option value="3">3 Years</option>
+              <option value="5">5 Years</option>
             </select>
+          </div>
+        </div>
+
+        {/* Membership Fee Highlight */}
+        <div className="bg-gradient-to-r from-[#F9D960] to-[#F9D960]/80 rounded-xl p-6 border-2 border-[#042C45]/20">
+          <div className="text-center">
+            <h3 className="text-2xl font-bold text-[#042C45] mb-2 font-fredoka">
+              Membership Fee
+            </h3>
+            <div className="text-center">
+              <div className="text-4xl font-bold text-[#042C45] font-fredoka mb-1">
+                KSh {(parseInt(formData.membershipYears) * 5000).toLocaleString()}
+              </div>
+              <div className="text-lg text-[#042C45]/80 font-league-spartan mb-3">
+                for {formData.membershipYears} {parseInt(formData.membershipYears) === 1 ? 'year' : 'years'} 
+                <span className="block text-sm mt-1">
+                  (KSh 5,000 per year)
+                </span>
+              </div>
+            </div>
+            <p className="text-sm text-[#042C45]/80 font-league-spartan">
+              All proceeds support our gender justice initiatives
+            </p>
           </div>
         </div>
 
