@@ -57,7 +57,7 @@ export default function GetInvolvedSection() {
               className="group"
             >
               <Link href={action.href}>
-                <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-brand-yellow group-hover:bg-gradient-to-br group-hover:from-brand-yellow/5 group-hover:to-brand-orange/5">
+                <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-[#042c45] group-hover:bg-gradient-to-br group-hover:from-white group-hover:to-[#042c45]/5">
                   <div className={`w-20 h-20 rounded-full bg-gradient-to-r ${action.color} flex items-center justify-center text-3xl mb-6 mx-auto group-hover:scale-110 transition-transform duration-300`}>
                     {action.icon}
                   </div>

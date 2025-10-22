@@ -30,7 +30,7 @@ export default function SRHRPage() {
     <WorkPageLayout
       title="Sexual and Reproductive Health and Rights"
       subtitle="Centering SRHR as a cornerstone of justice and liberation"
-      heroImage="/images/raised fists.jpeg"
+      heroImage="/images/team2.JPG"
     >
       <motion.div
         variants={staggerContainer}
@@ -151,9 +151,11 @@ export default function SRHRPage() {
                   Join Our Campaigns
                 </Button>
               </Link>
-              <Button variant="outline" className="w-full border-brand-teal text-brand-teal hover:bg-brand-teal hover:text-white">
-                Support Our Work
-              </Button>
+              <Link href="/get-involved#donate">
+                <Button variant="outline" className="w-full border-brand-teal text-brand-teal hover:bg-brand-teal hover:text-white">
+                  Support Our Work
+                </Button>
+              </Link>
             </div>
           </div>
         </motion.section>
@@ -165,12 +167,14 @@ export default function SRHRPage() {
             Together, we are building communities where reproductive justice is recognized as fundamental to equality. Your voice and support make this possible.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button 
-              size="lg" 
-              className="bg-brand-yellow text-brand-teal hover:bg-brand-orange hover:text-white px-8 py-4 text-lg"
-            >
-              Get Involved
-            </Button>
+            <Link href="/get-involved">
+              <Button 
+                size="lg" 
+                className="bg-brand-yellow text-brand-teal hover:bg-brand-orange hover:text-white px-8 py-4 text-lg"
+              >
+                Get Involved
+              </Button>
+            </Link>
           </div>
         </motion.section>
       </motion.div>

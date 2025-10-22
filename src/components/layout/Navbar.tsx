@@ -1,10 +1,12 @@
 'use client';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
   
   const links = [
     { href: '/', label: 'Home' },
@@ -15,6 +17,11 @@ export default function Navbar() {
     { href: '/events-news', label: 'Events & News' },
     { href: '/get-involved', label: 'Get Involved' },
   ];
+
+  // Close menu when pathname changes (navigation occurs)
+  useEffect(() => {
+    setIsOpen(false);
+  }, [pathname]);
 
   return (
     <nav className="bg-brand-teal text-white sticky top-0 z-50 shadow-lg">
@@ -43,7 +50,12 @@ export default function Navbar() {
         {isOpen && (
           <div className="md:hidden pb-4">
             {links.map((link) => (
-              <Link key={link.href} href={link.href} className="block py-2 hover:text-brand-yellow">
+              <Link 
+                key={link.href} 
+                href={link.href} 
+                className="block py-2 hover:text-brand-yellow"
+                onClick={() => setIsOpen(false)}
+              >
                 {link.label}
               </Link>
             ))}

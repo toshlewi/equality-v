@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 import WorkPageLayout from '@/components/layout/WorkPageLayout';
 import { Button } from '@/components/ui/button';
 
@@ -28,7 +29,7 @@ export default function EconomicJusticePage() {
     <WorkPageLayout
       title="Economic Justice"
       subtitle="Challenging neoliberal frameworks and advocating for feminist economic alternatives"
-      heroImage="/images/fundamental-rights.jpeg"
+      heroImage="/images/team7.JPEG"
     >
       <motion.div
         variants={staggerContainer}
@@ -122,12 +123,14 @@ export default function EconomicJusticePage() {
             <p className="text-lg leading-relaxed mb-6">
               An economy that gauges success by human well-being and planetary health, rather than by abstract growth figures or profit margins. Economic justice is the right to live with dignity, to offer and receive care, and to participate in shaping the principles of our collective future.
             </p>
-            <Button 
-              size="lg" 
-              className="bg-brand-yellow text-brand-teal hover:bg-brand-orange hover:text-white"
-            >
-              Learn More About Our Work
-            </Button>
+            <Link href="/about">
+              <Button 
+                size="lg" 
+                className="bg-brand-yellow text-brand-teal hover:bg-brand-orange hover:text-white"
+              >
+                Learn More About Our Work
+              </Button>
+            </Link>
           </div>
         </motion.section>
 
@@ -183,12 +186,14 @@ export default function EconomicJusticePage() {
             Designating neoliberalism as a form of gender-based violence is a necessary act of truth-telling. By contesting privatization and deleterious economic reforms, we endeavor to construct an economy that heals rather than inflicts harm.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button 
-              size="lg" 
-              className="bg-brand-yellow text-brand-teal hover:bg-brand-orange hover:text-white px-8 py-4 text-lg"
-            >
-              Get Involved
-            </Button>
+            <Link href="/get-involved">
+              <Button 
+                size="lg" 
+                className="bg-brand-yellow text-brand-teal hover:bg-brand-orange hover:text-white px-8 py-4 text-lg"
+              >
+                Get Involved
+              </Button>
+            </Link>
           </div>
         </motion.section>
       </motion.div>

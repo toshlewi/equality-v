@@ -72,7 +72,7 @@ export default function WorkCard({
               fill
               className="object-cover group-hover:scale-110 transition-transform duration-500"
             />
-            <div className={`absolute inset-0 bg-gradient-to-t ${color} opacity-20 group-hover:opacity-30 transition-opacity duration-300`} />
+            <div className={`absolute inset-0 bg-gradient-to-t ${color} opacity-5 group-hover:opacity-10 transition-opacity duration-300`} />
             {comingSoon && (
               <div className="absolute top-4 right-4 bg-brand-orange text-white px-3 py-1 rounded-full text-sm font-semibold">
                 Coming Soon

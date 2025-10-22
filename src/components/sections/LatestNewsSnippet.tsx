@@ -92,7 +92,7 @@ export default function LatestNewsSnippet() {
           className="text-center"
         >
           <Link 
-            href="/our-voices"
+            href="/events-news#news"
             className="btn-primary text-lg px-8 py-4 hover:bg-brand-orange hover:text-white transition-all duration-300 transform hover:scale-105"
           >
             See All News

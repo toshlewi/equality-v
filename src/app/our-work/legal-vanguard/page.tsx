@@ -1,6 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
+import Link from 'next/link';
 import WorkPageLayout from '@/components/layout/WorkPageLayout';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
@@ -30,7 +31,7 @@ const legalTeam = [
   {
     name: "Mutheu Mutuku",
     role: "Visionary Founder & Creative Director",
-    image: "/images/place1 (12).jpg",
+    image: "/images/aMutheu.jpg",
     bio: "A highly accomplished human rights lawyer focused on the intricate connections between gender justice, feminist macroeconomics, and climate justice. She possesses a remarkable ability to translate complex legal principles into tangible, public-facing initiatives."
   },
   {
@@ -87,7 +88,7 @@ export default function LegalVanguardPage() {
     <WorkPageLayout
       title="Legal Vanguard"
       subtitle="A community of legal minds working to decolonize legal thought and shape inclusive policy"
-      heroImage="/images/legal hero.jpeg"
+      heroImage="/images/h-coverphoto.png"
     >
       <motion.div
         variants={staggerContainer}
@@ -108,7 +109,7 @@ export default function LegalVanguardPage() {
         </motion.section>
 
         {/* Legal Vanguard Community */}
-        <motion.section variants={fadeInUp} className="bg-gradient-to-r from-amber-500 to-orange-600 rounded-2xl p-12 text-white">
+        <motion.section variants={fadeInUp} className="bg-gradient-to-r from-[#042c45] to-[#042c45]/90 rounded-2xl p-12 text-white">
           <div className="max-w-4xl">
             <h3 className="text-3xl font-bold mb-6">The Legal Vanguard Community</h3>
             <p className="text-xl leading-relaxed mb-8">
@@ -121,15 +122,9 @@ export default function LegalVanguardPage() {
               <Button 
                 size="lg" 
                 className="bg-brand-yellow text-brand-teal hover:bg-brand-orange hover:text-white"
+                onClick={() => setIsModalOpen(true)}
               >
                 Join the Legal Vanguard
-              </Button>
-              <Button 
-                size="lg" 
-                variant="outline"
-                className="border-white text-white hover:bg-white hover:text-orange-600"
-              >
-                Learn More
               </Button>
             </div>
           </div>
@@ -138,21 +133,20 @@ export default function LegalVanguardPage() {
         {/* Meet the Team */}
         <motion.section variants={fadeInUp}>
           <h3 className="text-3xl font-bold text-brand-teal mb-8 text-center">Meet Our Legal Team</h3>
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             {legalTeam.map((member, index) => (
               <motion.div
                 key={member.name}
                 variants={fadeInUp}
-                className="bg-white rounded-xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300"
+                className="bg-white rounded-xl p-4 sm:p-6 lg:p-8 shadow-lg hover:shadow-xl transition-shadow duration-300"
               >
-                <div className="h-80 bg-gray-200 rounded-lg mb-6 overflow-hidden">
+                <div className="relative w-full h-64 sm:h-72 md:h-80 lg:h-96 bg-gray-200 rounded-lg mb-6 overflow-hidden">
                   <Image
                     src={member.image}
                     alt={member.name}
-                    width={300}
-                    height={320}
-                    className="w-full h-full object-cover"
-                    style={{ width: 'auto', height: 'auto' }}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                   />
                 </div>
                 <h4 className="text-xl font-bold text-brand-teal mb-2">{member.name}</h4>

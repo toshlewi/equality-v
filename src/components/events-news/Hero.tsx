@@ -11,7 +11,7 @@ export default function Hero() {
         <div className="absolute inset-0 bg-gradient-to-br from-brand-teal via-brand-teal to-brand-teal opacity-90" />
         <div className="absolute inset-0 opacity-20">
           <Image
-            src="/images/place 27.jpeg"
+            src="/images/bookclub2.jpg"
             alt="Background"
             fill
             className="object-cover"

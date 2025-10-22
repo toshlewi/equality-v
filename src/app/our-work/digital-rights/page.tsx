@@ -30,7 +30,7 @@ export default function DigitalRightsPage() {
     <WorkPageLayout
       title="Digital Rights"
       subtitle="Creating safe spaces for women in virtual environments and championing digital justice"
-      heroImage="/images/raised fist.jpeg"
+      heroImage="/images/team8.JPG"
     >
       <motion.div
         variants={staggerContainer}
@@ -82,13 +82,15 @@ export default function DigitalRightsPage() {
                   Learn About Legal Vanguard
                 </Button>
               </Link>
-              <Button 
-                size="lg" 
-                variant="outline"
-                className="border-white text-white hover:bg-white hover:text-brand-teal"
-              >
-                Join Our Community
-              </Button>
+              <Link href="/get-involved#membership">
+                <Button 
+                  size="lg" 
+                  variant="outline"
+                  className="border-white text-white hover:bg-white hover:text-brand-teal"
+                >
+                  Join Our Community
+                </Button>
+              </Link>
             </div>
           </div>
         </motion.section>
@@ -100,12 +102,23 @@ export default function DigitalRightsPage() {
             Whether you're interested in digital privacy, online safety, or legal advocacy for digital rights, there's a place for you in our collective.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button 
-              size="lg" 
-              className="bg-brand-yellow text-brand-teal hover:bg-brand-orange hover:text-white px-8 py-4 text-lg"
-            >
-              Get Involved
-            </Button>
+            <Link href="/get-involved#membership">
+              <Button 
+                size="lg" 
+                className="bg-brand-yellow text-brand-teal hover:bg-brand-orange hover:text-white px-8 py-4 text-lg"
+              >
+                Join Our Community
+              </Button>
+            </Link>
+            <Link href="/get-involved#partner">
+              <Button 
+                size="lg" 
+                variant="outline"
+                className="border-brand-teal text-brand-teal hover:bg-brand-teal hover:text-white px-8 py-4 text-lg"
+              >
+                Partner With Us
+              </Button>
+            </Link>
           </div>
         </motion.section>
       </motion.div>

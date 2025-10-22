@@ -57,7 +57,7 @@ export default function JourneyContent() {
               The origins of Equality Vanguard are traceable to the precincts of law school, where four of its founding members underwent four years of rigorous legal training. Within those corridors of jurisprudence, it became manifest that the letter of the law, however noble, was often at variance with lived realities. While feminist legal theory provided intellectual grounding, its application revealed systemic deficiencies.
             </p>
 
-            <div className="bg-gradient-to-r from-brand-yellow/10 to-brand-orange/10 p-8 rounded-2xl my-12">
+            <div className="bg-gradient-to-r from-white to-[#042c45]/10 p-8 rounded-2xl my-12">
               <p className="font-fredoka text-2xl font-bold text-brand-teal text-center">
                 Why did the law appear progressive on paper, yet oppressive in practice?
               </p>

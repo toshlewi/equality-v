@@ -27,7 +27,7 @@ export default function MissionVisionSection() {
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
             viewport={{ once: true }}
-            className="bg-gradient-to-br from-brand-yellow/10 to-brand-orange/10 rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300"
+            className="bg-gradient-to-br from-white to-[#042c45]/10 rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300"
           >
             <div className="text-center">
               <div className="w-16 h-16 bg-brand-yellow rounded-full flex items-center justify-center mx-auto mb-6">

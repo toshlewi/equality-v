@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 import { Container } from '@/components/ui/Container';
 import { Button } from '@/components/ui/button';
 import WorkCard from '@/components/ui/WorkCard';
@@ -10,7 +11,7 @@ const workAreas = [
     id: 'digital-rights',
     title: 'Digital Rights',
     description: 'Creating safe spaces for women in virtual environments and championing digital justice.',
-    image: '/images/place1 (8).jpg',
+    image: '/images/hero-10.jpeg',
     href: '/our-work/digital-rights',
     color: 'from-blue-500 to-cyan-500'
   },
@@ -18,7 +19,7 @@ const workAreas = [
     id: 'srhr',
     title: 'SRHR',
     description: 'Sexual and Reproductive Health and Rights advocacy for bodily autonomy and dignity.',
-    image: '/images/place1 (2).jpg',
+    image: '/images/hero-13.jpeg',
     href: '/our-work/srhr',
     color: 'from-pink-500 to-rose-500'
   },
@@ -26,7 +27,7 @@ const workAreas = [
     id: 'economic-justice',
     title: 'Economic Justice',
     description: 'Challenging neoliberal frameworks and advocating for feminist economic alternatives.',
-    image: '/images/place1 (15).jpg',
+    image: '/images/hero-14.jpeg',
     href: '/our-work/economic-justice',
     color: 'from-green-500 to-emerald-500'
   },
@@ -34,7 +35,7 @@ const workAreas = [
     id: 'alkah-book-club',
     title: 'ALKAH Book Club',
     description: 'Feminist literature space where knowledge moves from theory to praxis through transformative reading.',
-    image: '/images/place1 (1).jpg',
+    image: '/images/place 25.jpeg',
     href: '/our-work/alkah-book-club',
     color: 'from-purple-500 to-violet-500',
     specialCta: 'Explore the Book Library'
@@ -43,19 +44,10 @@ const workAreas = [
     id: 'legal-vanguard',
     title: 'Legal Vanguard',
     description: 'A community of legal minds working to decolonize legal thought and shape inclusive policy.',
-    image: '/images/place1 (5).jpg',
+    image: '/images/place 27.jpeg',
     href: '/our-work/legal-vanguard',
-    color: 'from-amber-500 to-orange-500',
+    color: 'from-[#042c45] to-[#042c45]/80',
     specialCta: 'Join the Legal Vanguard'
-  },
-  {
-    id: 'mental-health',
-    title: 'Mental Health',
-    description: 'Coming soon - comprehensive mental health support and advocacy initiatives.',
-    image: '/images/place1 (6).jpg',
-    href: '/our-work/mental-health',
-    color: 'from-gray-400 to-gray-600',
-    comingSoon: true
   }
 ];
 
@@ -108,7 +100,6 @@ export default function OurWorkPage() {
               href={area.href}
               color={area.color}
               specialCta={area.specialCta}
-              comingSoon={area.comingSoon}
               index={index}
             />
           ))}
@@ -130,19 +121,23 @@ export default function OurWorkPage() {
             there's a place for you in our collective.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button 
-              size="lg" 
-              className="bg-brand-yellow text-brand-teal hover:bg-brand-orange hover:text-white px-8 py-4 text-lg"
-            >
-              Join Our Community
-            </Button>
-            <Button 
-              size="lg" 
-              variant="outline"
-              className="border-brand-teal text-brand-teal hover:bg-brand-teal hover:text-white px-8 py-4 text-lg"
-            >
-              Support Our Work
-            </Button>
+            <Link href="/get-involved#membership">
+              <Button 
+                size="lg" 
+                className="bg-brand-yellow text-brand-teal hover:bg-brand-orange hover:text-white px-8 py-4 text-lg"
+              >
+                Join Our Community
+              </Button>
+            </Link>
+            <Link href="/get-involved#donate">
+              <Button 
+                size="lg" 
+                variant="outline"
+                className="border-brand-teal text-brand-teal hover:bg-brand-teal hover:text-white px-8 py-4 text-lg"
+              >
+                Support Our Work
+              </Button>
+            </Link>
           </div>
         </motion.div>
       </Container>

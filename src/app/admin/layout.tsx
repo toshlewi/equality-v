@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import {
   Home,
   FileText,
@@ -156,6 +156,13 @@ function SidebarItem({ item, onNavigate }: { item: NavItem; onNavigate?: () => v
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const pathname = usePathname();
+
+  // Close mobile menu when pathname changes (navigation occurs)
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
+
   return (
     <div className="min-h-screen flex">
       {/* Mobile backdrop */}

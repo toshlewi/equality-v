@@ -2,13 +2,18 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { FileText, Book, Wrench, ArrowLeft, Menu, X } from 'lucide-react';
 
 export default function MatriArchiveHeader() {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Close menu when pathname changes (navigation occurs)
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [pathname]);
   
   const navLinks = [
     { 

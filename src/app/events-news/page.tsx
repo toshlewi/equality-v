@@ -308,7 +308,9 @@ export default function EventsNewsPage() {
       <PastEventsCarousel />
 
       {/* News Section */}
-      <NewsGrid news={news} />
+      <section id="news">
+        <NewsGrid news={news} />
+      </section>
 
       {/* Event Modal */}
       {selectedEvent && (

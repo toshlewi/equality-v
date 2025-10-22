@@ -14,7 +14,7 @@ export function ModalForm({ isOpen, onClose, children }: ModalFormProps) {
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 pt-20"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -31,7 +31,7 @@ export function ModalForm({ isOpen, onClose, children }: ModalFormProps) {
           
           {/* Modal Content */}
           <motion.div
-            className="relative bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+            className="relative bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[85vh] overflow-y-auto"
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -46,7 +46,7 @@ export function ModalForm({ isOpen, onClose, children }: ModalFormProps) {
             </button>
             
             {/* Form Content */}
-            <div className="p-6">
+            <div className="p-8">
               {children}
             </div>
           </motion.div>

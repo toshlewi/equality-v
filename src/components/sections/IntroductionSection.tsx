@@ -18,7 +18,7 @@ export default function IntroductionSection() {
           >
             <div className="relative w-full h-96 rounded-2xl overflow-hidden shadow-xl">
               <Image
-                src="/images/place1 (12).jpg"
+                src="/images/team1.jpg"
                 alt="The Journey - From law school to liberation"
                 fill
                 className="object-cover"

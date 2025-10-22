@@ -104,7 +104,7 @@ export default function SocialHighlights() {
                 className="flex-shrink-0 w-80 h-80 relative group cursor-pointer"
               >
                 {/* Media placeholder */}
-                <div className="aspect-square rounded-2xl overflow-hidden group-hover:scale-105 transition-transform duration-300 relative bg-gradient-to-br from-brand-teal/20 to-brand-orange/20">
+                <div className="aspect-square rounded-2xl overflow-hidden group-hover:scale-105 transition-transform duration-300 relative bg-gradient-to-br from-white to-[#042c45]/20">
                   <Image
                     src={post.image}
                     alt={`${post.type} - ${post.caption}`}

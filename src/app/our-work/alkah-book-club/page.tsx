@@ -57,7 +57,7 @@ export default function ALKAHBookClubPage() {
     <WorkPageLayout
       title="ALKAH Book Club"
       subtitle="Feminist literature space where knowledge moves from theory to praxis through transformative reading"
-      heroImage="/images/Decolonization-and-afrofeminism.jpeg"
+      heroImage="/images/bookclub2.jpg"
     >
       <motion.div
         variants={staggerContainer}
@@ -93,7 +93,7 @@ export default function ALKAHBookClubPage() {
                   Join Our Next Session
                 </Button>
               </Link>
-              <Link href="/matriarchive/book-suggestions">
+              <Link href="/matriarchive/alkah-library/suggestion">
                 <Button 
                   size="lg" 
                   variant="outline"
@@ -149,13 +149,15 @@ export default function ALKAHBookClubPage() {
                   Explore the Book Library
                 </Button>
               </Link>
-              <Button 
-                size="lg" 
-                variant="outline"
-                className="border-brand-teal text-brand-teal hover:bg-brand-teal hover:text-white px-8 py-4 text-lg"
-              >
-                Join Our Community
-              </Button>
+              <Link href="/get-involved#membership">
+                <Button 
+                  size="lg" 
+                  variant="outline"
+                  className="border-brand-teal text-brand-teal hover:bg-brand-teal hover:text-white px-8 py-4 text-lg"
+                >
+                  Join Our Community
+                </Button>
+              </Link>
             </div>
           </div>
         </motion.section>
@@ -220,7 +222,7 @@ export default function ALKAHBookClubPage() {
                   Join Our Next Session
                 </Button>
               </Link>
-              <Link href="/matriarchive/book-suggestions">
+              <Link href="/matriarchive/alkah-library/suggestion">
                 <Button variant="outline" className="w-full border-brand-teal text-brand-teal hover:bg-brand-teal hover:text-white">
                   Suggest a Book
                 </Button>
@@ -241,7 +243,7 @@ export default function ALKAHBookClubPage() {
             Whether you're a seasoned reader or new to feminist literature, ALKAH welcomes all who are ready to engage in the transformative power of collective reading and discussion.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/get-involved/membership">
+            <Link href="/get-involved">
               <Button 
                 size="lg" 
                 className="bg-brand-yellow text-brand-teal hover:bg-brand-orange hover:text-white px-8 py-4 text-lg"

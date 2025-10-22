@@ -10,7 +10,7 @@ export default function KnowledgePortalSnippet() {
       title: 'Digital Health Rights in Africa',
       author: 'Dr. Sarah Mwangi',
       date: 'Dec 15, 2024',
-      image: '/images/place1 (6).jpg'
+      image: '/images/place1 (15).jpg'
     },
     {
       type: 'Article',
