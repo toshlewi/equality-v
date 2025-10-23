@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { ReactNode, useState, useEffect } from "react";
+import { useSession, signOut } from "next-auth/react";
 import {
   Home,
   FileText,
@@ -157,11 +158,43 @@ function SidebarItem({ item, onNavigate }: { item: NavItem; onNavigate?: () => v
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
+  const { data: session, status } = useSession();
 
   // Close mobile menu when pathname changes (navigation occurs)
   useEffect(() => {
     setMobileOpen(false);
   }, [pathname]);
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (status === 'loading') return; // Still loading
+    
+    if (!session) {
+      router.push('/admin/login');
+      return;
+    }
+
+    // Check if user has admin access
+    if (session.user?.role && !['admin', 'editor', 'reviewer', 'finance'].includes(session.user.role)) {
+      router.push('/admin/login?error=AccessDenied');
+      return;
+    }
+  }, [session, status, router]);
+
+  // Show loading while checking authentication
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  // Don't render if not authenticated
+  if (!session) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen flex">
@@ -211,8 +244,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         {/* Sidebar bottom: user, settings, sign out */}
         <div className="p-4 border-t border-gray-800">
           <div className="mb-3">
-            <div className="text-sm font-medium">Jane Admin</div>
-            <div className="text-xs text-gray-400">Administrator</div>
+            <div className="text-sm font-medium">{session.user?.name || 'Admin'}</div>
+            <div className="text-xs text-gray-400 capitalize">{session.user?.role || 'Administrator'}</div>
           </div>
           <div className="flex items-center justify-between gap-2">
             <Link
@@ -221,12 +254,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             >
               <Settings className="w-4 h-4" /> Settings
             </Link>
-            <Link
-              href="#"
+            <button
+              onClick={() => signOut({ callbackUrl: '/admin/login' })}
               className="flex items-center gap-2 text-sm text-gray-300 hover:text-white"
             >
               <LogOut className="w-4 h-4" /> Sign out
-            </Link>
+            </button>
                 </div>
               </div>
       </aside>

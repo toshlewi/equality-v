@@ -65,7 +65,11 @@ const MemberSchema = new Schema({
     { membershipType: 1, isActive: 1 },
     { paymentStatus: 1 },
     { subscriptionEnd: 1 },
-    { referralCode: 1 }
+    { referralCode: 1 },
+    { isActive: 1, subscriptionEnd: 1 },
+    { paymentStatus: 1, createdAt: -1 },
+    { mailchimpId: 1 },
+    { createdAt: -1 }
   ]
 });
 

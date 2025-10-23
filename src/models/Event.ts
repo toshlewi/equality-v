@@ -84,7 +84,11 @@ const EventSchema = new Schema({
     { tags: 1 },
     { slug: 1 },
     { organizerId: 1 },
-    { registrationOpen: 1, status: 1 }
+    { registrationOpen: 1, status: 1 },
+    { startDate: 1, status: 1 },
+    { 'venue.city': 1, startDate: 1 },
+    { 'venue.isOnline': 1, startDate: 1 },
+    { createdAt: -1 }
   ]
 });
 

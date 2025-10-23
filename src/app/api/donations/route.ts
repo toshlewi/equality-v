@@ -1,0 +1,264 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
+import { connectDB } from '@/lib/mongodb';
+import Donation from '@/models/Donation';
+import { createPaymentIntent } from '@/lib/stripe';
+import { initiateSTKPush } from '@/lib/mpesa';
+import { verifyRecaptcha } from '@/lib/security';
+import { sanitizeInput } from '@/lib/auth';
+
+const donationSchema = z.object({
+  donorName: z.string().min(2, 'Name must be at least 2 characters').max(100),
+  donorEmail: z.string().email('Invalid email address'),
+  donorPhone: z.string().min(10, 'Phone number must be at least 10 characters'),
+  amount: z.number().min(1, 'Amount must be at least $1').max(10000, 'Amount cannot exceed $10,000'),
+  donationType: z.enum(['cash', 'product', 'service']),
+  category: z.enum(['general', 'education', 'healthcare', 'emergency', 'events', 'other']),
+  paymentMethod: z.enum(['stripe', 'mpesa']),
+  anonymous: z.boolean().default(false),
+  campaignTag: z.string().optional(),
+  message: z.string().max(500).optional(),
+  termsAccepted: z.boolean().refine(val => val === true, 'Terms must be accepted'),
+  privacyAccepted: z.boolean().refine(val => val === true, 'Privacy policy must be accepted'),
+  recaptchaToken: z.string().min(1, 'reCAPTCHA token is required')
+});
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const validatedData = donationSchema.parse(body);
+
+    // Verify reCAPTCHA
+    const isRecaptchaValid = await verifyRecaptcha(validatedData.recaptchaToken);
+    if (!isRecaptchaValid) {
+      return NextResponse.json(
+        { success: false, error: 'reCAPTCHA verification failed' },
+        { status: 400 }
+      );
+    }
+
+    await connectDB();
+
+    // Sanitize input
+    const sanitizedData = {
+      donorName: sanitizeInput(validatedData.donorName),
+      donorEmail: validatedData.donorEmail.toLowerCase(),
+      donorPhone: sanitizeInput(validatedData.donorPhone),
+      amount: validatedData.amount,
+      donationType: validatedData.donationType,
+      category: validatedData.category,
+      paymentMethod: validatedData.paymentMethod,
+      anonymous: validatedData.anonymous,
+      campaignTag: validatedData.campaignTag ? sanitizeInput(validatedData.campaignTag) : undefined,
+      message: validatedData.message ? sanitizeInput(validatedData.message) : undefined
+    };
+
+    // Create donation record with pending status
+    const donation = new Donation({
+      donorName: sanitizedData.donorName,
+      donorEmail: sanitizedData.donorEmail,
+      donorPhone: sanitizedData.donorPhone,
+      amount: sanitizedData.amount,
+      currency: 'USD',
+      donationType: validatedData.donationType,
+      category: validatedData.category,
+      paymentMethod: validatedData.paymentMethod,
+      anonymous: validatedData.anonymous,
+      campaignTag: sanitizedData.campaignTag,
+      message: sanitizedData.message,
+      status: 'pending',
+      paymentStatus: 'pending',
+      termsAccepted: validatedData.termsAccepted,
+      privacyAccepted: validatedData.privacyAccepted
+    });
+
+    await donation.save();
+
+    // Create payment based on method
+    if (validatedData.paymentMethod === 'stripe') {
+      // Create Stripe payment intent
+      const paymentIntent = await createPaymentIntent({
+        amount: validatedData.amount,
+        currency: 'usd',
+        metadata: {
+          donationId: donation._id.toString(),
+          donationType: validatedData.donationType,
+          type: 'donation'
+        },
+        customerEmail: sanitizedData.donorEmail,
+        customerName: sanitizedData.donorName,
+        description: `Donation to Equality Vanguard - ${validatedData.category}`
+      });
+
+      // Update donation with payment ID
+      donation.paymentId = paymentIntent.id;
+      await donation.save();
+
+      return NextResponse.json({
+        success: true,
+        data: {
+          donationId: donation._id.toString(),
+          paymentIntentId: paymentIntent.id,
+          clientSecret: paymentIntent.client_secret,
+          amount: validatedData.amount,
+          currency: 'USD'
+        }
+      });
+    } else if (validatedData.paymentMethod === 'mpesa') {
+      // Initiate M-Pesa STK Push
+      const stkPushResponse = await initiateSTKPush({
+        phone: validatedData.donorPhone,
+        amount: validatedData.amount,
+        accountReference: `donation_${donation._id.toString()}`,
+        transactionDesc: `Donation to Equality Vanguard`,
+        callbackUrl: `${process.env.NEXTAUTH_URL}/api/webhooks/mpesa`
+      });
+
+      // Update donation with checkout request ID
+      donation.paymentId = stkPushResponse.CheckoutRequestID;
+      await donation.save();
+
+      return NextResponse.json({
+        success: true,
+        data: {
+          donationId: donation._id.toString(),
+          checkoutRequestId: stkPushResponse.CheckoutRequestID,
+          merchantRequestId: stkPushResponse.MerchantRequestID,
+          amount: validatedData.amount,
+          currency: 'USD',
+          message: stkPushResponse.CustomerMessage
+        }
+      });
+    }
+
+  } catch (error) {
+    console.error('Donation creation error:', error);
+    
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { success: false, error: 'Validation failed', details: error.errors },
+        { status: 400 }
+      );
+    }
+
+    return NextResponse.json(
+      { success: false, error: 'Failed to create donation' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const donationId = searchParams.get('donationId');
+    const email = searchParams.get('email');
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '10');
+
+    await connectDB();
+
+    if (donationId) {
+      // Get specific donation
+      const donation = await Donation.findById(donationId);
+      
+      if (!donation) {
+        return NextResponse.json(
+          { success: false, error: 'Donation not found' },
+          { status: 404 }
+        );
+      }
+
+      return NextResponse.json({
+        success: true,
+        data: {
+          id: donation._id.toString(),
+          donorName: donation.anonymous ? 'Anonymous' : donation.donorName,
+          amount: donation.amount,
+          currency: donation.currency,
+          donationType: donation.donationType,
+          category: donation.category,
+          status: donation.status,
+          paymentStatus: donation.paymentStatus,
+          createdAt: donation.createdAt
+        }
+      });
+    } else if (email) {
+      // Get donations by email
+      const donations = await Donation.find({ 
+        donorEmail: email.toLowerCase() 
+      })
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .skip((page - 1) * limit);
+
+      const total = await Donation.countDocuments({ 
+        donorEmail: email.toLowerCase() 
+      });
+
+      return NextResponse.json({
+        success: true,
+        data: {
+          donations: donations.map(donation => ({
+            id: donation._id.toString(),
+            donorName: donation.anonymous ? 'Anonymous' : donation.donorName,
+            amount: donation.amount,
+            currency: donation.currency,
+            donationType: donation.donationType,
+            category: donation.category,
+            status: donation.status,
+            paymentStatus: donation.paymentStatus,
+            createdAt: donation.createdAt
+          })),
+          pagination: {
+            page,
+            limit,
+            total,
+            pages: Math.ceil(total / limit)
+          }
+        }
+      });
+    } else {
+      // Get public donations (recent, successful only)
+      const donations = await Donation.find({ 
+        status: 'completed',
+        paymentStatus: 'paid'
+      })
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .skip((page - 1) * limit);
+
+      const total = await Donation.countDocuments({ 
+        status: 'completed',
+        paymentStatus: 'paid'
+      });
+
+      return NextResponse.json({
+        success: true,
+        data: {
+          donations: donations.map(donation => ({
+            id: donation._id.toString(),
+            donorName: donation.anonymous ? 'Anonymous' : donation.donorName,
+            amount: donation.amount,
+            currency: donation.currency,
+            category: donation.category,
+            createdAt: donation.createdAt
+          })),
+          pagination: {
+            page,
+            limit,
+            total,
+            pages: Math.ceil(total / limit)
+          }
+        }
+      });
+    }
+
+  } catch (error) {
+    console.error('Error fetching donations:', error);
+    return NextResponse.json(
+      { success: false, error: 'Failed to fetch donations' },
+      { status: 500 }
+    );
+  }
+}

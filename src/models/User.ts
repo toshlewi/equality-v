@@ -13,6 +13,14 @@ const UserSchema = new Schema({
   }],
   twoFactorEnabled: { type: Boolean, default: false },
   twoFactorSecret: { type: String },
+  // Password reset
+  passwordResetToken: { type: String },
+  passwordResetExpiry: { type: Date },
+  lastPasswordChange: { type: Date },
+  // Email verification
+  emailVerified: { type: Boolean, default: false },
+  emailVerificationToken: { type: String },
+  emailVerificationExpiry: { type: Date }
 }, { timestamps: true });
 
 export default models.User || model('User', UserSchema);

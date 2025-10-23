@@ -1,42 +1,60 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-
-// Validation schema for upload request
-const uploadRequestSchema = z.object({
-  files: z.array(z.object({
-    filename: z.string(),
-    mimeType: z.string(),
-    fileSize: z.number(),
-    mediaType: z.enum(['image', 'video', 'audio', 'pdf'])
-  }))
-});
+import { generatePresignedUploadUrl } from '@/lib/storage';
+import { validateFile, multipleFileUploadSchema } from '@/lib/file-validation';
 
 // POST /api/uploads/request - Request signed upload URLs
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const validatedData = uploadRequestSchema.parse(body);
+    const validatedData = multipleFileUploadSchema.parse(body);
 
-    // TODO: Add authentication check
-    // TODO: Add rate limiting check
-    // TODO: Add file size validation
+    // Validate each file
+    const validationResults = validatedData.files.map(file => 
+      validateFile({
+        name: file.filename,
+        size: file.fileSize,
+        type: file.mimeType
+      }, file.mediaType)
+    );
 
+    // Check if any files are invalid
+    const invalidFiles = validationResults.filter(result => !result.isValid);
+    if (invalidFiles.length > 0) {
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: 'File validation failed', 
+          details: invalidFiles.map((result, index) => ({
+            file: validatedData.files[index].filename,
+            errors: result.errors
+          }))
+        },
+        { status: 400 }
+      );
+    }
+
+    // Generate presigned URLs for valid files
     const signedUrls = await Promise.all(
-      validatedData.files.map(async (file) => {
-        // Generate unique filename
-        const timestamp = Date.now();
-        const randomString = Math.random().toString(36).substring(2, 15);
-        const extension = file.filename.split('.').pop();
-        const uniqueFilename = `${file.mediaType}/${timestamp}-${randomString}.${extension}`;
-
-        // TODO: Generate actual signed URL using AWS S3 or similar
-        // For now, return mock signed URL
-        const mockSignedUrl = `https://mock-s3-bucket.s3.amazonaws.com/${uniqueFilename}`;
+      validatedData.files.map(async (file, index) => {
+        const validationResult = validationResults[index];
+        const sanitizedFilename = validationResult.sanitizedFilename || file.filename;
+        
+        const { uploadUrl, fileKey, publicUrl } = await generatePresignedUploadUrl(
+          sanitizedFilename,
+          file.mimeType,
+          {
+            folder: file.mediaType,
+            expires: 3600 // 1 hour
+          }
+        );
         
         return {
           filename: file.filename,
-          uniqueFilename,
-          signedUrl: mockSignedUrl,
+          sanitizedFilename,
+          fileKey,
+          uploadUrl,
+          publicUrl,
           mediaType: file.mediaType,
           mimeType: file.mimeType,
           fileSize: file.fileSize

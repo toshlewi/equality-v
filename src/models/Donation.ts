@@ -107,7 +107,12 @@ const DonationSchema = new Schema({
     { category: 1 },
     { donorEmail: 1 },
     { memberId: 1 },
-    { anonymous: 1, status: 1 }
+    { anonymous: 1, status: 1 },
+    { createdAt: -1 },
+    { donationType: 1, createdAt: -1 },
+    { status: 1, createdAt: -1 },
+    { amount: -1 },
+    { processedBy: 1, processedAt: -1 }
   ]
 });
 

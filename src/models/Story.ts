@@ -54,8 +54,25 @@ const StorySchema = new Schema({
     { tags: 1 },
     { anonymous: 1, status: 1 },
     { featured: 1, status: 1 },
-    { submitterEmail: 1 }
+    { submitterEmail: 1 },
+    { publishedAt: -1 },
+    { viewCount: -1 },
+    { likeCount: -1 }
   ]
+});
+
+// Add text search index for full-text search
+StorySchema.index({
+  title: 'text',
+  text: 'text',
+  tags: 'text'
+}, {
+  weights: {
+    title: 10,
+    tags: 5,
+    text: 1
+  },
+  name: 'story_text_search'
 });
 
 // Virtual for display name (anonymous or actual name)

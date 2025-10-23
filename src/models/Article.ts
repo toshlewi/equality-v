@@ -49,8 +49,28 @@ const ArticleSchema = new Schema({
     { tags: 1 },
     { language: 1 },
     { featured: 1, status: 1 },
-    { slug: 1 }
+    { slug: 1 },
+    { authorId: 1, status: 1 },
+    { submitterEmail: 1 },
+    { publishedAt: -1 },
+    { viewCount: -1 }
   ]
+});
+
+// Add text search index for full-text search
+ArticleSchema.index({
+  title: 'text',
+  body: 'text',
+  excerpt: 'text',
+  tags: 'text'
+}, {
+  weights: {
+    title: 10,
+    tags: 5,
+    excerpt: 3,
+    body: 1
+  },
+  name: 'article_text_search'
 });
 
 // Pre-save middleware to generate slug from title
