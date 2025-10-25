@@ -2,24 +2,33 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { connectDB } from '@/lib/mongodb';
-import Publication from '@/models/Publication';
+import Book from '@/models/Book';
 import { z } from 'zod';
 import mongoose from 'mongoose';
 
-// Validation schema for updating publications
-const updatePublicationSchema = z.object({
-  title: z.string().min(5, 'Title must be at least 5 characters').max(200, 'Title must not exceed 200 characters').optional(),
+// Validation schema for updating books
+const updateBookSchema = z.object({
+  title: z.string().min(2, 'Title must be at least 2 characters').max(200, 'Title must not exceed 200 characters').optional(),
   author: z.string().min(2, 'Author must be at least 2 characters').max(100, 'Author must not exceed 100 characters').optional(),
-  content: z.string().min(50, 'Content must be at least 50 characters').optional(),
-  excerpt: z.string().max(500, 'Excerpt must not exceed 500 characters').optional(),
-  featuredImage: z.string().url().optional(),
-  pdfUrl: z.string().url().optional(),
-  category: z.enum(['article', 'blog', 'report']).optional(),
+  isbn: z.string().optional(),
+  description: z.string().min(10, 'Description must be at least 10 characters').max(1000, 'Description must not exceed 1000 characters').optional(),
+  shortDescription: z.string().max(300, 'Short description must not exceed 300 characters').optional(),
+  coverImage: z.string().url().optional(),
+  year: z.number().min(1000, 'Year must be valid').max(new Date().getFullYear() + 1, 'Year cannot be in the future').optional(),
+  publisher: z.string().max(100, 'Publisher must not exceed 100 characters').optional(),
+  language: z.string().optional(),
+  pages: z.number().min(1, 'Pages must be at least 1').optional(),
+  category: z.enum(['fiction', 'non-fiction', 'poetry', 'essays', 'memoir', 'academic', 'other']).optional(),
   tags: z.array(z.string()).optional(),
+  isFeatured: z.boolean().optional(),
+  isInLibrary: z.boolean().optional(),
+  isAvailable: z.boolean().optional(),
+  isBookClubSelection: z.boolean().optional(),
+  bookClubDate: z.string().datetime().optional(),
+  discussionNotes: z.string().max(2000, 'Discussion notes must not exceed 2000 characters').optional(),
   seoTitle: z.string().max(60, 'SEO title must not exceed 60 characters').optional(),
   seoDescription: z.string().max(160, 'SEO description must not exceed 160 characters').optional(),
-  isFeatured: z.boolean().optional(),
-  status: z.enum(['draft', 'pending', 'published', 'archived']).optional()
+  status: z.enum(['active', 'inactive', 'archived']).optional()
 });
 
 // Helper function to generate slug
@@ -32,7 +41,7 @@ function generateSlug(title: string): string {
     .trim();
 }
 
-// GET /api/publications/[id] - Get a single publication
+// GET /api/books/[id] - Get a single book
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -45,43 +54,41 @@ export async function GET(
     // Validate ObjectId
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(
-        { success: false, error: 'Invalid publication ID' },
+        { success: false, error: 'Invalid book ID' },
         { status: 400 }
       );
     }
 
-    const publication = await Publication.findById(id)
+    const book = await Book.findById(id)
       .populate('createdBy', 'name email')
       .populate('updatedBy', 'name email');
 
-    if (!publication) {
+    if (!book) {
       return NextResponse.json(
-        { success: false, error: 'Publication not found' },
+        { success: false, error: 'Book not found' },
         { status: 404 }
       );
     }
 
-    // Increment view count for published publications
-    if (publication.status === 'published') {
-      await Publication.findByIdAndUpdate(id, { $inc: { viewCount: 1 } });
-      publication.viewCount += 1;
-    }
+    // Increment view count
+    await Book.findByIdAndUpdate(id, { $inc: { viewCount: 1 } });
+    book.viewCount += 1;
 
     return NextResponse.json({
       success: true,
-      data: publication
+      data: book
     });
 
   } catch (error) {
-    console.error('Error fetching publication:', error);
+    console.error('Error fetching book:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to fetch publication' },
+      { success: false, error: 'Failed to fetch book' },
       { status: 500 }
     );
   }
 }
 
-// PUT /api/publications/[id] - Update a publication
+// PUT /api/books/[id] - Update a book
 export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -96,7 +103,7 @@ export async function PUT(
       );
     }
 
-    // Check if user has permission to update publications
+    // Check if user has permission to update books
     if (!['admin', 'editor'].includes(session.user.role)) {
       return NextResponse.json(
         { success: false, error: 'Insufficient permissions' },
@@ -111,50 +118,51 @@ export async function PUT(
     // Validate ObjectId
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(
-        { success: false, error: 'Invalid publication ID' },
+        { success: false, error: 'Invalid book ID' },
         { status: 400 }
       );
     }
 
     const body = await request.json();
-    const validatedData = updatePublicationSchema.parse(body);
+    const validatedData = updateBookSchema.parse(body);
 
-    // Check if publication exists
-    const existingPublication = await Publication.findById(id);
-    if (!existingPublication) {
+    // Check if book exists
+    const existingBook = await Book.findById(id);
+    if (!existingBook) {
       return NextResponse.json(
-        { success: false, error: 'Publication not found' },
+        { success: false, error: 'Book not found' },
         { status: 404 }
       );
     }
 
     // Generate new slug if title is being updated
-    let slug = existingPublication.slug;
-    if (validatedData.title && validatedData.title !== existingPublication.title) {
+    let slug = existingBook.slug;
+    if (validatedData.title && validatedData.title !== existingBook.title) {
       slug = generateSlug(validatedData.title);
       
       // Ensure slug is unique
       let slugCounter = 1;
       let originalSlug = slug;
       
-      while (await Publication.findOne({ slug, _id: { $ne: id } })) {
+      while (await Book.findOne({ slug, _id: { $ne: id } })) {
         slug = `${originalSlug}-${slugCounter}`;
         slugCounter++;
       }
     }
 
-    // Set publishedAt when status changes to published
+    // Prepare update data
     const updateData: any = {
       ...validatedData,
       slug,
       updatedBy: session.user.id
     };
 
-    if (validatedData.status === 'published' && existingPublication.status !== 'published') {
-      updateData.publishedAt = new Date();
+    // Convert bookClubDate string to Date if provided
+    if (validatedData.bookClubDate) {
+      updateData.bookClubDate = new Date(validatedData.bookClubDate);
     }
 
-    const publication = await Publication.findByIdAndUpdate(
+    const book = await Book.findByIdAndUpdate(
       id,
       updateData,
       { new: true, runValidators: true }
@@ -162,12 +170,12 @@ export async function PUT(
 
     return NextResponse.json({
       success: true,
-      data: publication,
-      message: 'Publication updated successfully'
+      data: book,
+      message: 'Book updated successfully'
     });
 
   } catch (error) {
-    console.error('Error updating publication:', error);
+    console.error('Error updating book:', error);
     
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -181,13 +189,13 @@ export async function PUT(
     }
 
     return NextResponse.json(
-      { success: false, error: 'Failed to update publication' },
+      { success: false, error: 'Failed to update book' },
       { status: 500 }
     );
   }
 }
 
-// DELETE /api/publications/[id] - Delete a publication
+// DELETE /api/books/[id] - Delete a book
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -202,7 +210,7 @@ export async function DELETE(
       );
     }
 
-    // Check if user has permission to delete publications
+    // Check if user has permission to delete books
     if (session.user.role !== 'admin') {
       return NextResponse.json(
         { success: false, error: 'Insufficient permissions' },
@@ -217,34 +225,34 @@ export async function DELETE(
     // Validate ObjectId
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(
-        { success: false, error: 'Invalid publication ID' },
+        { success: false, error: 'Invalid book ID' },
         { status: 400 }
       );
     }
 
-    const publication = await Publication.findById(id);
-    if (!publication) {
+    const book = await Book.findById(id);
+    if (!book) {
       return NextResponse.json(
-        { success: false, error: 'Publication not found' },
+        { success: false, error: 'Book not found' },
         { status: 404 }
       );
     }
 
     // Soft delete by changing status to archived
-    await Publication.findByIdAndUpdate(id, { 
+    await Book.findByIdAndUpdate(id, { 
       status: 'archived',
       updatedBy: session.user.id
     });
 
     return NextResponse.json({
       success: true,
-      message: 'Publication archived successfully'
+      message: 'Book archived successfully'
     });
 
   } catch (error) {
-    console.error('Error deleting publication:', error);
+    console.error('Error deleting book:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to delete publication' },
+      { success: false, error: 'Failed to delete book' },
       { status: 500 }
     );
   }

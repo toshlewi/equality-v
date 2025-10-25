@@ -1,0 +1,71 @@
+import mongoose, { Schema, model, models } from 'mongoose';
+
+const BookSchema = new Schema({
+  title: { type: String, required: true, maxlength: 200 },
+  slug: { type: String, required: true, unique: true },
+  author: { type: String, required: true },
+  isbn: { type: String, unique: true, sparse: true },
+  description: { type: String, maxlength: 1000 },
+  shortDescription: { type: String, maxlength: 300 },
+  coverImage: { type: String },
+  year: { type: Number },
+  publisher: { type: String },
+  language: { type: String, default: 'English' },
+  pages: { type: Number },
+  category: { 
+    type: String, 
+    enum: ['fiction', 'non-fiction', 'poetry', 'essays', 'memoir', 'academic', 'other'],
+    default: 'non-fiction'
+  },
+  tags: [{ type: String }],
+  isFeatured: { type: Boolean, default: false },
+  isInLibrary: { type: Boolean, default: true },
+  isAvailable: { type: Boolean, default: true },
+  status: { 
+    type: String, 
+    enum: ['active', 'inactive', 'archived'], 
+    default: 'active' 
+  },
+  viewCount: { type: Number, default: 0 },
+  rating: { type: Number, default: 0 },
+  reviewCount: { type: Number, default: 0 },
+  // Book club specific fields
+  isBookClubSelection: { type: Boolean, default: false },
+  bookClubDate: { type: Date },
+  discussionNotes: { type: String },
+  // SEO fields
+  seoTitle: String,
+  seoDescription: String,
+  // Metadata
+  createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
+  updatedBy: { type: Schema.Types.ObjectId, ref: 'User' }
+}, { 
+  timestamps: true,
+  indexes: [
+    { title: 'text', author: 'text', description: 'text' },
+    { slug: 1 },
+    { isbn: 1 },
+    { author: 1 },
+    { category: 1 },
+    { isFeatured: 1, status: 1 },
+    { isBookClubSelection: 1, bookClubDate: -1 },
+    { status: 1, isInLibrary: 1 }
+  ]
+});
+
+// Virtual for formatted book club date
+BookSchema.virtual('formattedBookClubDate').get(function() {
+  if (!this.bookClubDate) return null;
+  return this.bookClubDate.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+});
+
+// Virtual for average rating
+BookSchema.virtual('averageRating').get(function() {
+  return this.reviewCount > 0 ? (this.rating / this.reviewCount).toFixed(1) : 0;
+});
+
+export default models.Book || model('Book', BookSchema);
