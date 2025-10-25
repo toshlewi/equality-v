@@ -42,3 +42,6 @@ async function testDatabaseIndexes() {
 
 // Run the test
 testDatabaseIndexes();
+
+// Export for use in other modules
+export default testDatabaseIndexes;

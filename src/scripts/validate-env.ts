@@ -1,5 +1,6 @@
 // Environment validation script
 require('dotenv').config({ path: '.env.local' });
+import { connectDB } from '../lib/mongodb';
 
 interface EnvVar {
   name: string;
@@ -16,6 +17,8 @@ const envVars: EnvVar[] = [
   // Authentication
   { name: 'NEXTAUTH_URL', value: process.env.NEXTAUTH_URL, required: true, description: 'NextAuth base URL', category: 'Authentication' },
   { name: 'NEXTAUTH_SECRET', value: process.env.NEXTAUTH_SECRET, required: true, description: 'NextAuth secret key', category: 'Authentication' },
+  { name: 'GOOGLE_CLIENT_ID', value: process.env.GOOGLE_CLIENT_ID, required: false, description: 'Google OAuth client ID', category: 'Authentication' },
+  { name: 'GOOGLE_CLIENT_SECRET', value: process.env.GOOGLE_CLIENT_SECRET, required: false, description: 'Google OAuth client secret', category: 'Authentication' },
   
   // Admin User
   { name: 'ADMIN_EMAIL', value: process.env.ADMIN_EMAIL, required: true, description: 'Admin user email', category: 'Admin' },
@@ -70,7 +73,7 @@ const envVars: EnvVar[] = [
   { name: 'NODE_ENV', value: process.env.NODE_ENV, required: true, description: 'Node environment', category: 'Application' },
 ];
 
-function validateEnvironment() {
+async function validateEnvironment() {
   console.log('🔍 Validating environment variables...\n');
   
   const categories = [...new Set(envVars.map(v => v.category))];
@@ -114,7 +117,14 @@ function validateEnvironment() {
     console.log('\n✅ All required environment variables are set!');
     console.log('🎉 Environment validation completed successfully!');
   }
+  
+  // Close connection
+  await connectDB();
+  console.log('🔌 Database connection closed');
 }
 
 // Run validation
-validateEnvironment();
+validateEnvironment().catch(console.error);
+
+// Export for use in other modules
+export default validateEnvironment;

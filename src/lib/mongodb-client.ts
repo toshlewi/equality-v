@@ -1,5 +1,8 @@
 import { MongoClient } from 'mongodb';
 
+// Load environment variables
+require('dotenv').config({ path: '.env.local' });
+
 const uri = process.env.MONGODB_URI!;
 const options = {};
 

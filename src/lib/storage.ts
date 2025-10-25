@@ -215,6 +215,11 @@ export async function fileExists(fileKey: string): Promise<boolean> {
   }
 }
 
+// Get public file URL (alias for getCDNUrl)
+export function getPublicFileUrl(fileKey: string): string {
+  return getCDNUrl(fileKey);
+}
+
 export default {
   generatePresignedUploadUrl,
   uploadFile,
@@ -223,5 +228,6 @@ export default {
   getFileMetadata,
   listFiles,
   getCDNUrl,
-  fileExists
+  fileExists,
+  getPublicFileUrl
 };

@@ -182,4 +182,7 @@ export function withApiSecurity(
   };
 }
 
+// Express rate limit (alias for withApiSecurity)
+export const expressRateLimit = withApiSecurity;
+
 export default withApiSecurity;

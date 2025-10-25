@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { fredoka, leagueSpartan } from "@/lib/fonts";
 import MainLayout from "@/components/layout/MainLayout";
+import SessionProvider from "@/components/providers/SessionProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -18,7 +19,9 @@ export default function RootLayout({
       <body
         className={`${fredoka.variable} ${leagueSpartan.variable} antialiased`}
       >
-        <MainLayout>{children}</MainLayout>
+        <SessionProvider>
+          <MainLayout>{children}</MainLayout>
+        </SessionProvider>
       </body>
     </html>
   );

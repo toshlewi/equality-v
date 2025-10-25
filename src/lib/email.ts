@@ -583,9 +583,23 @@ async function renderDefaultTemplate(template: string, data: any): Promise<strin
   `.trim();
 }
 
+// Password reset email function
+export async function sendPasswordResetEmail(email: string, resetUrl: string, name: string): Promise<{ success: boolean; messageId?: string; error?: string }> {
+  return sendEmail({
+    to: email,
+    subject: 'Password Reset - Equality Vanguard',
+    template: 'password-reset',
+    data: {
+      name,
+      resetUrl
+    }
+  });
+}
+
 export default {
   sendEmail,
   sendBulkEmails,
   trackDelivery,
-  handleBounce
+  handleBounce,
+  sendPasswordResetEmail
 };

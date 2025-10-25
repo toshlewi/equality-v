@@ -1,4 +1,5 @@
-import { generatePresignedUploadUrl } from '../lib/storage';
+import { generatePresignedUploadUrl, getPublicFileUrl } from '../lib/storage';
+import { connectDB } from '../lib/mongodb';
 
 async function testFileUpload() {
   try {
@@ -33,19 +34,16 @@ async function testFileUpload() {
   } catch (error) {
     console.error('❌ File upload test failed:', error);
     process.exit(1);
+  } finally {
+    // Close connection
+    await connectDB();
+    console.log('🔌 Database connection closed');
   }
 }
 
-// Import the function (we need to add this to the storage.ts file)
-function getPublicFileUrl(fileKey: string): string {
-  const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL;
-  
-  if (!R2_PUBLIC_URL) {
-    throw new Error('Cloudflare R2 environment variables not configured');
-  }
-  
-  return `${R2_PUBLIC_URL}/${fileKey}`;
-}
 
 // Run the test
 testFileUpload();
+
+// Export for use in other modules
+export default testFileUpload;

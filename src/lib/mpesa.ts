@@ -298,4 +298,14 @@ export function generateReceipt(transactionDetails: {
   return mpesaClient.generateReceipt(transactionDetails);
 }
 
+// Generate access token (alias for generateAccessToken)
+export async function generateAccessToken(): Promise<string> {
+  return mpesaClient.generateAccessToken();
+}
+
+// Generate password (alias for generatePassword)
+export function generatePassword(): string {
+  return mpesaClient['generatePassword']();
+}
+
 export default mpesaClient;

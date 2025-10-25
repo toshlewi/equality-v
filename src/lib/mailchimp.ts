@@ -413,6 +413,12 @@ export async function syncMemberToMailchimp(
   }
 }
 
+// Add subscriber to default list (alias for addSubscriber)
+export const addSubscriberToDefaultList = async (subscriberData: SubscriberData): Promise<{ success: boolean; memberId?: string; error?: string }> => {
+  const listId = process.env.MAILCHIMP_LIST_ID!;
+  return addSubscriber(listId, subscriberData);
+};
+
 export default {
   addSubscriber,
   updateSubscriber,

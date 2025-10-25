@@ -31,3 +31,6 @@ export default function RecaptchaProvider({ children }: RecaptchaProviderProps) 
 
   return <>{children}</>;
 }
+
+// Export as named export as well
+export { RecaptchaProvider };

@@ -22,3 +22,12 @@ Object.keys(process.env)
   .forEach(key => {
     console.log(`${key}: ${process.env[key] ? 'Set' : 'Not set'}`);
   });
+
+// Export for use in other modules
+export default function debugEnv() {
+  console.log('🔍 Debugging environment variables...');
+  // ... rest of the debug logic
+}
+
+// Run the debug
+debugEnv();

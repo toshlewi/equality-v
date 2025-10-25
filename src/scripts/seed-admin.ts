@@ -1,6 +1,7 @@
 import connectDB from '../lib/mongodb';
 import User from '../models/User';
 import bcrypt from 'bcryptjs';
+import mongoose from 'mongoose';
 
 const seedAdmin = async () => {
   await connectDB();
@@ -41,12 +42,15 @@ const seedAdmin = async () => {
     console.error('Error seeding admin user:', error);
     process.exit(1);
   } finally {
-    // Mongoose connection might not have a direct disconnect method if it's cached globally
-    // For a script, it's usually fine to let it exit, which closes the connection.
-    // If you need explicit disconnect, ensure your connectDB provides it.
+    // Close connection
+    await mongoose.disconnect();
+    console.log('🔌 Database connection closed');
     console.log('Admin seeding process finished.');
     process.exit(0);
   }
 };
 
 seedAdmin();
+
+// Export for use in other modules
+export default seedAdmin;

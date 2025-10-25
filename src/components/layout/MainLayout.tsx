@@ -12,7 +12,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   
   return (
     <>
-      <LiquidBackground />
+      {!isAdmin && <LiquidBackground />}
       {!isAdmin && !isMatriArchive && <Navbar />}
       <main className="min-h-screen relative z-10">{children}</main>
       {!isAdmin && !isMatriArchive && !isEventsNews && <Footer />}

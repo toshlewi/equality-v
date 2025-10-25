@@ -1,6 +1,7 @@
 import connectDB from '../lib/mongodb';
 import User from '../models/User';
 import { hashPassword, verifyPassword } from '../lib/auth';
+import mongoose from 'mongoose';
 
 async function testAuthentication() {
   try {
@@ -59,9 +60,15 @@ async function testAuthentication() {
     console.error('❌ Authentication test failed:', error);
     process.exit(1);
   } finally {
+    // Close connection
+    await mongoose.disconnect();
+    console.log('🔌 Database connection closed');
     process.exit(0);
   }
 }
 
 // Run the test
 testAuthentication();
+
+// Export for use in other modules
+export default testAuthentication;

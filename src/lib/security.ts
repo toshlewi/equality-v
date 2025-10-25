@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import rateLimit from 'express-rate-limit';
 import { verifyRecaptcha } from './recaptcha'; // We'll create this
 
+// Re-export verifyRecaptcha for convenience
+export { verifyRecaptcha };
+
 // Basic rate limiting middleware for Next.js API routes
 // Note: This is a simplified example. For production, consider a more robust solution
 // like Upstash Redis for distributed rate limiting across multiple instances.

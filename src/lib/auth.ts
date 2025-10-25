@@ -41,11 +41,21 @@ export const requireAuth = (roles?: string[]) => {
   };
 };
 
+// Input sanitization function
+export const sanitizeInput = (input: string): string => {
+  return input
+    .replace(/[<>]/g, '') // Remove < and > characters
+    .replace(/javascript:/gi, '') // Remove javascript: protocol
+    .replace(/on\w+=/gi, '') // Remove event handlers
+    .trim();
+};
+
 export default {
   hashPassword,
   verifyPassword,
   generateAuthToken,
   verifyAuthToken,
   getServerSession,
-  requireAuth
+  requireAuth,
+  sanitizeInput
 };

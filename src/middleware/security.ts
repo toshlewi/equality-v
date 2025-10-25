@@ -203,6 +203,12 @@ export function withSecurity(
   };
 }
 
+// Helmet middleware (alias for addSecurityHeaders)
+export const helmet = addSecurityHeaders;
+
+// CORS middleware (placeholder)
+export const cors = (options: any) => (request: NextRequest) => request;
+
 export default {
   addSecurityHeaders,
   validateRequest,
@@ -210,4 +216,6 @@ export default {
   isBlockedIP,
   sanitizeRequest,
   withSecurity,
+  helmet,
+  cors,
 };

@@ -340,6 +340,11 @@ export async function cleanupOldNotifications(daysOld: number = 30): Promise<{ s
   }
 }
 
+// Create notification for admin users (alias for createAdminNotification)
+export const createAdminNotificationForAll = async (data: Omit<NotificationData, 'userId'>): Promise<{ success: boolean; error?: string }> => {
+  return createAdminNotification(data);
+};
+
 export default {
   createNotification,
   getNotifications,

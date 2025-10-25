@@ -44,3 +44,6 @@ export const useRecaptcha = () => {
     verifyRecaptcha,
   };
 };
+
+// Export as default as well
+export default useRecaptcha;

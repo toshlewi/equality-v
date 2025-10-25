@@ -3,6 +3,7 @@ import { verifyRecaptcha } from '../lib/recaptcha';
 import { validatePasswordStrength, sanitizeInput, isBlockedIP } from '../lib/security';
 import { authRateLimit, apiRateLimit, formRateLimit } from '../middleware/rate-limit';
 import AuditLog from '../models/AuditLog';
+import mongoose from 'mongoose';
 
 async function testSecurity() {
   try {
@@ -111,9 +112,15 @@ async function testSecurity() {
     console.error('❌ Security test failed:', error);
     process.exit(1);
   } finally {
+    // Close connection
+    await mongoose.disconnect();
+    console.log('🔌 Database connection closed');
     process.exit(0);
   }
 }
 
 // Run the test
 testSecurity();
+
+// Export for use in other modules
+export default testSecurity;

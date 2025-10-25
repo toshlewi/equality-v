@@ -1,4 +1,5 @@
 import { S3Client, ListBucketsCommand, HeadBucketCommand, ListObjectsV2Command } from "@aws-sdk/client-s3";
+import { connectDB } from '../lib/mongodb';
 
 async function debugR2Connection() {
   try {
@@ -88,8 +89,15 @@ async function debugR2Connection() {
   } catch (error) {
     console.error('❌ R2 debugging failed:', error);
     process.exit(1);
+  } finally {
+    // Close connection
+    await connectDB();
+    console.log('🔌 Database connection closed');
   }
 }
 
 // Run the debug
 debugR2Connection();
+
+// Export for use in other modules
+export default debugR2Connection;

@@ -4,16 +4,11 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -42,60 +37,246 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100 dark:bg-gray-950">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Admin Login</CardTitle>
-          <CardDescription>Enter your credentials to access the admin portal.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {error && (
-            <Alert variant="destructive" className="mb-4">
-              <ExclamationTriangleIcon className="h-4 w-4" />
-              <AlertTitle>Login Failed</AlertTitle>
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-          {authError === "AccessDenied" && (
-            <Alert variant="destructive" className="mb-4">
-              <ExclamationTriangleIcon className="h-4 w-4" />
-              <AlertTitle>Access Denied</AlertTitle>
-              <AlertDescription>You do not have permission to access the admin portal.</AlertDescription>
-            </Alert>
-          )}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="m@example.com"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
+    <div style={{ 
+      minHeight: '100vh', 
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'center',
+      backgroundColor: '#042C45',
+      color: 'white',
+      padding: '20px'
+    }}>
+      <div style={{ 
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        padding: '40px',
+        borderRadius: '12px',
+        maxWidth: '400px',
+        width: '100%',
+        backdropFilter: 'blur(10px)',
+        border: '1px solid rgba(255, 255, 255, 0.2)'
+      }}>
+        <div style={{ textAlign: 'center', marginBottom: '30px' }}>
+          <div style={{
+            width: '60px',
+            height: '60px',
+            backgroundColor: '#F9D960',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '0 auto 20px',
+            fontSize: '24px'
+          }}>
+            🔒
+          </div>
+          <h1 style={{ 
+            fontSize: '28px', 
+            fontWeight: 'bold', 
+            marginBottom: '10px'
+          }}>
+            Admin Portal
+          </h1>
+          <p style={{ 
+            opacity: 0.8,
+            fontSize: '16px'
+          }}>
+            Enter your credentials to access the admin dashboard
+          </p>
+        </div>
+        
+        {/* Error Messages */}
+        {error && (
+          <div style={{
+            backgroundColor: 'rgba(239, 68, 68, 0.2)',
+            border: '1px solid rgba(239, 68, 68, 0.5)',
+            color: '#fecaca',
+            padding: '12px',
+            borderRadius: '8px',
+            marginBottom: '20px',
+            fontSize: '14px'
+          }}>
+            <strong>Login Failed:</strong> {error}
+          </div>
+        )}
+        
+        {authError === "AccessDenied" && (
+          <div style={{
+            backgroundColor: 'rgba(239, 68, 68, 0.2)',
+            border: '1px solid rgba(239, 68, 68, 0.5)',
+            color: '#fecaca',
+            padding: '12px',
+            borderRadius: '8px',
+            marginBottom: '20px',
+            fontSize: '14px'
+          }}>
+            <strong>Access Denied:</strong> You do not have permission to access the admin portal.
+          </div>
+        )}
+
+        {/* Login Form */}
+        <form onSubmit={handleSubmit}>
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ 
+              display: 'block', 
+              marginBottom: '8px',
+              fontSize: '14px',
+              fontWeight: '500'
+            }}>
+              Email Address
+            </label>
+            <input 
+              type="email" 
+              placeholder="admin@equalityvanguard.org"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '12px',
+                borderRadius: '8px',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                color: 'white',
+                boxSizing: 'border-box',
+                fontSize: '16px'
+              }}
+            />
+          </div>
+          
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ 
+              display: 'block', 
+              marginBottom: '8px',
+              fontSize: '14px',
+              fontWeight: '500'
+            }}>
+              Password
+            </label>
+            <div style={{ position: 'relative' }}>
+              <input 
+                type={showPassword ? "text" : "password"}
+                placeholder="Enter your password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  paddingRight: '40px',
+                  borderRadius: '8px',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  color: 'white',
+                  boxSizing: 'border-box',
+                  fontSize: '16px'
+                }}
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: 'absolute',
+                  right: '12px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  color: 'rgba(255, 255, 255, 0.6)',
+                  cursor: 'pointer',
+                  fontSize: '18px'
+                }}
+              >
+                {showPassword ? '🙈' : '👁️'}
+              </button>
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Logging in..." : "Login"}
-            </Button>
-          </form>
-          <div className="mt-4 text-center text-sm">
-            <Link href="/admin/forgot-password" className="underline">
-              Forgot password?
-            </Link>
           </div>
-        </CardContent>
-      </Card>
+
+          <button 
+            type="submit"
+            disabled={loading}
+            style={{
+              width: '100%',
+              padding: '14px',
+              backgroundColor: loading ? 'rgba(249, 217, 96, 0.7)' : '#F9D960',
+              color: '#042C45',
+              border: 'none',
+              borderRadius: '8px',
+              fontWeight: 'bold',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              fontSize: '16px',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            {loading ? (
+              <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ 
+                  display: 'inline-block',
+                  width: '16px',
+                  height: '16px',
+                  border: '2px solid #042C45',
+                  borderTop: '2px solid transparent',
+                  borderRadius: '50%',
+                  animation: 'spin 1s linear infinite',
+                  marginRight: '8px'
+                }}></span>
+                Signing in...
+              </span>
+            ) : (
+              'Sign In'
+            )}
+          </button>
+        </form>
+
+        {/* Forgot Password Link */}
+        <div style={{ textAlign: 'center', marginTop: '20px' }}>
+          <Link 
+            href="/admin/forgot-password" 
+            style={{
+              color: 'rgba(255, 255, 255, 0.7)',
+              textDecoration: 'none',
+              fontSize: '14px'
+            }}
+          >
+            Forgot your password?
+          </Link>
+        </div>
+
+        {/* Back to Main Site */}
+        <div style={{ textAlign: 'center', marginTop: '30px' }}>
+          <Link 
+            href="/" 
+            style={{
+              color: 'rgba(255, 255, 255, 0.7)',
+              textDecoration: 'none',
+              fontSize: '14px',
+              display: 'inline-flex',
+              alignItems: 'center'
+            }}
+          >
+            ← Back to main site
+          </Link>
+        </div>
+
+        {/* Security Notice */}
+        <div style={{
+          textAlign: 'center',
+          fontSize: '12px',
+          color: 'rgba(255, 255, 255, 0.5)',
+          marginTop: '20px',
+          padding: '12px',
+          backgroundColor: 'rgba(249, 217, 96, 0.1)',
+          borderRadius: '8px'
+        }}>
+          🔒 This is a secure admin area. All activities are logged and monitored.
+        </div>
+      </div>
+
+      <style jsx>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 }

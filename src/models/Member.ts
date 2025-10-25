@@ -1,99 +1,71 @@
-import { Schema, model, models } from 'mongoose';
+import mongoose, { Schema, model, models } from 'mongoose';
 
-// Member model for community membership management
-// Handles membership subscriptions, payments, and member data
 const MemberSchema = new Schema({
-  name: { type: String, required: true, maxlength: 100 },
-  email: { type: String, required: true, unique: true, maxlength: 255 },
-  phone: { type: String, required: true, maxlength: 20 },
-  // Membership details
+  email: { type: String, required: true, unique: true },
+  firstName: { type: String, required: true },
+  lastName: { type: String, required: true },
+  phone: { type: String },
   membershipType: { 
     type: String, 
-    enum: ['annual', 'lifetime', 'student', 'supporter'],
+    enum: ['individual', 'student', 'organization', 'supporter'],
     required: true 
   },
-  subscriptionStart: { type: Date, required: true },
-  subscriptionEnd: { type: Date, required: true },
+  status: { 
+    type: String, 
+    enum: ['pending', 'active', 'suspended', 'cancelled'],
+    default: 'pending' 
+  },
   isActive: { type: Boolean, default: true },
-  // Payment information
+  joinDate: { type: Date, default: Date.now },
+  expiryDate: { type: Date },
   paymentStatus: { 
     type: String, 
-    enum: ['pending', 'paid', 'failed', 'cancelled', 'refunded'],
-    default: 'pending'
+    enum: ['pending', 'paid', 'failed', 'refunded'],
+    default: 'pending' 
   },
-  paymentProvider: { type: String, enum: ['stripe', 'mpesa', 'bank_transfer'] },
-  paymentId: { type: String }, // Stripe payment intent ID or M-Pesa transaction ID
+  paymentMethod: { 
+    type: String, 
+    enum: ['stripe', 'mpesa', 'bank_transfer'],
+    default: 'stripe' 
+  },
+  paymentId: { type: String },
   amount: { type: Number, required: true },
   currency: { type: String, default: 'USD' },
-  // Member profile
-  profile: {
-    bio: { type: String, maxlength: 500 },
-    interests: [{ type: String }],
-    location: { type: String },
-    website: { type: String },
-    socialLinks: {
-      twitter: { type: String },
-      linkedin: { type: String },
-      instagram: { type: String }
-    }
+  address: {
+    street: String,
+    city: String,
+    state: String,
+    country: String,
+    postalCode: String
   },
-  // Communication preferences
-  newsletterSubscribed: { type: Boolean, default: true },
-  emailNotifications: { type: Boolean, default: true },
-  smsNotifications: { type: Boolean, default: false },
-  // Mailchimp integration
-  mailchimpId: { type: String },
-  mailchimpTags: [{ type: String }],
-  // Admin notes
-  notes: { type: String, maxlength: 1000 },
-  // Legal and consent
-  termsAccepted: { type: Boolean, required: true },
-  termsVersion: { type: String, required: true },
-  privacyAccepted: { type: Boolean, required: true },
-  privacyVersion: { type: String, required: true },
-  // Activity tracking
-  lastLogin: { type: Date },
-  loginCount: { type: Number, default: 0 },
-  // Referral system
-  referredBy: { type: Schema.Types.ObjectId, ref: 'Member' },
-  referralCode: { type: String, unique: true },
-  referrals: [{ type: Schema.Types.ObjectId, ref: 'Member' }]
+  organization: {
+    name: String,
+    type: String,
+    website: String
+  },
+  interests: [String],
+  newsletter: { type: Boolean, default: true },
+  emergencyContact: {
+    name: String,
+    phone: String,
+    relationship: String
+  },
+  notes: String,
+  lastLogin: Date,
+  profileImage: String,
+  documents: [{
+    type: { type: String },
+    url: String,
+    uploadedAt: { type: Date, default: Date.now }
+  }]
 }, { 
   timestamps: true,
   indexes: [
     { email: 1 },
     { membershipType: 1, isActive: 1 },
-    { paymentStatus: 1 },
-    { subscriptionEnd: 1 },
-    { referralCode: 1 },
-    { isActive: 1, subscriptionEnd: 1 },
-    { paymentStatus: 1, createdAt: -1 },
-    { mailchimpId: 1 },
-    { createdAt: -1 }
+    { status: 1 },
+    { joinDate: -1 }
   ]
-});
-
-// Pre-save middleware to generate referral code
-MemberSchema.pre('save', function(next) {
-  if (!this.referralCode) {
-    this.referralCode = `EV${this._id.toString().slice(-8).toUpperCase()}`;
-  }
-  next();
-});
-
-// Virtual for membership status
-MemberSchema.virtual('membershipStatus').get(function() {
-  if (!this.isActive) return 'inactive';
-  if (this.subscriptionEnd < new Date()) return 'expired';
-  if (this.paymentStatus === 'pending') return 'pending_payment';
-  return 'active';
-});
-
-// Virtual for days until expiry
-MemberSchema.virtual('daysUntilExpiry').get(function() {
-  const now = new Date();
-  const diffTime = this.subscriptionEnd.getTime() - now.getTime();
-  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 });
 
 export default models.Member || model('Member', MemberSchema);

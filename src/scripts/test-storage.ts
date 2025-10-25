@@ -1,4 +1,5 @@
 import { S3Client, ListBucketsCommand, HeadBucketCommand } from "@aws-sdk/client-s3";
+import { connectDB } from '../lib/mongodb';
 
 async function testStorageConnection() {
   try {
@@ -46,8 +47,15 @@ async function testStorageConnection() {
   } catch (error) {
     console.error('❌ Cloudflare R2 connection test failed:', error);
     process.exit(1);
+  } finally {
+    // Close connection
+    await connectDB();
+    console.log('🔌 Database connection closed');
   }
 }
 
 // Run the test
 testStorageConnection();
+
+// Export for use in other modules
+export default testStorageConnection;

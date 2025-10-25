@@ -24,4 +24,9 @@ export const verifyRecaptcha = async (token: string): Promise<boolean> => {
   }
 };
 
-export default { verifyRecaptcha };
+// Verify human (alias for verifyRecaptcha)
+export const verifyHuman = async (token: string): Promise<boolean> => {
+  return verifyRecaptcha(token);
+};
+
+export default { verifyRecaptcha, verifyHuman };

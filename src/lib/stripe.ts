@@ -274,4 +274,14 @@ export function getSupportedCurrencies(): string[] {
   ];
 }
 
+// Create payment intent (alias for createPaymentIntent)
+export const createPaymentIntentAlias = async (data: PaymentIntentData): Promise<Stripe.PaymentIntent> => {
+  return createPaymentIntent(data);
+};
+
+// Create checkout session (alias for createCheckoutSession)
+export const createCheckoutSessionAlias = async (data: CheckoutSessionData): Promise<Stripe.Checkout.Session> => {
+  return createCheckoutSession(data);
+};
+
 export default stripe;

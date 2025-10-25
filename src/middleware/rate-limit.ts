@@ -90,10 +90,14 @@ export const uploadRateLimit = createRateLimit({
   message: 'Too many file uploads, please try again later'
 });
 
+// Express rate limit (alias for createRateLimit)
+export const expressRateLimit = createRateLimit;
+
 export default {
   createRateLimit,
   authRateLimit,
   apiRateLimit,
   formRateLimit,
   uploadRateLimit,
+  expressRateLimit,
 };

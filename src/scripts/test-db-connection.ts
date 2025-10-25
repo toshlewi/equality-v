@@ -37,3 +37,6 @@ async function testDatabaseConnection() {
 
 // Run the test
 testDatabaseConnection();
+
+// Export for use in other modules
+export default testDatabaseConnection;

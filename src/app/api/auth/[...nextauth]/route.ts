@@ -1,19 +1,14 @@
 import NextAuth from "next-auth";
-import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { MongoDBAdapter } from "@auth/mongodb-adapter";
-import clientPromise from "@/lib/mongodb-client"; // We'll create this
 import User from "@/models/User";
 import { verifyPassword } from "@/lib/auth";
 import connectDB from "@/lib/mongodb";
 
+// Load environment variables
+require('dotenv').config({ path: '.env.local' });
+
 export const authOptions = {
-  adapter: MongoDBAdapter(clientPromise), // Use MongoDBAdapter
   providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    }),
     CredentialsProvider({
       name: "Credentials",
       credentials: {
@@ -21,17 +16,22 @@ export const authOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        await connectDB();
-        const user = await User.findOne({ email: credentials?.email });
+        try {
+          await connectDB();
+          const user = await User.findOne({ email: credentials?.email });
 
-        if (user && credentials?.password && await verifyPassword(credentials.password, user.password)) {
-          // Check if the user has an allowed role for admin access
-          const allowedRoles = ['admin', 'editor', 'reviewer', 'finance'];
-          if (!allowedRoles.includes(user.role)) {
-            throw new Error("Access Denied: Insufficient role.");
+          if (user && credentials?.password && await verifyPassword(credentials.password, user.password)) {
+            // Check if the user has an allowed role for admin access
+            const allowedRoles = ['admin', 'editor', 'reviewer', 'finance'];
+            if (!allowedRoles.includes(user.role)) {
+              throw new Error("Access Denied: Insufficient role.");
+            }
+            return { id: user._id.toString(), name: user.name, email: user.email, role: user.role };
+          } else {
+            return null;
           }
-          return { id: user._id.toString(), name: user.name, email: user.email, role: user.role };
-        } else {
+        } catch (error) {
+          console.error('NextAuth authorize error:', error);
           return null;
         }
       },
@@ -65,6 +65,7 @@ export const authOptions = {
     error: "/admin/login", // Error page
   },
   secret: process.env.NEXTAUTH_SECRET,
+  debug: process.env.NODE_ENV === 'development',
 };
 
 const handler = NextAuth(authOptions);
