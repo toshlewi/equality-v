@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Save, Eye, Upload, X } from 'lucide-react';
+import { ArrowLeft, Save, BookOpen, Upload, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -19,47 +19,59 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 
-interface PublicationFormData {
+interface BookFormData {
   title: string;
   author: string;
-  content: string;
-  excerpt: string;
+  genre: string;
+  year: number;
   category: string;
+  coverUrl: string;
+  description: string;
+  shortDescription: string;
+  isbn?: string;
+  publisher?: string;
+  language: string;
+  pages?: number;
   tags: string[];
-  featuredImage: string;
-  pdfUrl: string;
   isFeatured: boolean;
-  seoTitle: string;
-  seoDescription: string;
+  isInLibrary: boolean;
+  isAvailable: boolean;
+  isBookClubSelection: boolean;
 }
 
 interface UploadedFile {
   file: File;
   preview: string;
-  type: 'image' | 'pdf';
+  type: 'image';
 }
 
-export default function NewPublicationPage() {
+export default function AddBookPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [tagInput, setTagInput] = useState('');
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [uploading, setUploading] = useState(false);
-  const [formData, setFormData] = useState<PublicationFormData>({
+  const [formData, setFormData] = useState<BookFormData>({
     title: '',
     author: '',
-    content: '',
-    excerpt: '',
-    category: 'article',
+    genre: '',
+    year: new Date().getFullYear(),
+    category: 'non-fiction',
+    coverUrl: '',
+    description: '',
+    shortDescription: '',
+    isbn: '',
+    publisher: '',
+    language: 'English',
+    pages: undefined,
     tags: [],
-    featuredImage: '',
-    pdfUrl: '',
     isFeatured: false,
-    seoTitle: '',
-    seoDescription: ''
+    isInLibrary: true,
+    isAvailable: true,
+    isBookClubSelection: false
   });
 
-  const handleInputChange = (field: keyof PublicationFormData, value: string | boolean) => {
+  const handleInputChange = (field: keyof BookFormData, value: string | number | boolean) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -92,33 +104,33 @@ export default function NewPublicationPage() {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    if (files) {
-      Array.from(files).forEach(file => {
-        const type = file.type.startsWith('image/') ? 'image' : 'pdf';
+    if (files && files.length > 0) {
+      const file = files[0];
+      if (file.type.startsWith('image/')) {
         const reader = new FileReader();
         reader.onload = () => {
-          setUploadedFiles(prev => [...prev, {
+          setUploadedFiles([{
             file,
             preview: reader.result as string,
-            type
+            type: 'image'
           }]);
         };
         reader.readAsDataURL(file);
-      });
+      }
     }
   };
 
-  const removeFile = (index: number) => {
-    setUploadedFiles(prev => prev.filter((_, i) => i !== index));
+  const removeFile = () => {
+    setUploadedFiles([]);
   };
 
   const handleFileUpload = async () => {
+    if (uploadedFiles.length === 0) return;
+    
     setUploading(true);
     try {
       const formDataUpload = new FormData();
-      uploadedFiles.forEach(uploadedFile => {
-        formDataUpload.append('files', uploadedFile.file);
-      });
+      formDataUpload.append('files', uploadedFiles[0].file);
 
       const response = await fetch('/api/upload', {
         method: 'POST',
@@ -128,22 +140,16 @@ export default function NewPublicationPage() {
       if (response.ok) {
         const result = await response.json();
         if (Array.isArray(result) && result.length > 0) {
-          result.forEach((file: any) => {
-            if (file.type?.startsWith('image/')) {
-              setFormData(prev => ({ ...prev, featuredImage: file.url }));
-            } else if (file.type === 'application/pdf') {
-              setFormData(prev => ({ ...prev, pdfUrl: file.url }));
-            }
-          });
+          setFormData(prev => ({ ...prev, coverUrl: result[0].url }));
         }
       } else {
-        alert('Failed to upload files. Please try again.');
+        alert('Failed to upload image. Please try again.');
       }
-      setUploading(false);
     } catch (error) {
-      console.error('Error uploading files:', error);
+      console.error('Error uploading file:', error);
+      alert('Error uploading file. Please try again.');
+    } finally {
       setUploading(false);
-      alert('Error uploading files. Please try again.');
     }
   };
 
@@ -152,55 +158,33 @@ export default function NewPublicationPage() {
     setLoading(true);
 
     try {
-      const response = await fetch('/api/publications', {
+      const response = await fetch('/api/books', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          status: 'pending'
+        }),
       });
 
       const result = await response.json();
 
       if (result.success) {
-        router.push('/admin/content/publications');
+        router.push('/admin/content/books');
       } else {
-        console.error('Error creating publication:', result.error, result.details);
+        console.error('Error creating book:', result.error, result.details);
         const errorMessage = result.details 
           ? `Validation errors: ${result.details.join(', ')}`
           : result.error || 'Unknown error';
-        alert(`Error creating publication: ${errorMessage}`);
+        alert(`Error creating book: ${errorMessage}`);
       }
     } catch (error) {
-      console.error('Error creating publication:', error);
-      alert('Error creating publication. Please try again.');
+      console.error('Error creating book:', error);
+      alert('Error creating book. Please try again.');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handlePreview = () => {
-    // Open preview in new tab
-    const previewWindow = window.open('', '_blank');
-    if (previewWindow) {
-      previewWindow.document.write(`
-        <html>
-          <head>
-            <title>${formData.title} - Preview</title>
-            <style>
-              body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-              h1 { color: #333; }
-              .excerpt { font-style: italic; color: #666; margin: 20px 0; }
-              .content { line-height: 1.6; }
-            </style>
-          </head>
-          <body>
-            <h1>${formData.title}</h1>
-            <p class="excerpt">${formData.excerpt}</p>
-            <div class="content">${formData.content}</div>
-          </body>
-        </html>
-      `);
     }
   };
 
@@ -216,8 +200,8 @@ export default function NewPublicationPage() {
           <ArrowLeft className="w-4 h-4" />
         </Button>
         <div>
-          <h1 className="text-3xl font-bold">Create Publication</h1>
-          <p className="text-gray-600">Create a new publication or article</p>
+          <h1 className="text-3xl font-bold">Add Book</h1>
+          <p className="text-gray-600">Add a new book to the Alka Library</p>
         </div>
       </div>
 
@@ -237,7 +221,7 @@ export default function NewPublicationPage() {
                     id="title"
                     value={formData.title}
                     onChange={(e) => handleInputChange('title', e.target.value)}
-                    placeholder="Enter publication title"
+                    placeholder="Enter book title"
                     required
                   />
                 </div>
@@ -253,6 +237,40 @@ export default function NewPublicationPage() {
                   />
                 </div>
 
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="year">Year</Label>
+                    <Input
+                      id="year"
+                      type="number"
+                      value={formData.year}
+                      onChange={(e) => handleInputChange('year', parseInt(e.target.value))}
+                      placeholder="2024"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="pages">Pages</Label>
+                    <Input
+                      id="pages"
+                      type="number"
+                      value={formData.pages || ''}
+                      onChange={(e) => handleInputChange('pages', parseInt(e.target.value) || undefined)}
+                      placeholder="300"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="genre">Genre</Label>
+                  <Input
+                    id="genre"
+                    value={formData.genre}
+                    onChange={(e) => handleInputChange('genre', e.target.value)}
+                    placeholder="e.g., Feminism, African Literature"
+                  />
+                </div>
+
                 <div>
                   <Label htmlFor="category">Category *</Label>
                   <Select
@@ -263,69 +281,63 @@ export default function NewPublicationPage() {
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="article">Article</SelectItem>
-                      <SelectItem value="blog">Blog</SelectItem>
-                      <SelectItem value="report">Report</SelectItem>
+                      <SelectItem value="fiction">Fiction</SelectItem>
+                      <SelectItem value="non-fiction">Non-Fiction</SelectItem>
+                      <SelectItem value="poetry">Poetry</SelectItem>
+                      <SelectItem value="essays">Essays</SelectItem>
+                      <SelectItem value="memoir">Memoir</SelectItem>
+                      <SelectItem value="academic">Academic</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div>
-                  <Label htmlFor="excerpt">Excerpt</Label>
+                  <Label htmlFor="description">Description</Label>
                   <Textarea
-                    id="excerpt"
-                    value={formData.excerpt}
-                    onChange={(e) => handleInputChange('excerpt', e.target.value)}
-                    placeholder="Brief description of the publication"
-                    rows={3}
+                    id="description"
+                    value={formData.description}
+                    onChange={(e) => handleInputChange('description', e.target.value)}
+                    placeholder="Full description of the book"
+                    rows={5}
                   />
                 </div>
-              </CardContent>
-            </Card>
 
-            {/* Content */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Content</CardTitle>
-              </CardHeader>
-              <CardContent>
                 <div>
-                  <Label htmlFor="content">Content *</Label>
+                  <Label htmlFor="shortDescription">Short Description</Label>
                   <Textarea
-                    id="content"
-                    value={formData.content}
-                    onChange={(e) => handleInputChange('content', e.target.value)}
-                    placeholder="Write your publication content here..."
-                    rows={15}
-                    required
+                    id="shortDescription"
+                    value={formData.shortDescription}
+                    onChange={(e) => handleInputChange('shortDescription', e.target.value)}
+                    placeholder="Brief summary (max 300 characters)"
+                    rows={2}
+                    maxLength={300}
                   />
                 </div>
               </CardContent>
             </Card>
 
-            {/* Media */}
+            {/* Cover Image */}
             <Card>
               <CardHeader>
-                <CardTitle>Media</CardTitle>
+                <CardTitle>Cover Image</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <Label htmlFor="fileUpload">Upload Images or PDFs</Label>
+                  <Label htmlFor="fileUpload">Upload Cover Image</Label>
                   <Input
                     id="fileUpload"
                     type="file"
-                    accept="image/*,.pdf"
-                    multiple
+                    accept="image/*"
                     onChange={handleFileChange}
                     className="cursor-pointer"
                   />
-                  <p className="text-xs text-gray-500 mt-1">You can upload multiple files</p>
                 </div>
 
                 {uploadedFiles.length > 0 && (
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <p className="text-sm font-medium">Uploaded Files ({uploadedFiles.length})</p>
+                      <p className="text-sm font-medium">Uploaded Image</p>
                       <Button
                         type="button"
                         onClick={handleFileUpload}
@@ -335,27 +347,20 @@ export default function NewPublicationPage() {
                         {uploading ? 'Uploading...' : 'Upload to Server'}
                       </Button>
                     </div>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                       {uploadedFiles.map((file, index) => (
                         <div key={index} className="relative border rounded p-2">
-                          {file.type === 'image' ? (
-                            <img
-                              src={file.preview}
-                              alt="Preview"
-                              className="w-full h-24 object-cover rounded"
-                            />
-                          ) : (
-                            <div className="w-full h-24 bg-gray-100 rounded flex items-center justify-center">
-                              <Upload className="w-8 h-8 text-gray-400" />
-                              <span className="text-xs ml-2">{file.file.name}</span>
-                            </div>
-                          )}
+                          <img
+                            src={file.preview}
+                            alt="Preview"
+                            className="w-full h-48 object-cover rounded"
+                          />
                           <Button
                             type="button"
                             variant="destructive"
                             size="sm"
-                            onClick={() => removeFile(index)}
-                            className="absolute top-1 right-1"
+                            onClick={removeFile}
+                            className="absolute top-2 right-2"
                           >
                             <X className="w-3 h-3" />
                           </Button>
@@ -365,21 +370,10 @@ export default function NewPublicationPage() {
                   </div>
                 )}
 
-                {/* Display uploaded URLs */}
-                {(formData.featuredImage || formData.pdfUrl) && (
-                  <div className="space-y-2 text-sm">
-                    {formData.featuredImage && (
-                      <div>
-                        <p className="font-medium">Featured Image:</p>
-                        <p className="text-gray-600 break-all">{formData.featuredImage}</p>
-                      </div>
-                    )}
-                    {formData.pdfUrl && (
-                      <div>
-                        <p className="font-medium">PDF:</p>
-                        <p className="text-gray-600 break-all">{formData.pdfUrl}</p>
-                      </div>
-                    )}
+                {formData.coverUrl && (
+                  <div className="text-sm">
+                    <p className="font-medium">Cover URL:</p>
+                    <p className="text-gray-600 break-all">{formData.coverUrl}</p>
                   </div>
                 )}
               </CardContent>
@@ -388,18 +382,83 @@ export default function NewPublicationPage() {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Publish Settings */}
+            {/* Settings */}
             <Card>
               <CardHeader>
-                <CardTitle>Publish Settings</CardTitle>
+                <CardTitle>Settings</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="isFeatured">Featured Publication</Label>
+                  <Label htmlFor="isFeatured">Featured Book</Label>
                   <Switch
                     id="isFeatured"
                     checked={formData.isFeatured}
                     onCheckedChange={(checked) => handleInputChange('isFeatured', checked)}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="isInLibrary">In Library</Label>
+                  <Switch
+                    id="isInLibrary"
+                    checked={formData.isInLibrary}
+                    onCheckedChange={(checked) => handleInputChange('isInLibrary', checked)}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="isAvailable">Available</Label>
+                  <Switch
+                    id="isAvailable"
+                    checked={formData.isAvailable}
+                    onCheckedChange={(checked) => handleInputChange('isAvailable', checked)}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="isBookClubSelection">Book Club Selection</Label>
+                  <Switch
+                    id="isBookClubSelection"
+                    checked={formData.isBookClubSelection}
+                    onCheckedChange={(checked) => handleInputChange('isBookClubSelection', checked)}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Additional Info */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Additional Information</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="isbn">ISBN</Label>
+                  <Input
+                    id="isbn"
+                    value={formData.isbn || ''}
+                    onChange={(e) => handleInputChange('isbn', e.target.value)}
+                    placeholder="978-0-123456-78-9"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="publisher">Publisher</Label>
+                  <Input
+                    id="publisher"
+                    value={formData.publisher || ''}
+                    onChange={(e) => handleInputChange('publisher', e.target.value)}
+                    placeholder="Publisher name"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="language">Language</Label>
+                  <Input
+                    id="language"
+                    value={formData.language}
+                    onChange={(e) => handleInputChange('language', e.target.value)}
+                    placeholder="English"
                   />
                 </div>
               </CardContent>
@@ -439,35 +498,6 @@ export default function NewPublicationPage() {
               </CardContent>
             </Card>
 
-            {/* SEO Settings */}
-            <Card>
-              <CardHeader>
-                <CardTitle>SEO Settings</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label htmlFor="seoTitle">SEO Title</Label>
-                  <Input
-                    id="seoTitle"
-                    value={formData.seoTitle}
-                    onChange={(e) => handleInputChange('seoTitle', e.target.value)}
-                    placeholder="SEO optimized title"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="seoDescription">SEO Description</Label>
-                  <Textarea
-                    id="seoDescription"
-                    value={formData.seoDescription}
-                    onChange={(e) => handleInputChange('seoDescription', e.target.value)}
-                    placeholder="SEO optimized description"
-                    rows={3}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
             {/* Actions */}
             <Card>
               <CardContent className="pt-6">
@@ -478,17 +508,16 @@ export default function NewPublicationPage() {
                     disabled={loading}
                   >
                     <Save className="w-4 h-4 mr-2" />
-                    {loading ? 'Creating...' : 'Create Publication'}
+                    {loading ? 'Creating...' : 'Create Book'}
                   </Button>
                   
                   <Button
                     type="button"
                     variant="outline"
                     className="w-full"
-                    onClick={handlePreview}
+                    onClick={() => router.push('/admin/content/books')}
                   >
-                    <Eye className="w-4 h-4 mr-2" />
-                    Preview
+                    Cancel
                   </Button>
                 </div>
               </CardContent>
@@ -499,3 +528,4 @@ export default function NewPublicationPage() {
     </div>
   );
 }
+

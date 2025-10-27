@@ -8,28 +8,23 @@ import mongoose from 'mongoose';
 
 // Validation schema for updating books
 const updateBookSchema = z.object({
-  title: z.string().min(2, 'Title must be at least 2 characters').max(200, 'Title must not exceed 200 characters').optional(),
-  author: z.string().min(2, 'Author must be at least 2 characters').max(100, 'Author must not exceed 100 characters').optional(),
+  title: z.string().min(1, 'Title is required').max(300, 'Title must not exceed 300 characters').optional(),
+  author: z.string().min(1, 'Author is required').max(200, 'Author must not exceed 200 characters').optional(),
   isbn: z.string().optional(),
-  description: z.string().min(10, 'Description must be at least 10 characters').max(1000, 'Description must not exceed 1000 characters').optional(),
+  description: z.string().max(1000, 'Description must not exceed 1000 characters').optional(),
   shortDescription: z.string().max(300, 'Short description must not exceed 300 characters').optional(),
-  coverImage: z.string().url().optional(),
-  coverUrl: z.string().url().optional(),
+  coverUrl: z.string().optional(),
   genre: z.string().optional(),
-  year: z.number().min(1000, 'Year must be valid').max(new Date().getFullYear() + 1, 'Year cannot be in the future').optional(),
+  year: z.number().optional(),
   publisher: z.string().max(100, 'Publisher must not exceed 100 characters').optional(),
   language: z.string().optional(),
-  pages: z.number().min(1, 'Pages must be at least 1').optional(),
+  pages: z.number().optional(),
   category: z.enum(['fiction', 'non-fiction', 'poetry', 'essays', 'memoir', 'academic', 'other']).optional(),
   tags: z.array(z.string()).optional(),
   isFeatured: z.boolean().optional(),
   isInLibrary: z.boolean().optional(),
   isAvailable: z.boolean().optional(),
   isBookClubSelection: z.boolean().optional(),
-  bookClubDate: z.string().datetime().optional(),
-  discussionNotes: z.string().max(2000, 'Discussion notes must not exceed 2000 characters').optional(),
-  seoTitle: z.string().max(60, 'SEO title must not exceed 60 characters').optional(),
-  seoDescription: z.string().max(160, 'SEO description must not exceed 160 characters').optional(),
   status: z.enum(['pending', 'review', 'published', 'rejected']).optional()
 });
 
@@ -180,18 +175,20 @@ export async function PUT(
     console.error('Error updating book:', error);
     
     if (error instanceof z.ZodError) {
+      console.error('Validation errors:', error.errors);
       return NextResponse.json(
         { 
           success: false, 
           error: 'Validation failed', 
-          details: error.errors 
+          details: error.errors.map(e => `${e.path.join('.')}: ${e.message}`) 
         },
         { status: 400 }
       );
     }
 
+    const errorMessage = error instanceof Error ? error.message : 'Failed to update book';
     return NextResponse.json(
-      { success: false, error: 'Failed to update book' },
+      { success: false, error: errorMessage, details: errorMessage },
       { status: 500 }
     );
   }

@@ -21,7 +21,7 @@ interface Book {
   genre: string;
   year: number;
   category: string;
-  coverUrl: string;
+  coverUrl?: string;
   description: string;
   shortDescription: string;
   featured: boolean;
@@ -53,7 +53,10 @@ export default function BookLibraryPage() {
         if (selectedMatriarchiveCategory !== "All") params.append("matriarchiveCategory", selectedMatriarchiveCategory);
         params.append("sort", sortBy);
         
-        const response = await fetch(`/api/books?${params.toString()}`);
+        const response = await fetch(`/api/books?${params.toString()}`, {
+          cache: 'no-store',
+          next: { revalidate: 0 }
+        });
         if (!response.ok) {
           throw new Error('Failed to fetch books');
         }
@@ -227,10 +230,10 @@ export default function BookLibraryPage() {
                   <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 group cursor-pointer border-l-4 border-brand-yellow overflow-hidden">
                     {/* Book Cover */}
                     <div className="relative h-64 bg-gray-200">
-                      {book.coverImage ? (
+                      {book.coverUrl ? (
                         <img
-                          src={book.coverImage.url}
-                          alt={book.coverImage.alt}
+                          src={book.coverUrl}
+                          alt={book.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                       ) : (

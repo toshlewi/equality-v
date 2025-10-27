@@ -32,14 +32,14 @@ export default function PublicationReaderPage() {
 
   useEffect(() => {
     fetchPublication();
-  }, [params.slug]);
+  }, [params.id]);
 
   const fetchPublication = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const response = await fetch(`/api/publications/slug/${params.slug}`, {
+      const response = await fetch(`/api/publications/${params.id}`, {
         cache: 'no-store',
         next: { revalidate: 0 }
       });
@@ -58,9 +58,15 @@ export default function PublicationReaderPage() {
     }
   };
 
-  const handleViewPDF = () => {
+  const handleDownload = () => {
     if (publication?.pdfUrl) {
-      window.open(publication.pdfUrl, '_blank');
+      const link = document.createElement('a');
+      link.href = publication.pdfUrl;
+      link.download = `${publication.title}.pdf`;
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
   };
 
@@ -114,54 +120,6 @@ export default function PublicationReaderPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <style jsx global>{`
-        .publication-content-wrapper {
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-          line-height: 1.8;
-          color: #333;
-          max-width: 100%;
-        }
-        .publication-content-wrapper h1,
-        .publication-content-wrapper h2 {
-          font-size: 1.75rem;
-          font-weight: 700;
-          margin-top: 2rem;
-          margin-bottom: 1rem;
-          color: #1a1a1a;
-        }
-        .publication-content-wrapper .section-heading {
-          font-size: 1.5rem;
-          font-weight: 600;
-          margin-top: 1.5rem;
-          margin-bottom: 0.75rem;
-          color: #2c3e50;
-        }
-        .publication-content-wrapper p {
-          margin-bottom: 1.25rem;
-          text-align: justify;
-          font-size: 1.1rem;
-          line-height: 1.9;
-        }
-        .publication-content-wrapper .paragraph {
-          font-size: 1.1rem;
-          line-height: 1.9;
-        }
-        .publication-content-wrapper img {
-          max-width: 100%;
-          height: auto;
-          margin: 1.5rem 0;
-          border-radius: 4px;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        @media (max-width: 768px) {
-          .publication-content-wrapper p {
-            font-size: 1rem;
-          }
-          .publication-content-wrapper h2 {
-            font-size: 1.5rem;
-          }
-        }
-      `}</style>
       {/* Header */}
       <header className="bg-white border-b sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -179,10 +137,10 @@ export default function PublicationReaderPage() {
               {publication.pdfUrl && (
                 <Button
                   variant="outline"
-                  onClick={handleViewPDF}
+                  onClick={handleDownload}
                 >
-                  <FileText className="w-4 h-4 mr-2" />
-                  View PDF
+                  <Download className="w-4 h-4 mr-2" />
+                  Download PDF
                 </Button>
               )}
             </div>
@@ -243,11 +201,11 @@ export default function PublicationReaderPage() {
                       </div>
                     </div>
                     <Button
-                      onClick={handleViewPDF}
+                      onClick={handleDownload}
                       className="bg-brand-teal hover:bg-brand-orange"
                     >
-                      <FileText className="w-4 h-4 mr-2" />
-                      View PDF
+                      <Download className="w-4 h-4 mr-2" />
+                      Download PDF
                     </Button>
                   </div>
                 </CardContent>
@@ -266,30 +224,10 @@ export default function PublicationReaderPage() {
 
           {/* Content */}
           {publication.content && (
-            <div className="mb-8">
-              <div 
-                className="publication-content-wrapper"
-                dangerouslySetInnerHTML={{ __html: publication.content }}
-              />
-            </div>
-          )}
-
-          {/* Fallback to PDF if no content */}
-          {!publication.content && publication.pdfUrl && (
-            <Card className="mb-8">
-              <CardContent className="p-12 text-center">
-                <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-2">Full Document Available</h3>
-                <p className="text-gray-600 mb-6">View the complete PDF document</p>
-                <Button
-                  onClick={handleViewPDF}
-                  className="bg-brand-teal hover:bg-brand-orange"
-                >
-                  <FileText className="w-4 h-4 mr-2" />
-                  View Full PDF
-                </Button>
-              </CardContent>
-            </Card>
+            <div 
+              className="prose prose-lg max-w-none mb-8"
+              dangerouslySetInnerHTML={{ __html: publication.content }}
+            />
           )}
 
           {/* Tags */}
@@ -310,3 +248,4 @@ export default function PublicationReaderPage() {
     </div>
   );
 }
+

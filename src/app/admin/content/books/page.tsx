@@ -144,8 +144,10 @@ export default function BooksPage() {
     router.push(`/admin/content/books/${id}`);
   };
 
-  const handleView = (id: string) => {
-    router.push(`/books/${id}`);
+  const handleView = (book: any) => {
+    // Open the book in a new tab on the main site
+    const url = `/matriarchive/alkah-library/book-library/${book.slug}`;
+    window.open(url, '_blank');
   };
 
   const handleDelete = async (id: string) => {
@@ -379,7 +381,7 @@ export default function BooksPage() {
               <p className="text-gray-600">No books found</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
               {books.map((book) => (
                 <motion.div
                   key={book._id}
@@ -389,27 +391,27 @@ export default function BooksPage() {
                 >
                   {/* Book Cover */}
                   <div className="aspect-[3/4] bg-gray-100 relative">
-                    {book.coverImage ? (
+                    {book.coverUrl || book.coverImage ? (
                       <img
-                        src={book.coverImage}
+                        src={book.coverUrl || book.coverImage}
                         alt={book.title}
                         className="w-full h-full object-cover"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
-                        <BookOpen className="w-12 h-12 text-gray-400" />
+                        <BookOpen className="w-8 h-8 text-gray-400" />
                       </div>
                     )}
                     
                     {/* Status Badge */}
-                    <div className="absolute top-2 left-2">
+                    <div className="absolute top-1 left-1">
                       {getStatusBadge(book.status)}
                     </div>
                     
                     {/* Featured Badge */}
                     {book.isFeatured && (
-                      <div className="absolute top-2 right-2">
-                        <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-600">
+                      <div className="absolute top-1 right-1">
+                        <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-600 text-xs">
                           Featured
                         </Badge>
                       </div>
@@ -417,59 +419,33 @@ export default function BooksPage() {
                   </div>
                   
                   {/* Book Info */}
-                  <div className="p-4">
-                    <h3 className="font-semibold text-lg mb-2 line-clamp-2">{book.title}</h3>
-                    <p className="text-gray-600 text-sm mb-2">by {book.author}</p>
+                  <div className="p-2">
+                    <h3 className="font-semibold text-sm mb-1 line-clamp-2">{book.title}</h3>
+                    <p className="text-gray-600 text-xs mb-1 truncate">by {book.author}</p>
                     
                     {/* Rating */}
                     {book.reviewCount > 0 && (
-                      <div className="flex items-center gap-1 mb-2">
+                      <div className="flex items-center gap-1 mb-1">
                         {renderStars(Math.round(book.rating / book.reviewCount))}
-                        <span className="text-sm text-gray-500">
+                        <span className="text-xs text-gray-500">
                           ({book.reviewCount})
                         </span>
                       </div>
                     )}
                     
                     {/* Book Details */}
-                    <div className="space-y-1 text-sm text-gray-500 mb-3">
-                      {book.year && <p>Published: {book.year}</p>}
-                      {book.pages && <p>{book.pages} pages</p>}
-                      {book.isbn && <p>ISBN: {book.isbn}</p>}
+                    <div className="space-y-0.5 text-xs text-gray-500 mb-1">
+                      {book.year && <p className="truncate">Published: {book.year}</p>}
+                      {book.pages && <p className="truncate">{book.pages} pages</p>}
                     </div>
                     
-                    {/* Categories and Tags */}
-                    <div className="flex flex-wrap gap-1 mb-3">
+                    {/* Categories */}
+                    <div className="flex flex-wrap gap-1 mb-2">
                       {getCategoryBadge(book.category)}
-                      {book.isBookClubSelection && (
-                        <Badge variant="outline" className="text-purple-600 border-purple-600">
-                          Book Club
-                        </Badge>
-                      )}
                     </div>
-                    
-                    {/* Tags */}
-                    {book.tags && book.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mb-3">
-                        {book.tags.slice(0, 3).map((tag) => (
-                          <Badge key={tag} variant="outline" className="text-xs">
-                            {tag}
-                          </Badge>
-                        ))}
-                        {book.tags.length > 3 && (
-                          <Badge variant="outline" className="text-xs">
-                            +{book.tags.length - 3}
-                          </Badge>
-                        )}
-                      </div>
-                    )}
                     
                     {/* Actions */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-sm text-gray-500">
-                        <Calendar className="w-4 h-4" />
-                        {book.year}
-                      </div>
+                    <div className="flex items-center justify-end">
                       
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -478,7 +454,7 @@ export default function BooksPage() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleView(book._id)}>
+                          <DropdownMenuItem onClick={() => handleView(book)}>
                             <Eye className="w-4 h-4 mr-2" />
                             View
                           </DropdownMenuItem>

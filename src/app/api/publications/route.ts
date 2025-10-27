@@ -7,13 +7,13 @@ import { z } from 'zod';
 
 // Validation schema for creating publications
 const createPublicationSchema = z.object({
-  title: z.string().min(5, 'Title must be at least 5 characters').max(200, 'Title must not exceed 200 characters'),
-  author: z.string().min(2, 'Author must be at least 2 characters').max(100, 'Author must not exceed 100 characters'),
-  content: z.string().min(50, 'Content must be at least 50 characters'),
-  excerpt: z.string().max(500, 'Excerpt must not exceed 500 characters').optional(),
-  featuredImage: z.string().url().optional(),
-  pdfUrl: z.string().url().optional(),
-  category: z.enum(['article', 'blog', 'report']),
+  title: z.string().min(1, 'Title is required').max(300, 'Title must not exceed 300 characters'),
+  author: z.string().min(1, 'Author is required').max(200, 'Author must not exceed 200 characters'),
+  content: z.string().optional(),
+  excerpt: z.string().max(1000, 'Excerpt must not exceed 1000 characters').optional(),
+  featuredImage: z.string().optional(),
+  pdfUrl: z.string().optional(),
+  category: z.enum(['article', 'blog', 'report']).optional(),
   tags: z.array(z.string()).optional(),
   seoTitle: z.string().max(60, 'SEO title must not exceed 60 characters').optional(),
   seoDescription: z.string().max(160, 'SEO description must not exceed 160 characters').optional(),
@@ -169,13 +169,28 @@ export async function POST(request: NextRequest) {
       slugCounter++;
     }
 
-    // Create publication
-    const publication = new Publication({
-      ...validatedData,
+    // Ensure required fields exist (required by model)
+    const publicationData: any = {
+      title: validatedData.title,
+      author: validatedData.author,
+      content: validatedData.content || '<p>Content coming soon...</p>',
+      excerpt: validatedData.excerpt || '',
+      category: validatedData.category || 'article',
       slug,
-      createdBy: session.user.id,
-      status: 'draft' // Start as draft, admin can publish
-    });
+      status: 'pending',
+      createdBy: session.user.id
+    };
+
+    // Add optional fields
+    if (validatedData.featuredImage) publicationData.featuredImage = validatedData.featuredImage;
+    if (validatedData.pdfUrl) publicationData.pdfUrl = validatedData.pdfUrl;
+    if (validatedData.tags) publicationData.tags = validatedData.tags;
+    if (validatedData.seoTitle) publicationData.seoTitle = validatedData.seoTitle;
+    if (validatedData.seoDescription) publicationData.seoDescription = validatedData.seoDescription;
+    if (validatedData.isFeatured !== undefined) publicationData.isFeatured = validatedData.isFeatured;
+
+    // Create publication
+    const publication = new Publication(publicationData);
 
     await publication.save();
 
@@ -192,18 +207,20 @@ export async function POST(request: NextRequest) {
     console.error('Error creating publication:', error);
     
     if (error instanceof z.ZodError) {
+      console.error('Validation errors:', error.errors);
       return NextResponse.json(
         { 
           success: false, 
           error: 'Validation failed', 
-          details: error.errors 
+          details: error.errors.map(e => `${e.path.join('.')}: ${e.message}`) 
         },
         { status: 400 }
       );
     }
 
+    const errorMessage = error instanceof Error ? error.message : 'Failed to create publication';
     return NextResponse.json(
-      { success: false, error: 'Failed to create publication' },
+      { success: false, error: errorMessage, details: errorMessage },
       { status: 500 }
     );
   }

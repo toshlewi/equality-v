@@ -23,10 +23,7 @@ interface Publication {
   author: string;
   category: string;
   description: string;
-  coverImage?: {
-    url: string;
-    alt: string;
-  };
+  featuredImage?: string;
   publishedAt: string;
   viewCount: number;
   likeCount: number;
@@ -53,7 +50,10 @@ export default function PublicationsPage() {
         if (selectedCategory !== "All") params.append("category", selectedCategory);
         params.append("sort", sortBy);
         
-        const response = await fetch(`/api/publications?${params.toString()}`);
+        const response = await fetch(`/api/publications?${params.toString()}`, {
+          cache: 'no-store',
+          next: { revalidate: 0 }
+        });
         if (!response.ok) {
           throw new Error('Failed to fetch publications');
         }
@@ -216,14 +216,14 @@ export default function PublicationsPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: index * 0.1 }}
                 >
-                  <Link href={`/matriarchive/publications/${publication._id}`}>
+                  <Link href={`/matriarchive/publications/${publication.slug}`}>
                     <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 group cursor-pointer border-l-4 border-brand-yellow overflow-hidden">
                       {/* Cover Image */}
                       <div className="relative h-48 bg-gray-200">
-                        {publication.coverImage ? (
+                        {publication.featuredImage ? (
                           <img
-                            src={publication.coverImage.url}
-                            alt={publication.coverImage.alt}
+                            src={publication.featuredImage}
+                            alt={publication.title}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           />
                         ) : (

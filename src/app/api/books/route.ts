@@ -7,26 +7,24 @@ import { z } from 'zod';
 
 // Validation schema for creating books
 const createBookSchema = z.object({
-  title: z.string().min(2, 'Title must be at least 2 characters').max(200, 'Title must not exceed 200 characters'),
-  author: z.string().min(2, 'Author must be at least 2 characters').max(100, 'Author must not exceed 100 characters'),
-  isbn: z.string().optional(),
-  description: z.string().min(10, 'Description must be at least 10 characters').max(1000, 'Description must not exceed 1000 characters'),
+  title: z.string().min(1, 'Title is required').max(300, 'Title must not exceed 300 characters'),
+  author: z.string().min(1, 'Author is required').max(200, 'Author must not exceed 200 characters'),
+  genre: z.string().optional(),
+  year: z.number().optional(),
+  category: z.enum(['fiction', 'non-fiction', 'poetry', 'essays', 'memoir', 'academic', 'other']).optional(),
+  coverUrl: z.string().optional(),
+  description: z.string().max(1000, 'Description must not exceed 1000 characters').optional(),
   shortDescription: z.string().max(300, 'Short description must not exceed 300 characters').optional(),
-  coverImage: z.string().url().optional(),
-  year: z.number().min(1000, 'Year must be valid').max(new Date().getFullYear() + 1, 'Year cannot be in the future').optional(),
+  isbn: z.string().optional(),
   publisher: z.string().max(100, 'Publisher must not exceed 100 characters').optional(),
   language: z.string().default('English'),
   pages: z.number().min(1, 'Pages must be at least 1').optional(),
-  category: z.enum(['fiction', 'non-fiction', 'poetry', 'essays', 'memoir', 'academic', 'other']).default('non-fiction'),
   tags: z.array(z.string()).optional(),
   isFeatured: z.boolean().optional(),
   isInLibrary: z.boolean().default(true),
   isAvailable: z.boolean().default(true),
   isBookClubSelection: z.boolean().optional(),
-  bookClubDate: z.string().datetime().optional(),
-  discussionNotes: z.string().max(2000, 'Discussion notes must not exceed 2000 characters').optional(),
-  seoTitle: z.string().max(60, 'SEO title must not exceed 60 characters').optional(),
-  seoDescription: z.string().max(160, 'SEO description must not exceed 160 characters').optional()
+  status: z.enum(['pending', 'review', 'published', 'rejected']).optional()
 });
 
 // Helper function to generate slug
@@ -195,12 +193,30 @@ export async function POST(request: NextRequest) {
     }
 
     // Convert bookClubDate string to Date if provided
-    const bookData = {
-      ...validatedData,
+    const bookData: any = {
+      title: validatedData.title,
+      author: validatedData.author,
       slug,
+      status: validatedData.status || 'pending',
       createdBy: session.user.id,
-      status: 'active'
+      category: validatedData.category || 'non-fiction',
+      language: validatedData.language || 'English',
+      isInLibrary: validatedData.isInLibrary !== undefined ? validatedData.isInLibrary : true,
+      isAvailable: validatedData.isAvailable !== undefined ? validatedData.isAvailable : true
     };
+
+    // Add optional fields
+    if (validatedData.coverUrl) bookData.coverUrl = validatedData.coverUrl;
+    if (validatedData.genre) bookData.genre = validatedData.genre;
+    if (validatedData.year) bookData.year = validatedData.year;
+    if (validatedData.description) bookData.description = validatedData.description;
+    if (validatedData.shortDescription) bookData.shortDescription = validatedData.shortDescription;
+    if (validatedData.isbn) bookData.isbn = validatedData.isbn;
+    if (validatedData.publisher) bookData.publisher = validatedData.publisher;
+    if (validatedData.pages) bookData.pages = validatedData.pages;
+    if (validatedData.tags) bookData.tags = validatedData.tags;
+    if (validatedData.isFeatured !== undefined) bookData.isFeatured = validatedData.isFeatured;
+    if (validatedData.isBookClubSelection !== undefined) bookData.isBookClubSelection = validatedData.isBookClubSelection;
 
     if (validatedData.bookClubDate) {
       bookData.bookClubDate = new Date(validatedData.bookClubDate);
@@ -223,18 +239,20 @@ export async function POST(request: NextRequest) {
     console.error('Error creating book:', error);
     
     if (error instanceof z.ZodError) {
+      console.error('Validation errors:', error.errors);
       return NextResponse.json(
         { 
           success: false, 
           error: 'Validation failed', 
-          details: error.errors 
+          details: error.errors.map(e => `${e.path.join('.')}: ${e.message}`) 
         },
         { status: 400 }
       );
     }
 
+    const errorMessage = error instanceof Error ? error.message : 'Failed to create book';
     return NextResponse.json(
-      { success: false, error: 'Failed to create book' },
+      { success: false, error: errorMessage, details: errorMessage },
       { status: 500 }
     );
   }

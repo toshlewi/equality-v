@@ -139,17 +139,16 @@ export default function PublicationsPage() {
     router.push(`/admin/content/publications/${id}`);
   };
 
-  const handleView = (id: string) => {
-    router.push(`/publications/${id}`);
+  const handleView = (publication: any) => {
+    // Open the publication in a new tab on the main site
+    const url = `/matriarchive/publications/${publication.slug}`;
+    window.open(url, '_blank');
   };
 
   const handleViewPDF = (publication: Publication) => {
     if (publication.pdfUrl) {
-      setSelectedPDF({
-        url: publication.pdfUrl,
-        title: publication.title,
-        author: publication.author
-      });
+      // Open PDF directly in a new tab
+      window.open(publication.pdfUrl, '_blank');
     }
   };
 
@@ -282,7 +281,7 @@ export default function PublicationsPage() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
-              <div>
+    <div>
                 <p className="text-sm text-gray-600">In Review</p>
                 <p className="text-2xl font-bold">
                   {publications.filter(p => p.status === 'review').length}
@@ -381,44 +380,53 @@ export default function PublicationsPage() {
               <p className="text-gray-600">No publications found</p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-2">
               {publications.map((publication) => (
                 <motion.div
                   key={publication._id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="border rounded-lg p-4 hover:shadow-md transition-shadow"
+                  className="border rounded-lg p-2 hover:shadow-md transition-shadow flex gap-2"
                 >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <h3 className="font-semibold text-lg">{publication.title}</h3>
+                  {publication.featuredImage && (
+                    <div className="flex-shrink-0 w-12 h-12 rounded overflow-hidden">
+                      <img 
+                        src={publication.featuredImage} 
+                        alt={publication.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0 flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-semibold text-sm truncate">{publication.title}</h3>
                         {publication.isFeatured && (
-                          <Badge variant="outline" className="text-yellow-600 border-yellow-600">
+                          <Badge variant="outline" className="text-yellow-600 border-yellow-600 text-xs">
                             Featured
                           </Badge>
                         )}
                       </div>
                       
-                      <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+                      <p className="text-gray-600 text-xs mb-1 line-clamp-1">
                         {publication.excerpt}
                       </p>
                       
-                      <div className="flex items-center gap-4 text-sm text-gray-500">
+                      <div className="flex items-center gap-2 text-xs text-gray-500">
                         <div className="flex items-center gap-1">
-                          <User className="w-4 h-4" />
-                          {publication.author}
+                          <User className="w-3 h-3" />
+                          <span className="truncate">{publication.author}</span>
                         </div>
                         <div className="flex items-center gap-1">
-                          <Calendar className="w-4 h-4" />
-                          {formatDate(publication.publishedAt || publication.createdAt)}
+                          <Calendar className="w-3 h-3" />
+                          <span className="truncate">{formatDate(publication.publishedAt || publication.createdAt)}</span>
                         </div>
                       </div>
                       
-                      <div className="flex items-center gap-2 mt-3">
+                      <div className="flex items-center gap-1 mt-1">
                         {getStatusBadge(publication.status)}
                         {getCategoryBadge(publication.category)}
-                        {publication.tags.slice(0, 3).map((tag) => (
+                        {publication.tags.slice(0, 2).map((tag) => (
                           <Badge key={tag} variant="outline" className="text-xs">
                             {tag}
                           </Badge>
@@ -445,9 +453,9 @@ export default function PublicationsPage() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleView(publication._id)}>
+                          <DropdownMenuItem onClick={() => handleView(publication)}>
                             <Eye className="w-4 h-4 mr-2" />
-                            View
+                            View Publication
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => handleEdit(publication._id)}>
                             <Edit className="w-4 h-4 mr-2" />
