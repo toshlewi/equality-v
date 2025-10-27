@@ -4,11 +4,12 @@ const BookSchema = new Schema({
   title: { type: String, required: true, maxlength: 200 },
   slug: { type: String, required: true, unique: true },
   author: { type: String, required: true },
+  genre: { type: String },
+  year: { type: Number },
+  coverUrl: { type: String }, // renamed from coverImage
   isbn: { type: String, unique: true, sparse: true },
   description: { type: String, maxlength: 1000 },
   shortDescription: { type: String, maxlength: 300 },
-  coverImage: { type: String },
-  year: { type: Number },
   publisher: { type: String },
   language: { type: String, default: 'English' },
   pages: { type: Number },
@@ -23,10 +24,9 @@ const BookSchema = new Schema({
   isAvailable: { type: Boolean, default: true },
   status: { 
     type: String, 
-    enum: ['active', 'inactive', 'archived'], 
-    default: 'active' 
+    enum: ['pending', 'review', 'published', 'rejected'], 
+    default: 'pending' 
   },
-  viewCount: { type: Number, default: 0 },
   rating: { type: Number, default: 0 },
   reviewCount: { type: Number, default: 0 },
   // Book club specific fields
@@ -36,6 +36,13 @@ const BookSchema = new Schema({
   // SEO fields
   seoTitle: String,
   seoDescription: String,
+  // Submission metadata
+  submittedByName: { type: String },
+  submittedByEmail: { type: String },
+  submittedByPhone: { type: String },
+  submittedByOrganization: { type: String },
+  submittedByRole: { type: String },
+  submissionDate: { type: Date },
   // Metadata
   createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
   updatedBy: { type: Schema.Types.ObjectId, ref: 'User' }

@@ -5,9 +5,10 @@ import { connectDB } from '@/lib/mongodb';
 import Member from '@/models/Member';
 import Donation from '@/models/Donation';
 import Order from '@/models/Order';
-import Article from '@/models/Article';
-import Contact from '@/models/Contact';
+import Publication from '@/models/Publication';
+import Story from '@/models/Story';
 import Event from '@/models/Event';
+import Contact from '@/models/Contact';
 
 export async function GET(request: NextRequest) {
   try {
@@ -30,13 +31,13 @@ export async function GET(request: NextRequest) {
 
     await connectDB();
 
-    // Get current date ranges
+    // Get current date and start of month for calculations
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
 
-    // Get basic counts
+    // Overview data
     const [
       totalMembers,
       activeMembers,
@@ -44,183 +45,170 @@ export async function GET(request: NextRequest) {
       totalOrders,
       pendingSubmissions,
       upcomingEvents,
-      recentContacts,
-      monthlyDonations,
-      monthlyOrders,
-      monthlyMembers
+      recentContacts
     ] = await Promise.all([
       Member.countDocuments(),
       Member.countDocuments({ isActive: true }),
-      Donation.countDocuments({ status: 'completed' }),
-      Order.countDocuments({ status: 'confirmed' }),
-      Article.countDocuments({ status: 'pending' }),
+      Donation.aggregate([
+        { $match: { status: 'completed' } },
+        { $group: { _id: null, total: { $sum: '$amount' } } }
+      ]),
+      Order.aggregate([
+        { $match: { status: { $in: ['confirmed', 'shipped', 'delivered'] } } },
+        { $group: { _id: null, total: { $sum: '$total' } } }
+      ]),
+      Story.countDocuments({ status: 'pending' }),
       Event.countDocuments({ 
         startDate: { $gte: now },
         status: 'published'
       }),
       Contact.countDocuments({ 
         createdAt: { $gte: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000) }
-      }),
-      Donation.aggregate([
-        { $match: { status: 'completed', createdAt: { $gte: startOfMonth } } },
-        { $group: { _id: null, total: { $sum: '$amount' }, count: { $sum: 1 } } }
-      ]),
-      Order.aggregate([
-        { $match: { status: 'confirmed', createdAt: { $gte: startOfMonth } } },
-        { $group: { _id: null, total: { $sum: '$total' }, count: { $sum: 1 } } }
-      ]),
-      Member.countDocuments({ 
-        createdAt: { $gte: startOfMonth },
-        isActive: true
       })
     ]);
 
-    // Get donation totals
-    const donationTotals = await Donation.aggregate([
-      { $match: { status: 'completed' } },
-      { $group: { _id: null, total: { $sum: '$amount' } } }
-    ]);
-
-    const totalDonationAmount = donationTotals.length > 0 ? donationTotals[0].total : 0;
-
-    // Get order totals
-    const orderTotals = await Order.aggregate([
-      { $match: { status: 'confirmed' } },
-      { $group: { _id: null, total: { $sum: '$total' } } }
-    ]);
-
-    const totalOrderAmount = orderTotals.length > 0 ? orderTotals[0].total : 0;
-
-    // Get recent activity
-    const recentActivity = await Promise.all([
-      Article.find({ status: 'published' })
-        .sort({ publishedAt: -1 })
-        .limit(5)
-        .select('title publishedAt authorName'),
-      Donation.find({ status: 'completed' })
-        .sort({ createdAt: -1 })
-        .limit(5)
-        .select('amount donorName createdAt'),
-      Order.find({ status: 'confirmed' })
-        .sort({ createdAt: -1 })
-        .limit(5)
-        .select('orderNumber total customerInfo.name createdAt'),
-      Contact.find()
-        .sort({ createdAt: -1 })
-        .limit(5)
-        .select('name subject category createdAt')
-    ]);
-
-    // Get monthly growth data for charts
-    const monthlyGrowth = await Promise.all([
+    // Monthly data
+    const [
+      monthlyDonations,
+      monthlyOrders,
+      monthlyMembers,
+      lastMonthDonations,
+      lastMonthOrders,
+      lastMonthMembers
+    ] = await Promise.all([
       Donation.aggregate([
-        { $match: { status: 'completed', createdAt: { $gte: startOfLastMonth } } },
-        { $group: { 
-          _id: { 
-            year: { $year: '$createdAt' }, 
-            month: { $month: '$createdAt' } 
-          }, 
-          total: { $sum: '$amount' },
-          count: { $sum: 1 }
+        { $match: { 
+          status: 'completed',
+          createdAt: { $gte: startOfMonth }
         }},
-        { $sort: { '_id.year': 1, '_id.month': 1 } }
+        { $group: { _id: null, total: { $sum: '$amount' }, count: { $sum: 1 } } }
       ]),
       Order.aggregate([
-        { $match: { status: 'confirmed', createdAt: { $gte: startOfLastMonth } } },
-        { $group: { 
-          _id: { 
-            year: { $year: '$createdAt' }, 
-            month: { $month: '$createdAt' } 
-          }, 
-          total: { $sum: '$total' },
-          count: { $sum: 1 }
+        { $match: { 
+          status: { $in: ['confirmed', 'shipped', 'delivered'] },
+          createdAt: { $gte: startOfMonth }
         }},
-        { $sort: { '_id.year': 1, '_id.month': 1 } }
+        { $group: { _id: null, total: { $sum: '$total' }, count: { $sum: 1 } } }
       ]),
-      Member.aggregate([
-        { $match: { isActive: true, createdAt: { $gte: startOfLastMonth } } },
-        { $group: { 
-          _id: { 
-            year: { $year: '$createdAt' }, 
-            month: { $month: '$createdAt' } 
-          }, 
-          count: { $sum: 1 }
+      Member.countDocuments({ 
+        joinDate: { $gte: startOfMonth }
+      }),
+      Donation.aggregate([
+        { $match: { 
+          status: 'completed',
+          createdAt: { $gte: startOfLastMonth, $lte: endOfLastMonth }
         }},
-        { $sort: { '_id.year': 1, '_id.month': 1 } }
-      ])
+        { $group: { _id: null, total: { $sum: '$amount' }, count: { $sum: 1 } } }
+      ]),
+      Order.aggregate([
+        { $match: { 
+          status: { $in: ['confirmed', 'shipped', 'delivered'] },
+          createdAt: { $gte: startOfLastMonth, $lte: endOfLastMonth }
+        }},
+        { $group: { _id: null, total: { $sum: '$total' }, count: { $sum: 1 } } }
+      ]),
+      Member.countDocuments({ 
+        joinDate: { $gte: startOfLastMonth, $lte: endOfLastMonth }
+      })
     ]);
 
     // Calculate growth percentages
-    const currentMonthDonations = monthlyDonations.length > 0 ? monthlyDonations[0].total : 0;
-    const lastMonthDonations = await Donation.aggregate([
-      { $match: { status: 'completed', createdAt: { $gte: startOfLastMonth, $lte: endOfLastMonth } } },
-      { $group: { _id: null, total: { $sum: '$amount' } } }
-    ]);
-    const lastMonthDonationAmount = lastMonthDonations.length > 0 ? lastMonthDonations[0].total : 0;
-    const donationGrowth = lastMonthDonationAmount > 0 
-      ? ((currentMonthDonations - lastMonthDonationAmount) / lastMonthDonationAmount) * 100 
-      : 0;
+    const calculateGrowth = (current: number, previous: number) => {
+      if (previous === 0) return current > 0 ? 100 : 0;
+      return ((current - previous) / previous) * 100;
+    };
 
-    const currentMonthOrders = monthlyOrders.length > 0 ? monthlyOrders[0].total : 0;
-    const lastMonthOrders = await Order.aggregate([
-      { $match: { status: 'confirmed', createdAt: { $gte: startOfLastMonth, $lte: endOfLastMonth } } },
-      { $group: { _id: null, total: { $sum: '$total' } } }
-    ]);
-    const lastMonthOrderAmount = lastMonthOrders.length > 0 ? lastMonthOrders[0].total : 0;
-    const orderGrowth = lastMonthOrderAmount > 0 
-      ? ((currentMonthOrders - lastMonthOrderAmount) / lastMonthOrderAmount) * 100 
-      : 0;
+    const donationsGrowth = calculateGrowth(
+      monthlyDonations[0]?.total || 0,
+      lastMonthDonations[0]?.total || 0
+    );
 
-    const memberGrowth = lastMonthDonationAmount > 0 
-      ? ((monthlyMembers - (await Member.countDocuments({ 
-          createdAt: { $gte: startOfLastMonth, $lte: endOfLastMonth },
-          isActive: true
-        }))) / (await Member.countDocuments({ 
-          createdAt: { $gte: startOfLastMonth, $lte: endOfLastMonth },
-          isActive: true
-        }))) * 100 
-      : 0;
+    const ordersGrowth = calculateGrowth(
+      monthlyOrders[0]?.total || 0,
+      lastMonthOrders[0]?.total || 0
+    );
+
+    const membersGrowth = calculateGrowth(
+      monthlyMembers,
+      lastMonthMembers
+    );
+
+    // Recent activity
+    const [recentArticles, recentDonations, recentOrders, recentContactsList] = await Promise.all([
+      Publication.find({ status: 'published' })
+        .sort({ publishedAt: -1 })
+        .limit(5)
+        .populate('createdBy', 'name')
+        .lean(),
+      Donation.find({ status: 'completed' })
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .lean(),
+      Order.find({ status: { $in: ['confirmed', 'shipped', 'delivered'] } })
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .lean(),
+      Contact.find()
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .lean()
+    ]);
+
+    const dashboardData = {
+      overview: {
+        totalMembers,
+        activeMembers,
+        totalDonations: totalDonations[0]?.total || 0,
+        totalOrders: totalOrders[0]?.total || 0,
+        pendingSubmissions,
+        upcomingEvents,
+        recentContacts
+      },
+      monthly: {
+        donations: {
+          total: monthlyDonations[0]?.total || 0,
+          count: monthlyDonations[0]?.count || 0,
+          growth: donationsGrowth
+        },
+        orders: {
+          total: monthlyOrders[0]?.total || 0,
+          count: monthlyOrders[0]?.count || 0,
+          growth: ordersGrowth
+        },
+        members: {
+          count: monthlyMembers,
+          growth: membersGrowth
+        }
+      },
+      recentActivity: {
+        articles: recentArticles.map(article => ({
+          title: article.title,
+          authorName: article.createdBy?.name || article.author,
+          publishedAt: article.publishedAt || article.createdAt
+        })),
+        donations: recentDonations.map(donation => ({
+          donorName: donation.donorName,
+          amount: donation.amount,
+          createdAt: donation.createdAt
+        })),
+        orders: recentOrders.map(order => ({
+          orderNumber: order.orderNumber,
+          total: order.total,
+          status: order.status,
+          createdAt: order.createdAt
+        })),
+        contacts: recentContactsList.map(contact => ({
+          name: contact.name,
+          email: contact.email,
+          subject: contact.subject,
+          createdAt: contact.createdAt
+        }))
+      }
+    };
 
     return NextResponse.json({
       success: true,
-      data: {
-        overview: {
-          totalMembers,
-          activeMembers,
-          totalDonations: totalDonationAmount,
-          totalOrders: totalOrderAmount,
-          pendingSubmissions,
-          upcomingEvents,
-          recentContacts
-        },
-        monthly: {
-          donations: {
-            total: currentMonthDonations,
-            count: monthlyDonations.length > 0 ? monthlyDonations[0].count : 0,
-            growth: donationGrowth
-          },
-          orders: {
-            total: currentMonthOrders,
-            count: monthlyOrders.length > 0 ? monthlyOrders[0].count : 0,
-            growth: orderGrowth
-          },
-          members: {
-            count: monthlyMembers,
-            growth: memberGrowth
-          }
-        },
-        charts: {
-          donations: monthlyGrowth[0],
-          orders: monthlyGrowth[1],
-          members: monthlyGrowth[2]
-        },
-        recentActivity: {
-          articles: recentActivity[0],
-          donations: recentActivity[1],
-          orders: recentActivity[2],
-          contacts: recentActivity[3]
-        }
-      }
+      data: dashboardData
     });
 
   } catch (error) {

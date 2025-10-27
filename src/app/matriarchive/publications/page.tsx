@@ -48,6 +48,7 @@ export default function PublicationsPage() {
     const fetchPublications = async () => {
       try {
         const params = new URLSearchParams();
+        params.append("status", "published"); // Only fetch published publications
         if (searchTerm) params.append("search", searchTerm);
         if (selectedCategory !== "All") params.append("category", selectedCategory);
         params.append("sort", sortBy);
@@ -57,7 +58,7 @@ export default function PublicationsPage() {
           throw new Error('Failed to fetch publications');
         }
         const data = await response.json();
-        setPublications(data.publications || []);
+        setPublications(data.data.publications || []);
       } catch (error) {
         console.error("Error fetching publications:", error);
       } finally {

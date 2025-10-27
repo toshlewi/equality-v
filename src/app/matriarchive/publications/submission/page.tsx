@@ -20,7 +20,7 @@ const submissionSchema = z.object({
   title: z.string().min(1, "Title is required").max(300, "Title must be less than 300 characters"),
   author: z.string().min(1, "Author name is required").max(200, "Author name must be less than 200 characters"),
   authorEmail: z.string().email("Valid email is required"),
-  category: z.enum(["Article", "Blog", "Report", "Research", "Opinion"]),
+  category: z.enum(["article", "blog", "report"]),
   description: z.string().min(1, "Description is required").max(1000, "Description must be less than 1000 characters"),
   content: z.string().optional(),
   tags: z.string().optional(),
@@ -100,7 +100,7 @@ export default function PublicationSubmissionPage() {
         status: "pending"
       };
 
-      const response = await fetch("/api/publications", {
+      const response = await fetch("/api/publication-submissions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -109,15 +109,22 @@ export default function PublicationSubmissionPage() {
       });
 
       if (response.ok) {
-        setSubmitSuccess(true);
-        reset();
-        setUploadedFiles([]);
+        const result = await response.json();
+        if (result.success) {
+          setSubmitSuccess(true);
+          reset();
+          setUploadedFiles([]);
+        } else {
+          throw new Error(result.error || "Submission failed");
+        }
       } else {
-        throw new Error("Submission failed");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Submission failed");
       }
     } catch (error) {
       console.error("Error submitting publication:", error);
-      alert("Error submitting publication. Please try again.");
+      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
+      alert(`Error submitting publication: ${errorMessage}. Please try again.`);
     } finally {
       setSubmitting(false);
     }
@@ -231,11 +238,9 @@ export default function PublicationSubmissionPage() {
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-teal focus:border-transparent"
                     >
                       <option value="">Select category</option>
-                      <option value="Article">Article</option>
-                      <option value="Blog">Blog</option>
-                      <option value="Report">Report</option>
-                      <option value="Research">Research</option>
-                      <option value="Opinion">Opinion</option>
+                      <option value="article">Article</option>
+                      <option value="blog">Blog</option>
+                      <option value="report">Report</option>
                     </select>
                     {errors.category && (
                       <p className="mt-1 text-sm text-red-600 flex items-center">

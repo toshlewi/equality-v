@@ -8,18 +8,18 @@ import mongoose from 'mongoose';
 
 // Validation schema for updating publications
 const updatePublicationSchema = z.object({
-  title: z.string().min(5, 'Title must be at least 5 characters').max(200, 'Title must not exceed 200 characters').optional(),
-  author: z.string().min(2, 'Author must be at least 2 characters').max(100, 'Author must not exceed 100 characters').optional(),
-  content: z.string().min(50, 'Content must be at least 50 characters').optional(),
-  excerpt: z.string().max(500, 'Excerpt must not exceed 500 characters').optional(),
-  featuredImage: z.string().url().optional(),
-  pdfUrl: z.string().url().optional(),
+  title: z.string().min(1, 'Title is required').max(300, 'Title must not exceed 300 characters').optional(),
+  author: z.string().min(1, 'Author name is required').max(200, 'Author must not exceed 200 characters').optional(),
+  content: z.string().optional(),
+  excerpt: z.string().max(1000, 'Excerpt must not exceed 1000 characters').optional(),
+  featuredImage: z.string().optional(),
+  pdfUrl: z.string().optional(),
   category: z.enum(['article', 'blog', 'report']).optional(),
   tags: z.array(z.string()).optional(),
   seoTitle: z.string().max(60, 'SEO title must not exceed 60 characters').optional(),
   seoDescription: z.string().max(160, 'SEO description must not exceed 160 characters').optional(),
   isFeatured: z.boolean().optional(),
-  status: z.enum(['draft', 'pending', 'published', 'archived']).optional()
+  status: z.enum(['pending', 'review', 'published', 'rejected']).optional()
 });
 
 // Helper function to generate slug
@@ -145,10 +145,16 @@ export async function PUT(
 
     // Set publishedAt when status changes to published
     const updateData: any = {
-      ...validatedData,
       slug,
       updatedBy: session.user.id
     };
+
+    // Only add validated fields that are provided
+    Object.keys(validatedData).forEach(key => {
+      if (validatedData[key as keyof typeof validatedData] !== undefined) {
+        updateData[key] = validatedData[key as keyof typeof validatedData];
+      }
+    });
 
     if (validatedData.status === 'published' && existingPublication.status !== 'published') {
       updateData.publishedAt = new Date();
@@ -170,18 +176,19 @@ export async function PUT(
     console.error('Error updating publication:', error);
     
     if (error instanceof z.ZodError) {
+      console.error('Validation errors:', error.errors);
       return NextResponse.json(
         { 
           success: false, 
           error: 'Validation failed', 
-          details: error.errors 
+          details: error.errors.map(e => `${e.path.join('.')}: ${e.message}`) 
         },
         { status: 400 }
       );
     }
 
     return NextResponse.json(
-      { success: false, error: 'Failed to update publication' },
+      { success: false, error: error instanceof Error ? error.message : 'Failed to update publication' },
       { status: 500 }
     );
   }

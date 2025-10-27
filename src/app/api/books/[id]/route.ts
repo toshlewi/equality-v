@@ -14,6 +14,8 @@ const updateBookSchema = z.object({
   description: z.string().min(10, 'Description must be at least 10 characters').max(1000, 'Description must not exceed 1000 characters').optional(),
   shortDescription: z.string().max(300, 'Short description must not exceed 300 characters').optional(),
   coverImage: z.string().url().optional(),
+  coverUrl: z.string().url().optional(),
+  genre: z.string().optional(),
   year: z.number().min(1000, 'Year must be valid').max(new Date().getFullYear() + 1, 'Year cannot be in the future').optional(),
   publisher: z.string().max(100, 'Publisher must not exceed 100 characters').optional(),
   language: z.string().optional(),
@@ -28,7 +30,7 @@ const updateBookSchema = z.object({
   discussionNotes: z.string().max(2000, 'Discussion notes must not exceed 2000 characters').optional(),
   seoTitle: z.string().max(60, 'SEO title must not exceed 60 characters').optional(),
   seoDescription: z.string().max(160, 'SEO description must not exceed 160 characters').optional(),
-  status: z.enum(['active', 'inactive', 'archived']).optional()
+  status: z.enum(['pending', 'review', 'published', 'rejected']).optional()
 });
 
 // Helper function to generate slug

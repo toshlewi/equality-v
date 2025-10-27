@@ -20,7 +20,7 @@ const suggestionSchema = z.object({
   title: z.string().min(1, "Book title is required").max(300, "Title must be less than 300 characters"),
   author: z.string().min(1, "Author name is required").max(200, "Author name must be less than 200 characters"),
   year: z.number().min(1800, "Year must be after 1800").max(new Date().getFullYear() + 1, "Year cannot be in the future"),
-  category: z.enum(["Fiction", "Non-Fiction", "Biography", "Poetry", "Academic", "Children", "Other"]),
+  category: z.enum(["fiction", "non-fiction", "biography", "poetry", "academic", "children", "other"]),
   genre: z.string().optional(),
   summary: z.string().min(1, "Summary is required").max(1000, "Summary must be less than 1000 characters"),
   reason: z.string().min(1, "Reason for recommendation is required").max(500, "Reason must be less than 500 characters"),
@@ -100,7 +100,7 @@ export default function BookSuggestionPage() {
         status: "pending"
       };
 
-      const response = await fetch("/api/books", {
+      const response = await fetch("/api/book-suggestions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -109,15 +109,22 @@ export default function BookSuggestionPage() {
       });
 
       if (response.ok) {
-        setSubmitSuccess(true);
-        reset();
-        setUploadedFiles([]);
+        const result = await response.json();
+        if (result.success) {
+          setSubmitSuccess(true);
+          reset();
+          setUploadedFiles([]);
+        } else {
+          throw new Error(result.error || "Suggestion failed");
+        }
       } else {
-        throw new Error("Suggestion failed");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Suggestion failed");
       }
     } catch (error) {
       console.error("Error submitting book suggestion:", error);
-      alert("Error submitting book suggestion. Please try again.");
+      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
+      alert(`Error submitting book suggestion: ${errorMessage}. Please try again.`);
     } finally {
       setSubmitting(false);
     }
@@ -272,13 +279,13 @@ export default function BookSuggestionPage() {
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-teal focus:border-transparent"
                     >
                       <option value="">Select category</option>
-                      <option value="Fiction">Fiction</option>
-                      <option value="Non-Fiction">Non-Fiction</option>
-                      <option value="Biography">Biography</option>
-                      <option value="Poetry">Poetry</option>
-                      <option value="Academic">Academic</option>
-                      <option value="Children">Children</option>
-                      <option value="Other">Other</option>
+                      <option value="fiction">Fiction</option>
+                      <option value="non-fiction">Non-Fiction</option>
+                      <option value="biography">Biography</option>
+                      <option value="poetry">Poetry</option>
+                      <option value="academic">Academic</option>
+                      <option value="children">Children</option>
+                      <option value="other">Other</option>
                     </select>
                     {errors.category && (
                       <p className="mt-1 text-sm text-red-600 flex items-center">

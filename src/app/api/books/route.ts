@@ -47,6 +47,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '12');
+    const status = searchParams.get('status');
     const category = searchParams.get('category');
     const author = searchParams.get('author');
     const search = searchParams.get('search');
@@ -59,7 +60,19 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit;
 
     // Build query
-    const query: any = { status: 'active' };
+    const query: any = {};
+    
+    // Only filter by status if specified (for admin) or default to 'published' for public
+    if (status) {
+      query.status = status;
+    } else {
+      // Public access defaults to published only
+      const session = await getServerSession(authOptions);
+      if (!session || !['admin', 'editor', 'reviewer'].includes(session.user?.role)) {
+        query.status = 'published';
+      }
+      // If authenticated admin, query all statuses
+    }
     
     if (category) query.category = category;
     if (author) query.author = { $regex: author, $options: 'i' };
@@ -68,7 +81,14 @@ export async function GET(request: NextRequest) {
     if (available === 'true') query.isAvailable = true;
     
     if (search) {
-      query.$text = { $search: search };
+      // Use regex for case-insensitive search across multiple fields
+      query.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { author: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } },
+        { shortDescription: { $regex: search, $options: 'i' } },
+        { tags: { $in: [new RegExp(search, 'i')] } }
+      ];
     }
 
     // Build sort object
@@ -92,7 +112,7 @@ export async function GET(request: NextRequest) {
     if (featured === 'true' && page === 1) {
       featuredBooks = await Book.find({ 
         isFeatured: true, 
-        status: 'active' 
+        status: 'published' 
       })
       .sort({ createdAt: -1 })
       .limit(6)
@@ -105,7 +125,7 @@ export async function GET(request: NextRequest) {
     if (bookClub === 'true' && page === 1) {
       bookClubSelections = await Book.find({ 
         isBookClubSelection: true, 
-        status: 'active' 
+        status: 'published' 
       })
       .sort({ bookClubDate: -1 })
       .limit(6)

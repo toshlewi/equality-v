@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
-    const status = searchParams.get('status') || 'published';
+    const status = searchParams.get('status'); // Don't default to 'published' for admin
     const category = searchParams.get('category');
     const tag = searchParams.get('tag');
     const search = searchParams.get('search');
@@ -50,7 +50,19 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit;
 
     // Build query
-    const query: any = { status };
+    const query: any = {};
+    
+    // Only filter by status if specified (for admin) or default to 'published' for public
+    if (status) {
+      query.status = status;
+    } else {
+      // Public access defaults to published only
+      const session = await getServerSession(authOptions);
+      if (!session || !['admin', 'editor', 'reviewer'].includes(session.user?.role)) {
+        query.status = 'published';
+      }
+      // If authenticated admin, query all statuses
+    }
     
     if (category) query.category = category;
     if (tag) query.tags = { $in: [tag] };
@@ -58,7 +70,14 @@ export async function GET(request: NextRequest) {
     if (author) query.author = { $regex: author, $options: 'i' };
     
     if (search) {
-      query.$text = { $search: search };
+      // Use regex for case-insensitive search across multiple fields
+      query.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { author: { $regex: search, $options: 'i' } },
+        { content: { $regex: search, $options: 'i' } },
+        { excerpt: { $regex: search, $options: 'i' } },
+        { tags: { $in: [new RegExp(search, 'i')] } }
+      ];
     }
 
     // Build sort object

@@ -44,9 +44,10 @@ const navItems: NavItem[] = [
     label: "Content Management",
     icon: <FileText className="w-5 h-5" />,
     children: [
-      { label: "Publication Submissions", href: "/admin/content/publications" },
-      { label: "Our Voice Submissions", href: "/admin/content/our-voice" },
-      { label: "Book Suggestions", href: "/admin/content/book-suggestions" },
+      { label: "Publications", href: "/admin/content/publications" },
+      { label: "Alka Library", href: "/admin/content/books" },
+      { label: "Our Voice", href: "/admin/content/our-voice" },
+      { label: "Toolkits & Guides", href: "/admin/content/toolkits" },
     ],
   },
   {

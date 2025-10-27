@@ -4,10 +4,12 @@ const PublicationSchema = new Schema({
   title: { type: String, required: true, maxlength: 200 },
   slug: { type: String, required: true, unique: true },
   author: { type: String, required: true },
-  content: { type: String, required: true },
+  content: { type: String, required: true }, // HTML content after PDF conversion
   excerpt: { type: String, maxlength: 500 },
   featuredImage: { type: String },
-  pdfUrl: { type: String },
+  pdfUrl: { type: String }, // stored original file URL
+  images: [{ type: String }], // extracted or uploaded images
+  type: { type: String, enum: ['pdf', 'text'], default: 'pdf' },
   category: { 
     type: String, 
     enum: ['article', 'blog', 'report'], 
@@ -16,11 +18,10 @@ const PublicationSchema = new Schema({
   tags: [{ type: String }],
   status: { 
     type: String, 
-    enum: ['draft', 'pending', 'published', 'archived'], 
-    default: 'draft' 
+    enum: ['pending', 'review', 'published', 'rejected'], 
+    default: 'pending' 
   },
   publishedAt: { type: Date },
-  viewCount: { type: Number, default: 0 },
   isFeatured: { type: Boolean, default: false },
   seoTitle: String,
   seoDescription: String,
@@ -34,7 +35,8 @@ const PublicationSchema = new Schema({
     { slug: 1 },
     { category: 1 },
     { isFeatured: 1, status: 1 },
-    { createdBy: 1 }
+    { createdBy: 1 },
+    { type: 1 }
   ]
 });
 

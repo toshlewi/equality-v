@@ -18,16 +18,13 @@ interface Book {
   _id: string;
   title: string;
   author: string;
+  genre: string;
   year: number;
   category: string;
-  genre: string[];
-  summary: string;
-  coverImage?: {
-    url: string;
-    alt: string;
-  };
+  coverUrl: string;
+  description: string;
+  shortDescription: string;
   featured: boolean;
-  viewCount: number;
   tags: string[];
 }
 
@@ -49,6 +46,7 @@ export default function BookLibraryPage() {
     const fetchBooks = async () => {
       try {
         const params = new URLSearchParams();
+        params.append("status", "published"); // Only fetch published books
         if (searchTerm) params.append("search", searchTerm);
         if (selectedCategory !== "All") params.append("category", selectedCategory);
         if (selectedGenre !== "All") params.append("genre", selectedGenre);
@@ -60,7 +58,7 @@ export default function BookLibraryPage() {
           throw new Error('Failed to fetch books');
         }
         const data = await response.json();
-        setBooks(data.books || []);
+        setBooks(data.data?.books || []);
       } catch (error) {
         console.error("Error fetching books:", error);
       } finally {
@@ -265,33 +263,31 @@ export default function BookLibraryPage() {
                       </p>
 
                       <p className="text-gray-700 text-sm leading-relaxed mb-4 line-clamp-3">
-                        {book.summary}
+                        {book.description || book.shortDescription}
                       </p>
 
-                      {/* Genres */}
-                      {book.genre && book.genre.length > 0 && (
+                      {/* Genre */}
+                      {book.genre && (
+                        <div className="mb-4">
+                          <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-medium">
+                            {book.genre}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Tags */}
+                      {book.tags && book.tags.length > 0 && (
                         <div className="flex flex-wrap gap-1 mb-4">
-                          {book.genre.slice(0, 2).map((genre, genreIndex) => (
+                          {book.tags.slice(0, 3).map((tag, tagIndex) => (
                             <span
-                              key={genreIndex}
+                              key={tagIndex}
                               className="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs"
                             >
-                              {genre}
+                              {tag}
                             </span>
                           ))}
                         </div>
                       )}
-
-                      <div className="flex items-center justify-between text-sm text-gray-500">
-                        <div className="flex items-center space-x-1">
-                          <Eye className="w-4 h-4" />
-                          <span>{book.viewCount}</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <Star className="w-4 h-4 text-yellow-500" />
-                          <span>4.8</span>
-                        </div>
-                      </div>
                     </div>
                   </div>
                 </motion.div>
