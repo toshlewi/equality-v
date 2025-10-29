@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Play, Clock, Eye, User, X } from "lucide-react";
 
 interface Video {
@@ -19,9 +19,11 @@ interface Video {
 
 export default function VideoResourcesSection() {
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
+  const [videos, setVideos] = useState<Video[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock data - will be replaced with API call
-  const videos: Video[] = [
+  // Placeholder data (preserved)
+  const placeholders: Video[] = [
     {
       id: '1',
       title: 'Breaking the Silence: Women in Tech',
@@ -72,6 +74,45 @@ export default function VideoResourcesSection() {
     }
   ];
 
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await fetch('/api/our-voices/videos');
+        if (!res.ok) throw new Error('Failed');
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+          const mapped: Video[] = json.data
+            .filter((v: any) => v.visible !== false && v.status !== 'draft')
+            .map((v: any) => ({
+              id: v._id,
+              title: v.title,
+              description: v.description || '',
+              thumbnail: v.thumbnail || '/images/hero-1.png',
+              videoUrl: v.videoUrl,
+              duration: v.duration || 0,
+              author: v.author || 'Community',
+              views: v.views || 0,
+              publishedAt: v.publishedAt || new Date().toISOString(),
+              tags: v.tags || [],
+            }));
+          setVideos(mapped);
+        } else {
+          setVideos(placeholders);
+        }
+      } catch {
+        setVideos(placeholders);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+
+    // Refresh on window focus to show latest updates
+    const handleFocus = () => load();
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, []);
+
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -92,6 +133,21 @@ export default function VideoResourcesSection() {
       day: 'numeric'
     });
   };
+
+  if (loading) {
+    return (
+      <section className="py-20 text-white" style={{ backgroundColor: '#042C45' }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <div className="animate-pulse">
+              <div className="h-8 bg-white/20 rounded w-1/3 mx-auto mb-4"></div>
+              <div className="h-4 bg-white/10 rounded w-1/2 mx-auto"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="py-20 text-white" style={{ backgroundColor: '#042C45' }}>

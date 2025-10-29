@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Play, Pause, Volume2, Clock, User, Download, Share2 } from "lucide-react";
 
 interface AudioItem {
@@ -23,9 +23,11 @@ export default function AudioPodcastsSection() {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const [audioItems, setAudioItems] = useState<AudioItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock data - will be replaced with API call
-  const audioItems: AudioItem[] = [
+  // Placeholders (preserved)
+  const placeholders: AudioItem[] = [
     {
       id: '1',
       title: 'Economic Justice in Africa',
@@ -96,6 +98,41 @@ export default function AudioPodcastsSection() {
     }
   ];
 
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await fetch('/api/our-voices/audio');
+        if (!res.ok) throw new Error('Failed');
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+          const mapped: AudioItem[] = json.data
+            .filter((a: any) => a.visible !== false && a.status !== 'draft')
+            .map((a: any) => ({
+              id: a._id,
+              title: a.title,
+              description: a.description || '',
+              audioUrl: a.audioUrl,
+              thumbnail: a.thumbnail || '/images/hero-3.png',
+              duration: a.duration || 0,
+              author: a.author || 'Community',
+              publishedAt: a.publishedAt || new Date().toISOString(),
+              category: a.category || 'Podcast',
+              episode: a.episode,
+              season: a.season,
+            }));
+          setAudioItems(mapped);
+        } else {
+          setAudioItems(placeholders);
+        }
+      } catch {
+        setAudioItems(placeholders);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
+
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
@@ -144,6 +181,21 @@ export default function AudioPodcastsSection() {
       setCurrentTime(time);
     }
   };
+
+  if (loading) {
+    return (
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <div className="animate-pulse">
+              <div className="h-8 bg-gray-200 rounded w-1/3 mx-auto mb-4"></div>
+              <div className="h-4 bg-gray-100 rounded w-1/2 mx-auto"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="py-20 bg-white">

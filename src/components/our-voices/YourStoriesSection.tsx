@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-import { Heart, MessageCircle, Share2, Eye, Calendar, User, FileText, Image as ImageIcon, Volume2, Play } from "lucide-react";
+import { Heart, MessageCircle, Share2, Eye, Calendar, User, FileText, Image as ImageIcon, Volume2, Play, X } from "lucide-react";
 
 interface Story {
   id: string;
@@ -29,7 +29,7 @@ export default function YourStoriesSection() {
   const [loading, setLoading] = useState(true);
   const [selectedStory, setSelectedStory] = useState<Story | null>(null);
 
-  // Mock data - will be replaced with API call
+  // Placeholder data (preserved)
   useEffect(() => {
     const mockStories: Story[] = [
       {
@@ -165,8 +165,47 @@ export default function YourStoriesSection() {
       }
     ];
 
+    const load = async () => {
+      try {
+        const res = await fetch('/api/stories?status=published&limit=12');
+        if (!res.ok) throw new Error('Failed');
+        const json = await res.json();
+        if (json.success && json.data?.stories?.length > 0) {
+          const mapped: Story[] = json.data.stories.map((s: any) => ({
+            id: s._id,
+            title: s.title,
+            content: s.content || s.text || '',
+            author: s.anonymous ? 'Anonymous' : (s.submitterName || 'Anonymous'),
+            isAnonymous: !!s.anonymous,
+            publishedAt: s.publishedAt || s.createdAt,
+            media: (s.mediaFiles || s.files || []).map((m: any) => ({
+              type: m.mediaType || m.type || 'image',
+              url: m.url,
+              thumbnail: m.thumbnailUrl,
+            })),
+            tags: s.tags || [],
+            likes: s.likeCount || 0,
+            comments: 0,
+            shares: s.shareCount || 0,
+            views: s.viewCount || 0,
+            featured: !!s.featured,
+          }));
+          setStories(mapped);
+        } else {
+          setStories(mockStories);
+        }
+      } catch {
     setStories(mockStories);
+      } finally {
     setLoading(false);
+      }
+    };
+    load();
+
+    // Refresh on window focus to show latest updates
+    const handleFocus = () => load();
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
   }, []);
 
   const formatDate = (dateString: string) => {
@@ -247,13 +286,19 @@ export default function YourStoriesSection() {
               className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer group"
               onClick={() => setSelectedStory(story)}
             >
-              {/* Media Preview */}
+              {/* Media Preview (use first image if any, otherwise default cover) */}
               <div className="relative aspect-video">
+                {(() => {
+                  const firstImage = story.media.find(m => m.type === 'image');
+                  const coverSrc = firstImage?.thumbnail || firstImage?.url || '/images/story-cover.jpg';
+                  return (
                 <img
-                  src={story.media[0]?.thumbnail || '/images/placeholder.jpg'}
+                      src={coverSrc}
                   alt={story.title}
-                  className="w-full h-full object-cover"
+                      className="w-full h-full object-cover object-center"
                 />
+                  );
+                })()}
                 
                 {/* Media Type Indicator */}
                 <div className="absolute top-4 left-4 flex items-center space-x-2">
@@ -385,25 +430,57 @@ export default function YourStoriesSection() {
                   {selectedStory.content}
                 </p>
 
-                {/* Media Display */}
+                {/* Media Display with viewers */}
                 {selectedStory.media.length > 0 && (
                   <div className="mb-6">
                     <h4 className="font-fredoka text-lg font-bold text-brand-teal mb-4">
                       Media
                     </h4>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                      {selectedStory.media.map((media, idx) => (
-                        <div key={idx} className="relative">
-                          <img
-                            src={media.thumbnail || media.url}
-                            alt={`Media ${idx + 1}`}
-                            className="w-full h-32 object-cover rounded-lg"
-                          />
-                          <div className="absolute top-2 right-2 bg-black/60 text-white p-1 rounded">
-                            {getMediaIcon(media.type)}
+                    <div className="space-y-4">
+                      {selectedStory.media.map((media, idx) => {
+                        if (media.type === 'image') {
+                          return (
+                            <div key={idx} className="rounded-xl overflow-hidden border">
+                              <img src={media.url} alt={`Image ${idx + 1}`} className="w-full h-auto" />
+                            </div>
+                          );
+                        }
+                        if (media.type === 'video') {
+                          return (
+                            <div key={idx} className="rounded-xl overflow-hidden border">
+                              <video src={media.url} controls className="w-full h-auto" />
+                            </div>
+                          );
+                        }
+                        if (media.type === 'audio') {
+                          return (
+                            <div key={idx} className="rounded-xl overflow-hidden border p-4">
+                              <audio src={media.url} controls className="w-full" />
+                            </div>
+                          );
+                        }
+                        if (media.type === 'pdf') {
+                          return (
+                            <div key={idx} className="rounded-xl overflow-hidden border">
+                              <div className="flex items-center justify-between px-4 py-2 bg-gray-50 border-b">
+                                <div className="flex items-center gap-2 text-gray-700">
+                                  <FileText className="w-4 h-4" />
+                                  <span>Document</span>
+                                </div>
+                                <a href={media.url} download className="text-sm text-brand-orange hover:underline">
+                                  Download
+                                </a>
+                              </div>
+                              <iframe src={`/api/view-pdf?path=${encodeURIComponent(media.url)}`} className="w-full h-[500px]" />
+                            </div>
+                          );
+                        }
+                        return (
+                          <div key={idx} className="rounded-xl overflow-hidden border p-4">
+                            <a href={media.url} target="_blank" rel="noreferrer" className="text-brand-orange hover:underline">Open media</a>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 )}

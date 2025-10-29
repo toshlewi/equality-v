@@ -28,7 +28,15 @@ export async function POST(request: NextRequest) {
         "application/pdf",
         "application/msword",
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        "text/plain"
+        "text/plain",
+        "video/mp4",
+        "video/webm",
+        "video/quicktime",
+        "video/x-msvideo",
+        "audio/mpeg",
+        "audio/mp3",
+        "audio/wav",
+        "audio/ogg"
       ];
 
       if (!allowedTypes.includes(file.type)) {
@@ -38,11 +46,12 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // Validate file size (10MB max)
-      const maxSize = 10 * 1024 * 1024; // 10MB
+      // Validate file size (200MB max for videos, 10MB for others)
+      const maxSize = file.type.startsWith('video/') ? 200 * 1024 * 1024 : 10 * 1024 * 1024;
+      const maxSizeLabel = file.type.startsWith('video/') ? '200MB' : '10MB';
       if (file.size > maxSize) {
         return NextResponse.json(
-          { error: `File ${file.name} is too large. Maximum size is 10MB.` },
+          { error: `File ${file.name} is too large. Maximum size is ${maxSizeLabel}.` },
           { status: 400 }
         );
       }

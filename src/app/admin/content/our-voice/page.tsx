@@ -21,7 +21,11 @@ import {
   Image,
   Video,
   Music,
-  Download
+  Download,
+  Layout,
+  Film,
+  Volume2,
+  Settings
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -44,23 +48,30 @@ import {
 interface Story {
   _id: string;
   title: string;
-  submitterName: string;
-  submitterEmail: string;
+  submitterName?: string;
+  submitterEmail?: string;
   anonymous: boolean;
   tags: string[];
-  text: string;
-  files: Array<{
+  text?: string;
+  files?: Array<{
     name: string;
     url: string;
     type: string;
     size: number;
     description?: string;
   }>;
+  mediaFiles?: Array<{
+    name?: string;
+    url: string;
+    type?: string;
+    mediaType?: string;
+    size?: number;
+  }>;
   status: 'pending' | 'in_review' | 'approved' | 'rejected' | 'published';
   reviewerId?: string;
   reviewNotes?: string;
   consentToPublish: boolean;
-  contentRights: string;
+  contentRights: boolean | string;
   termsAccepted: boolean;
   createdAt: string;
   updatedAt: string;
@@ -101,7 +112,16 @@ export default function OurVoicePage() {
         ...(searchTerm && { search: searchTerm }),
       });
 
-      const response = await fetch(`/api/stories?${params}`);
+      const response = await fetch(`/api/admin/stories?${params}`);
+      if (!response.ok) {
+        console.error('Failed to fetch stories', response.status);
+        return;
+      }
+      const contentType = response.headers.get('content-type') || '';
+      if (!contentType.includes('application/json')) {
+        console.error('Unexpected response content-type:', contentType);
+        return;
+      }
       const data: StoriesResponse = await response.json();
 
       if (data.success) {
@@ -150,6 +170,21 @@ export default function OurVoicePage() {
     }
   };
 
+  const handleInReview = async (id: string) => {
+    try {
+      const response = await fetch(`/api/stories/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'in_review' }),
+      });
+      if (response.ok) {
+        fetchStories();
+      }
+    } catch (error) {
+      console.error('Error moving story to in_review:', error);
+    }
+  };
+
   const handleReject = async (id: string) => {
     try {
       const response = await fetch(`/api/stories/${id}`, {
@@ -179,6 +214,21 @@ export default function OurVoicePage() {
       }
     } catch (error) {
       console.error('Error publishing story:', error);
+    }
+  };
+
+  const handleUnpublish = async (id: string) => {
+    try {
+      const response = await fetch(`/api/stories/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'approved' }),
+      });
+      if (response.ok) {
+        fetchStories();
+      }
+    } catch (error) {
+      console.error('Error unpublishing story:', error);
     }
   };
 
@@ -264,6 +314,53 @@ export default function OurVoicePage() {
           <p className="text-gray-600">Manage story submissions and user-generated content</p>
         </div>
       </div>
+
+      {/* Navigation to Sub-pages */}
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Settings className="w-5 h-5 text-gray-600" />
+            <h2 className="text-lg font-semibold">Manage Content</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Button
+              variant="outline"
+              className="flex items-center justify-start gap-3 h-auto p-4 hover:bg-gray-50 transition-colors"
+              onClick={() => router.push('/admin/content/our-voice/hero')}
+            >
+              <Layout className="w-5 h-5 text-brand-teal" />
+              <div className="text-left">
+                <div className="font-semibold">Hero Section</div>
+                <div className="text-xs text-gray-500">Manage hero items</div>
+              </div>
+            </Button>
+            
+            <Button
+              variant="outline"
+              className="flex items-center justify-start gap-3 h-auto p-4 hover:bg-gray-50 transition-colors"
+              onClick={() => router.push('/admin/content/our-voice/videos')}
+            >
+              <Film className="w-5 h-5 text-brand-orange" />
+              <div className="text-left">
+                <div className="font-semibold">Video Resources</div>
+                <div className="text-xs text-gray-500">Manage video content</div>
+              </div>
+            </Button>
+            
+            <Button
+              variant="outline"
+              className="flex items-center justify-start gap-3 h-auto p-4 hover:bg-gray-50 transition-colors"
+              onClick={() => router.push('/admin/content/our-voice/audio')}
+            >
+              <Volume2 className="w-5 h-5 text-brand-yellow" />
+              <div className="text-left">
+                <div className="font-semibold">Audio & Podcasts</div>
+                <div className="text-xs text-gray-500">Manage audio content</div>
+              </div>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
@@ -402,7 +499,7 @@ export default function OurVoicePage() {
                       </div>
                       
                       <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-                        {story.text.substring(0, 200)}...
+                        {(story.text || '').substring(0, 200)}{story.text && story.text.length > 200 ? '...' : ''}
                       </p>
                       
                       <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
@@ -414,26 +511,26 @@ export default function OurVoicePage() {
                           <Calendar className="w-4 h-4" />
                           {formatDate(story.createdAt)}
                         </div>
-                        {story.files.length > 0 && (
+                        {((story.files && story.files.length > 0) || (story.mediaFiles && story.mediaFiles.length > 0)) && (
                           <div className="flex items-center gap-1">
                             <Download className="w-4 h-4" />
-                            {story.files.length} file{story.files.length !== 1 ? 's' : ''}
+                            {(story.files?.length || story.mediaFiles?.length || 0)} file{((story.files?.length || story.mediaFiles?.length || 0) !== 1) ? 's' : ''}
                           </div>
                         )}
                       </div>
                       
                       {/* Files Preview */}
-                      {story.files.length > 0 && (
+                      {((story.files && story.files.length > 0) || (story.mediaFiles && story.mediaFiles.length > 0)) && (
                         <div className="flex items-center gap-2 mb-3">
-                          {story.files.slice(0, 3).map((file, index) => (
+                          {(story.files || story.mediaFiles || []).slice(0, 3).map((file: any, index: number) => (
                             <div key={index} className="flex items-center gap-1 text-xs text-gray-500">
-                              {getFileIcon(file.type)}
-                              <span>{file.name}</span>
+                              {getFileIcon(file.type || file.mediaType || '')}
+                              <span>{file.name || 'File'}</span>
                             </div>
                           ))}
-                          {story.files.length > 3 && (
+                          {(story.files?.length || story.mediaFiles?.length || 0) > 3 && (
                             <span className="text-xs text-gray-500">
-                              +{story.files.length - 3} more
+                              +{((story.files?.length || story.mediaFiles?.length || 0) - 3)} more
                             </span>
                           )}
                         </div>
@@ -477,6 +574,12 @@ export default function OurVoicePage() {
                             <Eye className="w-4 h-4 mr-2" />
                             View Details
                           </DropdownMenuItem>
+                          {(story.status === 'pending' || story.status === 'approved') && (
+                            <DropdownMenuItem onClick={() => handleInReview(story._id)}>
+                              <Eye className="w-4 h-4 mr-2" />
+                              Move to In Review
+                            </DropdownMenuItem>
+                          )}
                           {story.status === 'pending' && (
                             <DropdownMenuItem onClick={() => handleApprove(story._id)}>
                               <CheckCircle className="w-4 h-4 mr-2" />
@@ -487,6 +590,12 @@ export default function OurVoicePage() {
                             <DropdownMenuItem onClick={() => handlePublish(story._id)}>
                               <Eye className="w-4 h-4 mr-2" />
                               Publish
+                            </DropdownMenuItem>
+                          )}
+                          {story.status === 'published' && (
+                            <DropdownMenuItem onClick={() => handleUnpublish(story._id)}>
+                              <EyeOff className="w-4 h-4 mr-2" />
+                              Unpublish
                             </DropdownMenuItem>
                           )}
                           {story.status !== 'rejected' && (

@@ -20,7 +20,7 @@ export default function HeroSection() {
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Mock data for now - will be replaced with API call
+  // Placeholder data (preserved)
   useEffect(() => {
     const mockData: MediaItem[] = [
       {
@@ -138,8 +138,42 @@ export default function HeroSection() {
       }
     ];
     
+    const load = async () => {
+      try {
+        const res = await fetch('/api/our-voices/hero');
+        if (!res.ok) throw new Error('Failed');
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+          const items: MediaItem[] = json.data
+            .filter((i: any) => i.visible !== false && i.status !== 'draft')
+            .slice(0, 12)
+            .map((i: any) => ({
+              id: i._id,
+              type: i.type || 'image',
+              title: i.title,
+              thumbnail: i.backgroundImage,
+              duration: i.duration,
+              author: i.author,
+              views: i.views,
+              featured: i.featured,
+            }));
+          setMediaItems(items);
+        } else {
+          setMediaItems(mockData);
+        }
+      } catch {
     setMediaItems(mockData);
+      } finally {
     setLoading(false);
+      }
+    };
+
+    load();
+
+    // Refresh on window focus to show latest updates
+    const handleFocus = () => load();
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
   }, []);
 
   const getIcon = (type: string) => {

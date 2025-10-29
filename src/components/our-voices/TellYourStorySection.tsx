@@ -25,7 +25,8 @@ const storySchema = z.object({
   submitterEmail: z.string().email("Please enter a valid email address").optional(),
   submitterPhone: z.string().optional(),
   anonymous: z.boolean().default(false),
-  tags: z.array(z.string()).optional(),
+  // Accept either a CSV string from the input or an array
+  tags: z.union([z.string(), z.array(z.string())]).optional(),
   consentToPublish: z.boolean().refine(val => val === true, "You must consent to publish your story"),
   contentRights: z.boolean().refine(val => val === true, "You must confirm you own the content rights"),
   termsAccepted: z.boolean().refine(val => val === true, "You must accept the terms and conditions")
@@ -144,25 +145,102 @@ export default function TellYourStorySection() {
 
   const onSubmit = async (data: StoryFormData) => {
     setIsSubmitting(true);
-    
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Step 1: Upload files if any
+      let uploaded: { name: string; url: string; type: string; size: number; thumbnailUrl?: string }[] = [];
+      if (uploadedFiles.length > 0) {
+        const uploadPromises = uploadedFiles.map(async (fileUpload) => {
+          const formData = new FormData();
+          formData.append('files', fileUpload.file);
+
+          const uploadRes = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData,
+          });
+
+          if (!uploadRes.ok) throw new Error('File upload failed');
+
+          const uploadResult = await uploadRes.json();
+          if (Array.isArray(uploadResult) && uploadResult.length > 0) {
+            const uploaded = uploadResult[0];
+            return {
+              name: uploaded.name,
+              url: uploaded.url,
+              type: uploaded.type,
+              size: uploaded.size,
+              thumbnailUrl: fileUpload.type === 'image' ? uploaded.url : undefined,
+            };
+          }
+          return null;
+        });
+
+        const results = await Promise.all(uploadPromises);
+        uploaded = results.filter((f): f is { name: string; url: string; type: string; size: number; thumbnailUrl?: string } => f !== null);
+      }
+
+      // Step 2: Submit story to API
+      const tagsArray = data.tags 
+        ? (typeof data.tags === 'string' ? data.tags.split(',').map(t=>t.trim()).filter(Boolean) : Array.isArray(data.tags) ? data.tags : [])
+        : [];
+
+      const payload: any = {
+        title: data.title,
+        content: data.content,
+        anonymous: data.anonymous,
+        tags: tagsArray,
+        consentToPublish: data.consentToPublish,
+        contentRights: data.contentRights,
+        termsAccepted: data.termsAccepted,
+      };
+
+      // Only include submitter info if not anonymous
+      if (!data.anonymous) {
+        if (data.submitterName) payload.submitterName = data.submitterName;
+        if (data.submitterEmail) payload.submitterEmail = data.submitterEmail;
+      }
       
-      console.log('Story submission data:', {
-        ...data,
-        files: uploadedFiles.map(f => ({
-          name: f.file.name,
-          type: f.type,
-          size: f.size
-        }))
+      if (data.submitterPhone) payload.submitterPhone = data.submitterPhone;
+
+      // Only include mediaFiles if there are uploaded files
+      if (uploaded.length > 0) {
+        payload.mediaFiles = uploaded.map(u => ({
+          filename: u.name,
+          originalName: u.name,
+          mimeType: u.type,
+          fileSize: u.size,
+          url: u.url,
+          thumbnailUrl: u.thumbnailUrl,
+          mediaType: u.type.startsWith('image/') ? 'image' as const :
+                     u.type.startsWith('video/') ? 'video' as const :
+                     u.type.startsWith('audio/') ? 'audio' as const : 'pdf' as const,
+        }));
+      }
+
+      console.log('Submitting story payload:', { ...payload, mediaFiles: payload.mediaFiles?.length || 0 });
+
+      const submitRes = await fetch('/api/stories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
       });
-      
+
+      const submitJson = await submitRes.json();
+
+      if (!submitRes.ok || !submitJson.success) {
+        // Format validation errors for display
+        if (submitJson.details && Array.isArray(submitJson.details)) {
+          const errorMessages = submitJson.details.map((d: any) => `${d.path.join('.')}: ${d.message}`).join(', ');
+          throw new Error(errorMessages || submitJson.error || 'Submission failed');
+        }
+        throw new Error(submitJson.error || 'Submission failed');
+      }
+
       setSubmitSuccess(true);
       reset();
       setUploadedFiles([]);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Submission error:', error);
+      alert(error.message || 'There was an error submitting your story. Please try again.');
     } finally {
       setIsSubmitting(false);
     }

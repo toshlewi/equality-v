@@ -13,7 +13,7 @@ interface TeamMember {
   fullBio: string;
   socialLinks?: {
     linkedin?: string;
-    twitter?: string;
+    instagram?: string;
     email?: string;
   };
 }
@@ -32,8 +32,8 @@ Her work is strategically focused on the intricate connections between gender ju
 
 Mutheu's influence extends to high-level international collaborations. She has forged significant partnerships with esteemed organizations such as the Nobel Women's Initiative, demonstrating her commitment to global peace and women's rights, and the Global Landscapes Forum, highlighting her dedication to environmental sustainability and land-use issues. Furthermore, her insightful contributions as a member of the EU–Kenya Youth Sounding Board underscore her direct role in shaping European Union policy that profoundly impacts young people in Kenya, always with a critical intersectional lens that ensures inclusivity and equity. Through these multifaceted roles, Mutheu Mutuku continues to be a formidable advocate for a more just and equitable world.`,
     socialLinks: {
-      linkedin: '#',
-      twitter: '#',
+      linkedin: 'https://www.linkedin.com/in/mutheu-mutuku/',
+      instagram: 'https://www.instagram.com/mutheucreates/?hl=en',
       email: 'mutheu@equalityvanguard.org'
     }
   },
@@ -46,7 +46,8 @@ Mutheu's influence extends to high-level international collaborations. She has f
     bio: 'Co-founder of Equality Vanguard, bringing strategic vision and leadership to our mission.',
     fullBio: 'Carla Mujisa is a co-founder of Equality Vanguard, bringing strategic vision and leadership to our mission of advancing gender justice and Pan-African feminism. Her dedication to the cause and collaborative approach has been instrumental in shaping our organization\'s direction and impact.',
     socialLinks: {
-      linkedin: '#',
+      linkedin: 'https://www.linkedin.com/in/carla-mujisa/',
+      instagram: 'https://www.instagram.com/_.mujisa/?hl=en',
       email: 'carla@equalityvanguard.org'
     }
   },
@@ -61,7 +62,7 @@ Mutheu's influence extends to high-level international collaborations. She has f
 
 This, coupled with her legal background, continue to spur her to work towards a future that knows and asserts the financial empowerment of every woman in every right; a vocation she continues to zealously pursue through her earnest service as the Money Matters Strategist at Equality Vanguard Africa.`,
     socialLinks: {
-      linkedin: '#',
+      linkedin: 'https://www.linkedin.com/in/nadia-achieng-0464631b7/',
       email: 'nadia@equalityvanguard.org'
     }
   },
@@ -80,8 +81,8 @@ Celine blends strategy with creativity, drawing on her experience as both a comm
 
 Passionate about feminist values, Celine uses her work and platforms to amplify women's voices, challenge inequality, and spark conversations that inspire collective action. At Equality Vanguard, she is dedicated to building vibrant communications that center justice, equality, and the power of storytelling.`,
     socialLinks: {
-      linkedin: '#',
-      twitter: '#',
+      linkedin: 'https://www.linkedin.com/in/celine-mumbi-673b78146/',
+      instagram: 'https://www.instagram.com/celine_.mumbi/?hl=en',
       email: 'celine@equalityvanguard.org'
     }
   },
@@ -98,7 +99,8 @@ Melvin is passionate about the intersection of law and technology. With her cert
 
 While not drafting contracts, Melvin enjoys watching films and series and dancing.`,
     socialLinks: {
-      linkedin: '#',
+      linkedin: 'https://www.linkedin.com/in/melvin-bosibori-720b0b243/',
+      instagram: 'https://www.instagram.com/themelvin254/?hl=en',
       email: 'melvin@equalityvanguard.org'
     }
   },
@@ -113,7 +115,8 @@ While not drafting contracts, Melvin enjoys watching films and series and dancin
 
 Her skills span legal research and drafting, advocacy communication, and editorial leadership. With a focus on sexual and reproductive health and rights (SRHR), economic justice, gender justice, and digital rights, she uses the written word to break down complex issues, amplify marginalized voices, and drive forward the advancement of equality and justice.`,
     socialLinks: {
-      linkedin: '#',
+      linkedin: 'https://www.linkedin.com/in/purity-buyanzi-a3b904239/',
+      instagram: 'https://www.instagram.com/ms.buyanzi/?hl=en',
       email: 'purity@equalityvanguard.org'
     }
   }
@@ -236,17 +239,23 @@ export default function TeamSection() {
                       {selectedMember.socialLinks.linkedin && (
                         <a
                           href={selectedMember.socialLinks.linkedin}
+                          target="_blank"
+                          rel="noopener noreferrer"
                           className="w-10 h-10 bg-brand-teal rounded-full flex items-center justify-center text-white hover:bg-brand-orange transition-colors duration-200"
                         >
                           <span className="text-sm font-bold">in</span>
                         </a>
                       )}
-                      {selectedMember.socialLinks.twitter && (
+                      {selectedMember.socialLinks.instagram && (
                         <a
-                          href={selectedMember.socialLinks.twitter}
+                          href={selectedMember.socialLinks.instagram}
+                          target="_blank"
+                          rel="noopener noreferrer"
                           className="w-10 h-10 bg-brand-orange rounded-full flex items-center justify-center text-white hover:bg-brand-teal transition-colors duration-200"
                         >
-                          <span className="text-sm font-bold">𝕏</span>
+                          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                          </svg>
                         </a>
                       )}
                       {selectedMember.socialLinks.email && (
