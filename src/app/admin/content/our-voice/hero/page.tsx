@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Edit, Eye, EyeOff, Upload, ArrowLeft, X, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,8 @@ interface HeroItem {
   text?: string;
   backgroundImage: string;
   type?: 'video' | 'image' | 'audio' | 'story';
+  thumbnail?: string;
+  videoUrl?: string;
   duration?: number;
   author?: string;
   views?: number;
@@ -25,10 +27,13 @@ export default function AdminHeroPage() {
   const [items, setItems] = useState<HeroItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  const [form, setForm] = useState<HeroItem>({ title: "", backgroundImage: "", type: 'image', visible: true, status: 'published' });
-  const [uploading, setUploading] = useState(false);
+  const defaultForm: HeroItem = { title: "", backgroundImage: "", text: "", type: 'image', thumbnail: "", videoUrl: "", author: "", views: 0, featured: false, visible: true, status: 'published' } as any;
+  const [form, setForm] = useState<HeroItem>(defaultForm);
+  const [uploading, setUploading] = useState<'background'|'thumbnail'|null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const thumbInputRef = useRef<HTMLInputElement>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [thumbPreview, setThumbPreview] = useState<string | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -37,11 +42,11 @@ export default function AdminHeroPage() {
       const json = await res.json();
       if (json.success) {
         const loaded = json.data || [];
-        // Sort by order and ensure we have exactly 12 items
+        // Sort by order and ensure we have exactly 13 items
         const sorted = loaded.sort((a: HeroItem, b: HeroItem) => (a.order || 0) - (b.order || 0));
         
-        // If less than 12, initialize
-        if (sorted.length < 12) {
+        // If less than 13, initialize
+        if (sorted.length < 13) {
           const initRes = await fetch('/api/our-voices/hero/init', { method: 'POST' });
           if (initRes.ok) {
             // Reload after initialization
@@ -53,8 +58,8 @@ export default function AdminHeroPage() {
             }
           }
         } else {
-          // Ensure exactly 12 items
-          setItems(sorted.slice(0, 12));
+          // Ensure exactly 13 items
+          setItems(sorted.slice(0, 13));
         }
       }
     } catch (error) {
@@ -75,7 +80,7 @@ export default function AdminHeroPage() {
       return;
     }
 
-    setUploading(true);
+    setUploading('background');
     try {
       const formData = new FormData();
       formData.append('files', file);
@@ -88,8 +93,13 @@ export default function AdminHeroPage() {
       if (res.ok) {
         const uploaded = await res.json();
         if (Array.isArray(uploaded) && uploaded.length > 0) {
-          setForm(prev => ({ ...prev, backgroundImage: uploaded[0].url }));
-          setImagePreview(URL.createObjectURL(file));
+          const url = uploaded[0].url as string;
+          if (file.type.startsWith('video/')) {
+            setForm(prev => ({ ...prev, videoUrl: url, type: 'video' }));
+          } else {
+            setForm(prev => ({ ...prev, backgroundImage: url }));
+            setImagePreview(URL.createObjectURL(file));
+          }
         }
       } else {
         alert('Failed to upload file');
@@ -98,23 +108,67 @@ export default function AdminHeroPage() {
       console.error('Upload error:', error);
       alert('Error uploading file');
     } finally {
-      setUploading(false);
+      setUploading(null);
+    }
+  };
+
+  const handleThumbUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      alert('Please upload an image file for thumbnail');
+      return;
+    }
+    setUploading('thumbnail');
+    try {
+      const formData = new FormData();
+      formData.append('files', file);
+      const res = await fetch('/api/upload', { method: 'POST', body: formData });
+      if (res.ok) {
+        const uploaded = await res.json();
+        if (Array.isArray(uploaded) && uploaded.length > 0) {
+          setForm(prev => ({ ...prev, thumbnail: uploaded[0].url }));
+          setThumbPreview(URL.createObjectURL(file));
+        }
+      } else {
+        alert('Failed to upload thumbnail');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error uploading thumbnail');
+    } finally {
+      setUploading(null);
     }
   };
 
   const startEdit = (index: number) => {
     const item = items[index];
-    setForm({ ...item });
+    if (!item) return;
+    setForm({
+      ...defaultForm,
+      ...item,
+      title: item.title || '',
+      backgroundImage: item.backgroundImage || '',
+      text: item.text || '',
+      type: (item.type as any) || 'image',
+      thumbnail: item.thumbnail || '',
+      videoUrl: (item as any).videoUrl || '',
+      author: item.author || '',
+      views: item.views || 0,
+      featured: item.featured ?? false,
+      visible: item.visible ?? true,
+      status: (item.status as any) || 'published',
+    } as any);
     setEditingIndex(index);
-    if (item.backgroundImage) {
-      setImagePreview(item.backgroundImage);
-    }
+    setImagePreview(item.backgroundImage || null);
+    setThumbPreview(item.thumbnail || null);
   };
 
   const cancelEdit = () => {
     setEditingIndex(null);
-    setForm({ title: "", backgroundImage: "", type: 'image', visible: true, status: 'published' });
+    setForm(defaultForm);
     setImagePreview(null);
+    setThumbPreview(null);
   };
 
   const onSubmit = async (e: React.FormEvent) => {
@@ -193,7 +247,7 @@ export default function AdminHeroPage() {
 
                   <div>
                     <label className="block text-sm font-medium mb-1">Background Image *</label>
-                    <div className="space-y-2">
+                  <div className="space-y-2">
                       <div className="flex items-center gap-2">
                         <input
                           ref={fileInputRef}
@@ -206,11 +260,11 @@ export default function AdminHeroPage() {
                           type="button"
                           variant="outline"
                           onClick={() => fileInputRef.current?.click()}
-                          disabled={uploading}
+                        disabled={uploading === 'background'}
                           className="flex items-center gap-2"
                         >
                           <Upload className="w-4 h-4" />
-                          {uploading ? 'Uploading...' : 'Upload Image/Video'}
+                        {uploading === 'background' ? 'Uploading...' : 'Upload Image/Video'}
                         </Button>
                         {form.backgroundImage && (
                           <span className="text-sm text-gray-600 truncate max-w-xs">
@@ -297,10 +351,11 @@ export default function AdminHeroPage() {
 
           {/* 12 Cards Grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {Array.from({ length: 12 }).map((_, index) => {
+            {Array.from({ length: 13 }).map((_, index) => {
               const item = items[index];
               return (
-                <div key={item?._id || `placeholder-${index}`} className="bg-white border rounded-lg overflow-hidden">
+                <React.Fragment key={item?._id || `placeholder-${index}`}>
+                <div className="bg-white border rounded-lg overflow-hidden">
                   <div className="aspect-video bg-gray-100 relative">
                     {item?.backgroundImage ? (
                       <img src={item.backgroundImage} alt={item.title} className="w-full h-full object-cover" />
@@ -327,13 +382,15 @@ export default function AdminHeroPage() {
                         {item?.type || 'image'} • #{index + 1}
                       </span>
                       <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => startEdit(index)}
-                          className="p-1.5 hover:bg-gray-100 rounded"
-                          title="Edit"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </button>
+                        {item && (
+                          <button
+                            onClick={() => startEdit(index)}
+                            className="p-1.5 hover:bg-gray-100 rounded"
+                            title="Edit"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                        )}
                         {item?._id && (
                           <button
                             onClick={() => toggleVisibility(item)}
@@ -351,6 +408,57 @@ export default function AdminHeroPage() {
                     </div>
                   </div>
                 </div>
+
+                {/* Thumbnail for non-image types */}
+                {form.type !== 'image' && (
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Thumbnail (recommended for video/audio/story)</label>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <input
+                          ref={thumbInputRef}
+                          type="file"
+                          accept="image/*"
+                          onChange={handleThumbUpload}
+                          className="hidden"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => thumbInputRef.current?.click()}
+                          disabled={uploading === 'thumbnail'}
+                          className="flex items-center gap-2"
+                        >
+                          <Upload className="w-4 h-4" />
+                          {uploading === 'thumbnail' ? 'Uploading...' : 'Upload Thumbnail'}
+                        </Button>
+                        {form.thumbnail && (
+                          <span className="text-sm text-gray-600 truncate max-w-xs">{form.thumbnail}</span>
+                        )}
+                      </div>
+                      {(thumbPreview || form.thumbnail) && (
+                        <div className="relative w-full h-40 border rounded overflow-hidden">
+                          <img
+                            src={thumbPreview || form.thumbnail!}
+                            alt="Thumbnail Preview"
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Video preview */}
+                {form.type === 'video' && form.videoUrl && (
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Video Preview</label>
+                    <div className="relative w-full aspect-video border rounded overflow-hidden bg-black">
+                      <video src={form.videoUrl} controls className="w-full h-full" poster={form.thumbnail || form.backgroundImage} />
+                    </div>
+                  </div>
+                )}
+                </React.Fragment>
               );
             })}
           </div>

@@ -8,6 +8,8 @@ const updateSchema = z.object({
   text: z.string().max(500).optional(),
   backgroundImage: z.string().optional(),
   type: z.enum(['video', 'image', 'audio', 'story']).optional(),
+  thumbnail: z.string().optional(),
+  videoUrl: z.string().optional(),
   duration: z.number().optional(),
   author: z.string().optional(),
   views: z.number().optional(),

@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-import { Play, Volume2, FileText, Image as ImageIcon } from "lucide-react";
+import { Play, Volume2, FileText, Image as ImageIcon, X } from "lucide-react";
 import { StaggeredGrid, FadeInSlide, FloatingElement } from "./ScrollAnimations";
 
 interface MediaItem {
@@ -10,6 +10,7 @@ interface MediaItem {
   type: 'video' | 'image' | 'audio' | 'story';
   title: string;
   thumbnail: string;
+  videoUrl?: string;
   duration?: number;
   author?: string;
   views?: number;
@@ -19,6 +20,7 @@ interface MediaItem {
 export default function HeroSection() {
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedVideo, setSelectedVideo] = useState<MediaItem | null>(null);
 
   // Placeholder data (preserved)
   useEffect(() => {
@@ -146,12 +148,13 @@ export default function HeroSection() {
         if (json.success && Array.isArray(json.data) && json.data.length > 0) {
           const items: MediaItem[] = json.data
             .filter((i: any) => i.visible !== false && i.status !== 'draft')
-            .slice(0, 12)
+            .slice(0, 13)
             .map((i: any) => ({
               id: i._id,
               type: i.type || 'image',
               title: i.title,
-              thumbnail: i.backgroundImage,
+              thumbnail: i.thumbnail || i.backgroundImage,
+              videoUrl: i.videoUrl,
               duration: i.duration,
               author: i.author,
               views: i.views,
@@ -246,7 +249,7 @@ export default function HeroSection() {
               <FloatingElement
                 intensity={5}
                 speed={3}
-                className="relative group cursor-pointer rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 aspect-square"
+                className={`relative group ${mediaItems[0]?.type==='video' ? 'cursor-pointer' : ''} rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 aspect-square`}
               >
                 {mediaItems[0] && (
                   <>
@@ -256,6 +259,17 @@ export default function HeroSection() {
                         alt={mediaItems[0].title}
                         className="w-full h-full object-cover"
                       />
+                      {mediaItems[0].type === 'video' && (
+                        <button
+                          onClick={() => setSelectedVideo(mediaItems[0])}
+                          className="absolute inset-0 flex items-center justify-center"
+                          aria-label="Play video"
+                        >
+                          <div className="bg-brand-yellow text-brand-teal p-4 rounded-full group-hover:scale-110 transition-transform duration-300">
+                            <Play className="w-7 h-7" />
+                          </div>
+                        </button>
+                      )}
                       <div className="absolute inset-0 bg-black/40 group-hover:bg-black/60 transition-colors duration-300" />
                       <div className="absolute inset-0 p-6 flex flex-col justify-between">
                         <div className="flex items-start justify-between">
@@ -296,7 +310,7 @@ export default function HeroSection() {
               <FloatingElement
                 intensity={4}
                 speed={3.5}
-                className="relative group cursor-pointer rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 aspect-square"
+                className={`relative group ${mediaItems[1]?.type==='video' ? 'cursor-pointer' : ''} rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 aspect-square`}
               >
                 {mediaItems[1] && (
                   <>
@@ -306,6 +320,13 @@ export default function HeroSection() {
                         alt={mediaItems[1].title}
                         className="w-full h-full object-cover"
                       />
+                      {mediaItems[1].type === 'video' && (
+                        <button onClick={() => setSelectedVideo(mediaItems[1])} className="absolute inset-0 flex items-center justify-center" aria-label="Play video">
+                          <div className="bg-brand-yellow text-brand-teal p-2 rounded-full">
+                            <Play className="w-5 h-5" />
+                          </div>
+                        </button>
+                      )}
                       <div className="absolute inset-0 bg-black/40 group-hover:bg-black/60 transition-colors duration-300" />
                       <div className="absolute inset-0 p-3 flex flex-col justify-between">
                         <div className="flex items-start justify-between">
@@ -331,7 +352,7 @@ export default function HeroSection() {
               <FloatingElement
                 intensity={5}
                 speed={3.2}
-                className="relative group cursor-pointer rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 aspect-square"
+                className={`relative group ${mediaItems[2]?.type==='video' ? 'cursor-pointer' : ''} rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 aspect-square`}
               >
                 {mediaItems[2] && (
                   <>
@@ -341,6 +362,13 @@ export default function HeroSection() {
                         alt={mediaItems[2].title}
                         className="w-full h-full object-cover"
                       />
+                      {mediaItems[2].type === 'video' && (
+                        <button onClick={() => setSelectedVideo(mediaItems[2])} className="absolute inset-0 flex items-center justify-center" aria-label="Play video">
+                          <div className="bg-brand-yellow text-brand-teal p-3 rounded-full">
+                            <Play className="w-6 h-6" />
+                          </div>
+                        </button>
+                      )}
                       <div className="absolute inset-0 bg-black/40 group-hover:bg-black/60 transition-colors duration-300" />
                       <div className="absolute inset-0 p-5 flex flex-col justify-between">
                         <div className="flex items-start justify-between">
@@ -380,7 +408,7 @@ export default function HeroSection() {
               <FloatingElement
                 intensity={4}
                 speed={3.8}
-                className="relative group cursor-pointer rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 aspect-square"
+                className={`relative group ${mediaItems[3]?.type==='video' ? 'cursor-pointer' : ''} rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 aspect-square`}
               >
                 {mediaItems[3] && (
                   <>
@@ -390,6 +418,13 @@ export default function HeroSection() {
                         alt={mediaItems[3].title}
                         className="w-full h-full object-cover"
                       />
+                      {mediaItems[3].type === 'video' && (
+                        <button onClick={() => setSelectedVideo(mediaItems[3])} className="absolute inset-0 flex items-center justify-center" aria-label="Play video">
+                          <div className="bg-brand-yellow text-brand-teal p-2 rounded-full">
+                            <Play className="w-5 h-5" />
+                          </div>
+                        </button>
+                      )}
                       <div className="absolute inset-0 bg-black/40 group-hover:bg-black/60 transition-colors duration-300" />
                       <div className="absolute inset-0 p-3 flex flex-col justify-between">
                         <div className="flex items-start justify-between">
@@ -426,6 +461,13 @@ export default function HeroSection() {
                         alt={mediaItems[4].title}
                         className="w-full h-full object-cover"
                       />
+                      {mediaItems[4].type === 'video' && (
+                        <button onClick={() => setSelectedVideo(mediaItems[4])} className="absolute inset-0 flex items-center justify-center" aria-label="Play video">
+                          <div className="bg-brand-yellow text-brand-teal p-2 rounded-full">
+                            <Play className="w-5 h-5" />
+                          </div>
+                        </button>
+                      )}
                       <div className="absolute inset-0 bg-black/40 group-hover:bg-black/60 transition-colors duration-300" />
                       <div className="absolute inset-0 p-3 flex flex-col justify-between">
                         <div className="flex items-start justify-between">
@@ -461,6 +503,13 @@ export default function HeroSection() {
                         alt={mediaItems[5].title}
                         className="w-full h-full object-cover"
                       />
+                      {mediaItems[5].type === 'video' && (
+                        <button onClick={() => setSelectedVideo(mediaItems[5])} className="absolute inset-0 flex items-center justify-center" aria-label="Play video">
+                          <div className="bg-brand-yellow text-brand-teal p-2 rounded-full">
+                            <Play className="w-5 h-5" />
+                          </div>
+                        </button>
+                      )}
                       <div className="absolute inset-0 bg-black/40 group-hover:bg-black/60 transition-colors duration-300" />
                       <div className="absolute inset-0 p-4 flex flex-col justify-between">
                         <div className="flex items-start justify-between">
@@ -511,6 +560,13 @@ export default function HeroSection() {
                         alt={mediaItems[6].title}
                         className="w-full h-full object-cover"
                       />
+                      {mediaItems[6].type === 'video' && (
+                        <button onClick={() => setSelectedVideo(mediaItems[6])} className="absolute inset-0 flex items-center justify-center" aria-label="Play video">
+                          <div className="bg-brand-yellow text-brand-teal p-3 rounded-full">
+                            <Play className="w-6 h-6" />
+                          </div>
+                        </button>
+                      )}
                       <div className="absolute inset-0 bg-black/40 group-hover:bg-black/60 transition-colors duration-300" />
                       <div className="absolute inset-0 p-4 sm:p-6 md:p-8 flex flex-col justify-between">
                         <div className="flex items-start justify-between">
@@ -560,6 +616,13 @@ export default function HeroSection() {
                         alt={mediaItems[7].title}
                         className="w-full h-full object-cover"
                       />
+                      {mediaItems[7].type === 'video' && (
+                        <button onClick={() => setSelectedVideo(mediaItems[7])} className="absolute inset-0 flex items-center justify-center" aria-label="Play video">
+                          <div className="bg-brand-yellow text-brand-teal p-2 rounded-full">
+                            <Play className="w-5 h-5" />
+                          </div>
+                        </button>
+                      )}
                       <div className="absolute inset-0 bg-black/40 group-hover:bg-black/60 transition-colors duration-300" />
                       <div className="absolute inset-0 p-4 flex flex-col justify-between">
                         <div className="flex items-start justify-between">
@@ -609,6 +672,13 @@ export default function HeroSection() {
                         alt={mediaItems[8].title}
                         className="w-full h-full object-cover"
                       />
+                      {mediaItems[8].type === 'video' && (
+                        <button onClick={() => setSelectedVideo(mediaItems[8])} className="absolute inset-0 flex items-center justify-center" aria-label="Play video">
+                          <div className="bg-brand-yellow text-brand-teal p-2 rounded-full">
+                            <Play className="w-5 h-5" />
+                          </div>
+                        </button>
+                      )}
                       <div className="absolute inset-0 bg-black/40 group-hover:bg-black/60 transition-colors duration-300" />
                       <div className="absolute inset-0 p-3 flex flex-col justify-between">
                         <div className="flex items-start justify-between">
@@ -645,6 +715,13 @@ export default function HeroSection() {
                         alt={mediaItems[9].title}
                         className="w-full h-full object-cover"
                       />
+                      {mediaItems[9].type === 'video' && (
+                        <button onClick={() => setSelectedVideo(mediaItems[9])} className="absolute inset-0 flex items-center justify-center" aria-label="Play video">
+                          <div className="bg-brand-yellow text-brand-teal p-2 rounded-full">
+                            <Play className="w-5 h-5" />
+                          </div>
+                        </button>
+                      )}
                       <div className="absolute inset-0 bg-black/40 group-hover:bg-black/60 transition-colors duration-300" />
                       <div className="absolute inset-0 p-3 flex flex-col justify-between">
                         <div className="flex items-start justify-between">
@@ -680,6 +757,13 @@ export default function HeroSection() {
                         alt={mediaItems[10].title}
                         className="w-full h-full object-cover"
                       />
+                      {mediaItems[10].type === 'video' && (
+                        <button onClick={() => setSelectedVideo(mediaItems[10])} className="absolute inset-0 flex items-center justify-center" aria-label="Play video">
+                          <div className="bg-brand-yellow text-brand-teal p-2 rounded-full">
+                            <Play className="w-5 h-5" />
+                          </div>
+                        </button>
+                      )}
                       <div className="absolute inset-0 bg-black/40 group-hover:bg-black/60 transition-colors duration-300" />
                       <div className="absolute inset-0 p-4 flex flex-col justify-between">
                         <div className="flex items-start justify-between">
@@ -729,6 +813,13 @@ export default function HeroSection() {
                         alt={mediaItems[11].title}
                         className="w-full h-full object-cover"
                       />
+                      {mediaItems[11].type === 'video' && (
+                        <button onClick={() => setSelectedVideo(mediaItems[11])} className="absolute inset-0 flex items-center justify-center" aria-label="Play video">
+                          <div className="bg-brand-yellow text-brand-teal p-2 rounded-full">
+                            <Play className="w-5 h-5" />
+                          </div>
+                        </button>
+                      )}
                       <div className="absolute inset-0 bg-black/40 group-hover:bg-black/60 transition-colors duration-300" />
                       <div className="absolute inset-0 p-3 flex flex-col justify-between">
                         <div className="flex items-start justify-between">
@@ -765,6 +856,13 @@ export default function HeroSection() {
                         alt={mediaItems[12].title}
                         className="w-full h-full object-cover"
                       />
+                      {mediaItems[12].type === 'video' && (
+                        <button onClick={() => setSelectedVideo(mediaItems[12])} className="absolute inset-0 flex items-center justify-center" aria-label="Play video">
+                          <div className="bg-brand-yellow text-brand-teal p-2 rounded-full">
+                            <Play className="w-5 h-5" />
+                          </div>
+                        </button>
+                      )}
                       <div className="absolute inset-0 bg-black/40 group-hover:bg-black/60 transition-colors duration-300" />
                       <div className="absolute inset-0 p-4 flex flex-col justify-between">
                         <div className="flex items-start justify-between">
@@ -822,6 +920,37 @@ export default function HeroSection() {
           </motion.button>
         </FadeInSlide>
       </div>
+
+      {/* Video Modal */}
+      {selectedVideo && selectedVideo.videoUrl && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
+          onClick={() => setSelectedVideo(null)}
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            className="bg-white rounded-2xl max-w-4xl w-full overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between p-4 border-b">
+              <h3 className="font-fredoka text-xl font-bold text-brand-teal">{selectedVideo.title}</h3>
+              <button onClick={() => setSelectedVideo(null)} className="p-2 hover:bg-gray-100 rounded-full">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <div className="aspect-video bg-black">
+              <video controls className="w-full h-full" poster={selectedVideo.thumbnail}>
+                <source src={selectedVideo.videoUrl} />
+              </video>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
     </section>
   );
 }

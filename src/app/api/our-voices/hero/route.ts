@@ -8,6 +8,8 @@ const createSchema = z.object({
   text: z.string().max(500).optional(),
   backgroundImage: z.string().min(1),
   type: z.enum(['video', 'image', 'audio', 'story']).optional(),
+  thumbnail: z.string().optional(),
+  videoUrl: z.string().optional(),
   duration: z.number().optional(),
   author: z.string().optional(),
   views: z.number().optional(),
@@ -24,7 +26,7 @@ export async function GET(request: NextRequest) {
     const includeDrafts = searchParams.get('includeDrafts') === 'true';
     const query: any = {};
     if (!includeDrafts) query.status = 'published';
-    const items = await HeroItem.find(query).sort({ order: 1, createdAt: -1 }).limit(12).lean();
+    const items = await HeroItem.find(query).sort({ order: 1, createdAt: -1 }).limit(13).lean();
     return NextResponse.json({ success: true, data: items });
   } catch (error) {
     return NextResponse.json({ success: false, error: 'Failed to fetch hero items' }, { status: 500 });
@@ -38,8 +40,8 @@ export async function POST(request: NextRequest) {
     const data = createSchema.parse(body);
 
     const count = await HeroItem.countDocuments({});
-    if (count >= 12) {
-      return NextResponse.json({ success: false, error: 'Maximum of 12 hero items allowed' }, { status: 400 });
+    if (count >= 13) {
+      return NextResponse.json({ success: false, error: 'Maximum of 13 hero items allowed' }, { status: 400 });
     }
 
     const item = new HeroItem(data);

@@ -2,14 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/mongodb';
 import HeroItem from '@/models/HeroItem';
 
-// Initialize 12 hero items from placeholders
+// Initialize 13 hero items from placeholders
 export async function POST(request: NextRequest) {
   try {
     await connectDB();
     
     // Check if items already exist
     const existing = await HeroItem.countDocuments();
-    if (existing >= 12) {
+    if (existing >= 13) {
       return NextResponse.json({ 
         success: false, 
         message: 'Hero items already initialized' 
@@ -29,6 +29,7 @@ export async function POST(request: NextRequest) {
       { title: 'Voices of Resistance', backgroundImage: '/images/place1 (5).jpg', type: 'audio', duration: 1800, author: 'Community Voices', views: 4200, order: 10, visible: true, status: 'published' },
       { title: 'Art for Change Exhibition', backgroundImage: '/images/place1 (6).jpg', type: 'image', author: 'Creative Collective', views: 5800, order: 11, visible: true, status: 'published' },
       { title: 'From Struggle to Strength', backgroundImage: '/images/place1 (7).jpg', type: 'story', author: 'Anonymous', views: 11200, order: 12, visible: true, status: 'published' },
+      { title: 'Climate Justice Action', backgroundImage: '/images/place1 (8).jpg', type: 'video', duration: 240, author: 'Environmental Team', views: 8900, featured: true, order: 13, visible: true, status: 'published' },
     ];
 
     // Delete existing and create new

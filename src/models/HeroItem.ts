@@ -5,6 +5,10 @@ const HeroItemSchema = new Schema({
   text: { type: String, maxlength: 500 },
   backgroundImage: { type: String, required: true },
   type: { type: String, enum: ['video', 'image', 'audio', 'story'], default: 'image' },
+  // Optional thumbnail for non-image items (video/audio/story)
+  thumbnail: { type: String },
+  // Optional media URL for video/audio types
+  videoUrl: { type: String },
   duration: { type: Number },
   author: { type: String },
   views: { type: Number, default: 0 },
