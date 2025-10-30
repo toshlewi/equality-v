@@ -20,27 +20,23 @@ interface Toolkit {
   _id: string;
   title: string;
   slug: string;
-  author: string;
   category: string;
   description: string;
-  targetAudience: string[];
-  difficultyLevel: string;
-  estimatedTime: string;
-  coverImage?: {
-    url: string;
-    alt: string;
-  };
+  targetAudience?: string[];
+  difficultyLevel?: string;
+  estimatedTime?: string;
+  featuredImage?: string;
   files: Array<{
     name: string;
     url: string;
     type: string;
     size: number;
   }>;
-  publishedAt: string;
+  createdAt: string;
   viewCount: number;
   downloadCount: number;
-  featured: boolean;
-  tags: string[];
+  isFeatured: boolean;
+  tags?: string[];
 }
 
 export default function ToolkitsGuidesPage() {
@@ -52,9 +48,9 @@ export default function ToolkitsGuidesPage() {
   const [selectedDifficulty, setSelectedDifficulty] = useState("All");
   const [sortBy, setSortBy] = useState("newest");
 
-  const categories = ["All", "Guide", "Toolkit", "Manual", "Framework", "Template", "Checklist"];
-  const audiences = ["All", "Activists", "Researchers", "Students", "Organizations", "General Public"];
-  const difficulties = ["All", "Beginner", "Intermediate", "Advanced"];
+  const categories = ["All", "legal", "advocacy", "education", "community", "research", "other"];
+  const audiences = ["All", "activists", "researchers", "students", "organizations", "general public"];
+  const difficulties = ["All", "beginner", "intermediate", "advanced"];
 
   // Fetch toolkits from API
   useEffect(() => {
@@ -63,16 +59,17 @@ export default function ToolkitsGuidesPage() {
         const params = new URLSearchParams();
         if (searchTerm) params.append("search", searchTerm);
         if (selectedCategory !== "All") params.append("category", selectedCategory);
-        if (selectedAudience !== "All") params.append("audience", selectedAudience);
-        if (selectedDifficulty !== "All") params.append("difficulty", selectedDifficulty);
-        params.append("sort", sortBy);
-        
+        if (selectedDifficulty !== "All") params.append("difficultyLevel", selectedDifficulty as string);
+        params.append("status", "published");
+        params.append("sortBy", sortBy === 'popular' ? 'downloadCount' : sortBy === 'title' ? 'title' : 'createdAt');
+        params.append("sortOrder", sortBy === 'oldest' ? 'asc' : 'desc');
+
         const response = await fetch(`/api/toolkits?${params.toString()}`);
         if (!response.ok) {
           throw new Error('Failed to fetch toolkits');
         }
         const data = await response.json();
-        setToolkits(data.toolkits || []);
+        setToolkits(data?.data?.toolkits || []);
       } catch (error) {
         console.error("Error fetching toolkits:", error);
       } finally {
@@ -85,21 +82,21 @@ export default function ToolkitsGuidesPage() {
 
   const getCategoryColor = (category: string) => {
     const colors = {
-      Guide: "bg-blue-100 text-blue-800",
-      Toolkit: "bg-green-100 text-green-800",
-      Manual: "bg-purple-100 text-purple-800",
-      Framework: "bg-orange-100 text-orange-800",
-      Template: "bg-pink-100 text-pink-800",
-      Checklist: "bg-yellow-100 text-yellow-800"
+      legal: "bg-blue-100 text-blue-800",
+      advocacy: "bg-green-100 text-green-800",
+      education: "bg-purple-100 text-purple-800",
+      community: "bg-orange-100 text-orange-800",
+      research: "bg-pink-100 text-pink-800",
+      other: "bg-gray-100 text-gray-800"
     };
     return colors[category as keyof typeof colors] || "bg-gray-100 text-gray-800";
   };
 
   const getDifficultyColor = (difficulty: string) => {
     const colors = {
-      Beginner: "bg-green-100 text-green-800",
-      Intermediate: "bg-yellow-100 text-yellow-800",
-      Advanced: "bg-red-100 text-red-800"
+      beginner: "bg-green-100 text-green-800",
+      intermediate: "bg-yellow-100 text-yellow-800",
+      advanced: "bg-red-100 text-red-800"
     };
     return colors[difficulty as keyof typeof colors] || "bg-gray-100 text-gray-800";
   };
@@ -240,14 +237,14 @@ export default function ToolkitsGuidesPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: index * 0.1 }}
                 >
-                  <Link href={`/matriarchive/toolkits-guides/${toolkit._id}`}>
+                  <Link href={`/matriarchive/toolkits-guides/${toolkit.slug}`}>
                     <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 group cursor-pointer border-l-4 border-[#FF7D05] overflow-hidden">
                     {/* Cover Image */}
                     <div className="relative h-48 bg-gray-200">
-                      {toolkit.coverImage ? (
+                      {toolkit.featuredImage ? (
                         <img
-                          src={toolkit.coverImage.url}
-                          alt={toolkit.coverImage.alt}
+                          src={toolkit.featuredImage}
+                          alt={toolkit.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                       ) : (
@@ -255,7 +252,7 @@ export default function ToolkitsGuidesPage() {
                           <Wrench className="w-16 h-16 text-gray-400" />
                         </div>
                       )}
-                      {toolkit.featured && (
+                      {toolkit.isFeatured && (
                         <div className="absolute top-4 right-4 bg-brand-orange text-white px-2 py-1 rounded-full text-xs font-semibold">
                           Featured
                         </div>
@@ -268,7 +265,7 @@ export default function ToolkitsGuidesPage() {
                         <span className={`px-3 py-1 rounded-full text-sm font-medium ${getCategoryColor(toolkit.category)}`}>
                           {toolkit.category}
                         </span>
-                        <span className={`px-2 py-1 rounded text-xs font-medium ${getDifficultyColor(toolkit.difficultyLevel)}`}>
+                        <span className={`px-2 py-1 rounded text-xs font-medium ${getDifficultyColor(toolkit.difficultyLevel || '')}`}>
                           {toolkit.difficultyLevel}
                         </span>
                       </div>
@@ -276,10 +273,6 @@ export default function ToolkitsGuidesPage() {
                       <h3 className="font-fredoka text-xl font-bold text-brand-teal mb-3 group-hover:text-brand-orange transition-colors line-clamp-2">
                         {toolkit.title}
                       </h3>
-
-                      <p className="text-gray-600 mb-4 text-sm font-medium">
-                        By {toolkit.author}
-                      </p>
 
                       <p className="text-gray-700 text-sm leading-relaxed mb-4 line-clamp-3">
                         {toolkit.description}

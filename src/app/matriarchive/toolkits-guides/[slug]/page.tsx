@@ -9,27 +9,24 @@ import PDFViewer from '@/components/ui/PDFViewer';
 interface Toolkit {
   _id: string;
   title: string;
-  author: string;
+  slug: string;
   category: string;
   description: string;
-  targetAudience: string[];
-  difficultyLevel: string;
-  estimatedTime: string;
-  coverImage: {
-    url: string;
-    alt: string;
-  };
+  targetAudience?: string[];
+  difficultyLevel?: string;
+  estimatedTime?: string;
+  featuredImage?: string;
   files: Array<{
     name: string;
     url: string;
     type: string;
     size: number;
   }>;
-  publishedAt: string;
+  createdAt: string;
   viewCount: number;
   downloadCount: number;
-  featured: boolean;
-  tags: string[];
+  isFeatured: boolean;
+  tags?: string[];
 }
 
 export default function ToolkitPage() {
@@ -41,49 +38,32 @@ export default function ToolkitPage() {
 
   useEffect(() => {
     const fetchToolkit = async () => {
-      // Don't fetch if slug is undefined or empty
       if (!slug) {
-        setError('Invalid toolkit ID');
+        setError('Invalid toolkit');
         setLoading(false);
         return;
       }
-
       try {
         setLoading(true);
         setError(null);
-        
-        // Fetch all toolkits and find the one with matching slug
-        const response = await fetch('/api/toolkits');
-        if (!response.ok) {
-          throw new Error('Failed to fetch toolkits');
-        }
-        
+        const response = await fetch(`/api/toolkits/${slug}`);
+        if (!response.ok) throw new Error('Failed to fetch toolkit');
         const data = await response.json();
-        const foundToolkit = data.toolkits.find((toolkit: Toolkit) => 
-          toolkit._id === slug || 
-          toolkit.title.toLowerCase().replace(/[^a-z0-9]+/g, '-') === slug
-        );
-        
-        if (!foundToolkit) {
-          throw new Error('Toolkit not found');
-        }
-        
-        setToolkit(foundToolkit);
+        setToolkit(data?.data as Toolkit);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
         setLoading(false);
       }
     };
-
     fetchToolkit();
   }, [slug]);
 
   const getDifficultyColor = (difficulty: string) => {
     const colors = {
-      Beginner: 'bg-green-100 text-green-800',
-      Intermediate: 'bg-yellow-100 text-yellow-800',
-      Advanced: 'bg-red-100 text-red-800'
+      beginner: 'bg-green-100 text-green-800',
+      intermediate: 'bg-yellow-100 text-yellow-800',
+      advanced: 'bg-red-100 text-red-800'
     };
     return colors[difficulty as keyof typeof colors] || 'bg-gray-100 text-gray-800';
   };
@@ -173,12 +153,8 @@ export default function ToolkitPage() {
               
               <div className="flex items-center space-x-6 text-sm text-gray-600 mb-4">
                 <div className="flex items-center space-x-1">
-                  <User className="w-4 h-4" />
-                  <span>{toolkit.author}</span>
-                </div>
-                <div className="flex items-center space-x-1">
                   <Calendar className="w-4 h-4" />
-                  <span>{new Date(toolkit.publishedAt).toLocaleDateString()}</span>
+                  <span>{new Date(toolkit.createdAt).toLocaleDateString()}</span>
                 </div>
                 <div className="flex items-center space-x-1">
                   <Clock className="w-4 h-4" />
@@ -190,10 +166,10 @@ export default function ToolkitPage() {
                 <span className="px-3 py-1 bg-brand-yellow text-brand-teal text-sm font-medium rounded-full">
                   {toolkit.category}
                 </span>
-                <span className={`px-3 py-1 text-sm font-medium rounded-full ${getDifficultyColor(toolkit.difficultyLevel)}`}>
+                <span className={`px-3 py-1 text-sm font-medium rounded-full ${getDifficultyColor(toolkit.difficultyLevel || '')}`}>
                   {toolkit.difficultyLevel}
                 </span>
-                {toolkit.featured && (
+                {toolkit.isFeatured && (
                   <span className="px-3 py-1 bg-brand-orange text-white text-sm font-medium rounded-full">
                     Featured
                   </span>
@@ -223,7 +199,7 @@ export default function ToolkitPage() {
               </div>
 
               <div className="flex flex-wrap gap-2">
-                {toolkit.tags.map((tag, index) => (
+                {(toolkit.tags || []).map((tag, index) => (
                   <span
                     key={index}
                     className="inline-flex items-center space-x-1 px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-full"

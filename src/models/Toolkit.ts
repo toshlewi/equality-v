@@ -13,6 +13,7 @@ const ToolkitSchema = new Schema({
   subcategory: { type: String },
   tags: [{ type: String }],
   featuredImage: { type: String },
+  thumbnailImage: { type: String },
   files: [{
     name: { type: String, required: true },
     url: { type: String, required: true },

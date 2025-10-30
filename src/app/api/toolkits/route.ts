@@ -13,12 +13,16 @@ const createToolkitSchema = z.object({
   category: z.enum(['legal', 'advocacy', 'education', 'community', 'research', 'other']),
   subcategory: z.string().optional(),
   tags: z.array(z.string()).optional(),
-  featuredImage: z.string().url().optional(),
+  featuredImage: z
+    .string()
+    .regex(/^\/(uploads|images)\//, 'Featured image must be an uploaded file path')
+    .or(z.string().url())
+    .optional(),
   files: z.array(z.object({
-    name: z.string().required(),
-    url: z.string().url().required(),
+    name: z.string(),
+    url: z.string().url(),
     type: z.enum(['pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx']),
-    size: z.number().required(),
+    size: z.number(),
     description: z.string().optional(),
     isPrimary: z.boolean().default(false)
   })).optional(),
@@ -31,7 +35,12 @@ const createToolkitSchema = z.object({
   prerequisites: z.array(z.string()).optional(),
   learningOutcomes: z.array(z.string()).optional(),
   seoTitle: z.string().max(60, 'SEO title must not exceed 60 characters').optional(),
-  seoDescription: z.string().max(160, 'SEO description must not exceed 160 characters').optional()
+  seoDescription: z.string().max(160, 'SEO description must not exceed 160 characters').optional(),
+  thumbnailImage: z
+    .string()
+    .regex(/^\/(uploads|images)\//, 'Thumbnail image must be an uploaded file path')
+    .or(z.string().url())
+    .optional()
 });
 
 // Helper function to generate slug
