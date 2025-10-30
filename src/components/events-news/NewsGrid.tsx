@@ -8,11 +8,14 @@ import { Calendar, ArrowRight, ExternalLink } from "lucide-react";
 import NewsModal from "./NewsModal";
 
 interface NewsItem {
-  id: string;
+  id?: string; // legacy mock
+  _id?: string; // API
   title: string;
-  excerpt: string;
-  date: string;
-  image: string;
+  excerpt?: string;
+  date?: string; // legacy mock
+  publishedAt?: string; // API
+  image?: string; // legacy mock
+  featuredImage?: string; // API
   category: string;
   featured?: boolean;
 }
@@ -59,6 +62,10 @@ export default function NewsGrid({ news }: NewsGridProps) {
     }
   };
 
+  const getKey = (item: NewsItem, index: number) => item.id || item._id || String(index);
+  const getImage = (item: NewsItem) => item.image || item.featuredImage || '';
+  const getDate = (item: NewsItem) => item.date || item.publishedAt || '';
+
   return (
     <section id="news" className="py-20 bg-brand-teal relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -83,7 +90,7 @@ export default function NewsGrid({ news }: NewsGridProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {news.map((item, index) => (
             <motion.article
-              key={item.id}
+              key={getKey(item, index)}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
@@ -95,13 +102,19 @@ export default function NewsGrid({ news }: NewsGridProps) {
               <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden">
                 {/* Image */}
                 <div className="relative h-48 overflow-hidden">
-                  <Image
-                    src={item.image}
-                    alt={item.title}
-                    fill
-                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    className="object-cover group-hover:scale-110 transition-transform duration-500"
-                  />
+                  {getImage(item) ? (
+                    <Image
+                      src={getImage(item)!}
+                      alt={item.title}
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      className="object-cover group-hover:scale-110 transition-transform duration-500"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                      <span className="text-gray-500 text-sm">No image</span>
+                    </div>
+                  )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                   
                   {/* Category badge */}
@@ -136,7 +149,7 @@ export default function NewsGrid({ news }: NewsGridProps) {
                 <div className="p-6">
                   <div className="flex items-center text-gray-500 text-sm mb-3">
                     <Calendar className="w-4 h-4 mr-2 text-brand-orange" />
-                    <span>{formatDate(item.date)}</span>
+                      <span>{getDate(item) ? formatDate(getDate(item)!) : '—'}</span>
                   </div>
 
                   <h3 className="font-fredoka text-xl font-bold text-brand-teal mb-3 line-clamp-2 group-hover:text-brand-orange transition-colors">

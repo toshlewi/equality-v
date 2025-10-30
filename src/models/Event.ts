@@ -38,6 +38,16 @@ const EventSchema = new Schema({
   isFree: { type: Boolean, default: true },
   price: { type: Number, default: 0 },
   currency: { type: String, default: 'USD' },
+  ticketInfo: {
+    accessCode: { type: String },
+    hasDiscounts: { type: Boolean, default: false },
+    discountCodes: [{
+      code: { type: String },
+      amountOff: { type: Number, default: 0 },
+      percentOff: { type: Number, default: 0 },
+      expiresAt: { type: Date }
+    }]
+  },
   capacity: Number,
   registeredCount: { type: Number, default: 0 },
   waitlistCount: { type: Number, default: 0 },
@@ -45,11 +55,27 @@ const EventSchema = new Schema({
   registrationDeadline: Date,
   featuredImage: String,
   images: [String],
+  bannerImage: String,
   tags: [String],
   organizer: {
     name: String,
     email: String,
     phone: String
+  },
+  registration: {
+    type: {
+      type: String,
+      enum: ['form', 'external'],
+      default: 'form'
+    },
+    externalLink: String,
+    formFields: [{
+      name: String,
+      label: String,
+      type: { type: String, enum: ['text', 'email', 'phone', 'select', 'textarea'] },
+      required: { type: Boolean, default: true },
+      options: [String]
+    }]
   },
   requirements: [String],
   whatToBring: [String],
@@ -72,6 +98,13 @@ const EventSchema = new Schema({
     website: String,
     level: String
   }],
+  recap: {
+    enabled: { type: Boolean, default: false },
+    type: { type: String, enum: ['gallery', 'video'], default: 'gallery' },
+    galleryImages: [String],
+    videoUrl: String,
+    summary: String
+  },
   seoTitle: String,
   seoDescription: String,
   seoKeywords: [String],

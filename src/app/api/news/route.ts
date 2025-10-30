@@ -1,117 +1,94 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { connectDB } from '@/lib/mongodb';
+import News from '@/models/News';
+import { z } from 'zod';
 
-// TODO: Connect to MongoDB news collection
-// This is a placeholder API endpoint for news
+const createSchema = z.object({
+  title: z.string().min(1),
+  content: z.string().min(1),
+  excerpt: z.string().optional(),
+  featuredImage: z.string().optional(),
+  images: z.array(z.string()).optional(),
+  category: z.enum(['announcement', 'update', 'event', 'achievement', 'partnership', 'other']),
+  tags: z.array(z.string()).optional(),
+  isFeatured: z.boolean().optional(),
+  isBreaking: z.boolean().optional(),
+  author: z.object({ name: z.string().min(1), bio: z.string().optional(), image: z.string().optional(), socialLinks: z.object({ twitter: z.string().optional(), linkedin: z.string().optional(), website: z.string().optional() }).optional() }),
+  status: z.enum(['draft', 'published', 'archived']).optional(),
+  publishSchedule: z.string().or(z.date()).optional(),
+  seoTitle: z.string().optional(),
+  seoDescription: z.string().optional(),
+  seoKeywords: z.array(z.string()).optional()
+});
+
+function slugify(title: string): string {
+  return title.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim();
+}
 
 export async function GET(request: NextRequest) {
   try {
+    await connectDB();
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
     const featured = searchParams.get('featured');
     const limit = parseInt(searchParams.get('limit') || '10');
-    
-    // TODO: Replace with actual MongoDB query
-    // const query = { status: 'published' };
-    // if (category) query.category = category;
-    // if (featured) query.featured = featured === 'true';
-    // const news = await News.find(query).sort({ createdAt: -1 }).limit(limit);
-    
-    const mockNews = [
-      {
-        id: "1",
-        title: "Equality Vanguard Launches New Legal Vanguard Program",
-        excerpt: "Our newest initiative brings together legal minds committed to decolonizing legal thought and advancing gender justice.",
-        content: "Full article content here...",
-        date: "2024-01-15",
-        image: "/images/place1 (7).jpg",
-        category: "Announcements",
-        featured: true,
-        status: "published",
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      },
-      {
-        id: "2",
-        title: "ALKAH Book Club: February Reading List",
-        excerpt: "This month we're diving into 'Decolonization and Afrofeminism' by Dr. Sylvia Tamale.",
-        content: "Full article content here...",
-        date: "2024-01-20",
-        image: "/images/place1 (8).jpg",
-        category: "Updates",
-        featured: false,
-        status: "published",
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      },
-      {
-        id: "3",
-        title: "Partnership with Nobel Women's Initiative",
-        excerpt: "We're excited to announce our collaboration with the Nobel Women's Initiative on advancing women's rights globally.",
-        content: "Full article content here...",
-        date: "2024-01-25",
-        image: "/images/place1 (9).jpg",
-        category: "Partnerships",
-        featured: true,
-        status: "published",
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      }
-    ];
+    const status = searchParams.get('status');
+    const page = parseInt(searchParams.get('page') || '1');
+    const q = searchParams.get('q');
 
-    // Filter by category if specified
-    let filteredNews = mockNews;
-    if (category) {
-      filteredNews = mockNews.filter(item => item.category === category);
-    }
-    if (featured) {
-      filteredNews = filteredNews.filter(item => item.featured === (featured === 'true'));
+    const query: any = {};
+    if (category) query.category = category;
+    if (featured === 'true') query.isFeatured = true;
+    if (q) query.$or = [{ title: { $regex: q, $options: 'i' } }, { content: { $regex: q, $options: 'i' } }];
+
+    if (status) {
+      query.status = status;
+    } else {
+      const session = await getServerSession(authOptions);
+      if (!session || !['admin', 'editor', 'reviewer'].includes(session.user?.role)) query.status = 'published';
     }
 
-    return NextResponse.json({
-      success: true,
-      data: filteredNews.slice(0, limit),
-      message: "News retrieved successfully"
-    });
+    const skip = (page - 1) * limit;
+    const news = await News.find(query).sort({ publishedAt: -1, createdAt: -1 }).skip(skip).limit(limit).lean();
+    const total = await News.countDocuments(query);
 
+    return NextResponse.json({ success: true, data: { news, pagination: { page, limit, total, pages: Math.ceil(total / limit) } } });
   } catch (error) {
     console.error('Error fetching news:', error);
-    return NextResponse.json(
-      { 
-        success: false, 
-        message: "Failed to fetch news",
-        error: error instanceof Error ? error.message : "Unknown error"
-      },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, message: 'Failed to fetch news' }, { status: 500 });
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) return NextResponse.json({ success: false, message: 'Authentication required' }, { status: 401 });
+    if (!['admin', 'editor'].includes(session.user.role)) return NextResponse.json({ success: false, message: 'Insufficient permissions' }, { status: 403 });
+
+    await connectDB();
     const body = await request.json();
-    
-    // TODO: Validate request body with Zod schema
-    // TODO: Create news article in MongoDB
-    // TODO: Send admin notification
-    // TODO: Add to Mailchimp if applicable
-    
-    console.log('Creating news article:', body);
-    
-    return NextResponse.json({
-      success: true,
-      message: "News article created successfully",
-      data: { id: "new-news-id" }
+    const payload = createSchema.parse(body);
+
+    let slug = slugify(payload.title);
+    let i = 1;
+    const base = slug;
+    while (await News.findOne({ slug })) slug = `${base}-${i++}`;
+
+    const news = await News.create({
+      ...payload,
+      slug,
+      publishSchedule: payload.publishSchedule ? new Date(payload.publishSchedule as any) : undefined,
+      createdBy: session.user.id
     });
 
+    return NextResponse.json({ success: true, data: news, message: 'News created' }, { status: 201 });
   } catch (error) {
-    console.error('Error creating news article:', error);
-    return NextResponse.json(
-      { 
-        success: false, 
-        message: "Failed to create news article",
-        error: error instanceof Error ? error.message : "Unknown error"
-      },
-      { status: 500 }
-    );
+    if (error instanceof z.ZodError) {
+      return NextResponse.json({ success: false, message: 'Validation failed', errors: error.flatten() }, { status: 400 });
+    }
+    console.error('Error creating news:', error);
+    return NextResponse.json({ success: false, message: 'Failed to create news' }, { status: 500 });
   }
 }

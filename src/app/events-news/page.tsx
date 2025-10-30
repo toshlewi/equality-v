@@ -16,170 +16,50 @@ if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
 
-interface Event {
-  id: string;
+interface EventApiItem {
+  _id: string;
   title: string;
-  date: string;
-  time: string;
-  location: string;
-  price: number | null;
-  image: string;
+  startDate: string;
+  endDate: string;
+  location?: { name?: string; city?: string; country?: string; isVirtual?: boolean };
+  price?: number;
+  isFree: boolean;
+  featuredImage?: string;
   category: string;
   description: string;
-  instructor?: string;
-  featured?: boolean;
 }
 
-interface NewsItem {
-  id: string;
-  title: string;
-  excerpt: string;
-  date: string;
-  image: string;
-  category: string;
-  featured?: boolean;
-}
+interface NewsItem { _id: string; title: string; excerpt?: string; featuredImage?: string; category: string; publishedAt?: string; }
 
 export default function EventsNewsPage() {
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-  const [events, setEvents] = useState<Event[]>([]);
+  const [selectedEvent, setSelectedEvent] = useState<EventApiItem | null>(null);
+  const [events, setEvents] = useState<EventApiItem[]>([]);
   const [news, setNews] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Mock data - will be replaced with API calls
   useEffect(() => {
-    const mockEvents: Event[] = [
-      {
-        id: "1",
-        title: "Feminist Legal Theory Workshop",
-        date: "2024-02-15",
-        time: "10:00 AM - 4:00 PM",
-        location: "Nairobi, Kenya",
-        price: 2500,
-        image: "/images/place1 (1).jpg",
-        category: "Workshops",
-        description: "Join us for an intensive workshop on feminist legal theory and its practical applications in contemporary legal practice. This workshop will explore intersectional approaches to law and justice.",
-        instructor: "Dr. Sylvia Tamale",
-        featured: true
-      },
-      {
-        id: "2",
-        title: "Digital Rights & Privacy Discussion",
-        date: "2024-02-20",
-        time: "6:00 PM - 8:00 PM",
-        location: "Online",
-        price: null,
-        image: "/images/place1 (2).jpg",
-        category: "Talks",
-        description: "A panel discussion on digital rights, privacy, and how they intersect with gender justice in the digital age.",
-        instructor: "Tech Team",
-        featured: false
-      },
-      {
-        id: "3",
-        title: "Art for Change Exhibition",
-        date: "2024-02-25",
-        time: "2:00 PM - 6:00 PM",
-        location: "Alliance Française, Nairobi",
-        price: 500,
-        image: "/images/place1 (3).jpg",
-        category: "Exhibitions",
-        description: "An exhibition showcasing feminist art from across Africa, exploring themes of resistance, resilience, and reimagining.",
-        instructor: "Creative Collective",
-        featured: true
-      },
-      {
-        id: "4",
-        title: "Economic Justice Webinar",
-        date: "2024-03-01",
-        time: "7:00 PM - 8:30 PM",
-        location: "Online",
-        price: null,
-        image: "/images/place1 (4).jpg",
-        category: "Virtual Events",
-        description: "Understanding the intersection of economic policy and gender justice in African contexts.",
-        instructor: "Dr. Amina Hassan",
-        featured: false
-      },
-      {
-        id: "5",
-        title: "SRHR Advocacy Training",
-        date: "2024-03-10",
-        time: "9:00 AM - 5:00 PM",
-        location: "Kampala, Uganda",
-        price: 3000,
-        image: "/images/place1 (5).jpg",
-        category: "Workshops",
-        description: "Comprehensive training on sexual and reproductive health and rights advocacy strategies.",
-        instructor: "SRHR Team",
-        featured: false
-      },
-      {
-        id: "6",
-        title: "Climate Justice & Gender",
-        date: "2024-03-15",
-        time: "3:00 PM - 5:00 PM",
-        location: "Lagos, Nigeria",
-        price: 1000,
-        image: "/images/place1 (6).jpg",
-        category: "Talks",
-        description: "Exploring the gendered impacts of climate change and feminist approaches to climate justice.",
-        instructor: "Environmental Team",
-        featured: true
+    (async () => {
+      try {
+        const [evRes, newsRes] = await Promise.all([
+          fetch('/api/events?status=published'),
+          fetch('/api/news?status=published')
+        ]);
+        const evJson = await evRes.json();
+        const newsJson = await newsRes.json();
+        if (evJson.success) setEvents(evJson.data.events);
+        if (newsJson.success) setNews(newsJson.data.news);
+      } finally {
+        setLoading(false);
       }
-    ];
-
-    const mockNews: NewsItem[] = [
-      {
-        id: "1",
-        title: "Equality Vanguard Launches New Legal Vanguard Program",
-        excerpt: "Our newest initiative brings together legal minds committed to decolonizing legal thought and advancing gender justice.",
-        date: "2024-01-15",
-        image: "/images/place1 (7).jpg",
-        category: "Announcements",
-        featured: true
-      },
-      {
-        id: "2",
-        title: "ALKAH Book Club: February Reading List",
-        excerpt: "This month we're diving into 'Decolonization and Afrofeminism' by Dr. Sylvia Tamale.",
-        date: "2024-01-20",
-        image: "/images/place1 (8).jpg",
-        category: "Updates",
-        featured: false
-      },
-      {
-        id: "3",
-        title: "Partnership with Nobel Women's Initiative",
-        excerpt: "We're excited to announce our collaboration with the Nobel Women's Initiative on advancing women's rights globally.",
-        date: "2024-01-25",
-        image: "/images/place1 (9).jpg",
-        category: "Partnerships",
-        featured: true
-      },
-      {
-        id: "4",
-        title: "Digital Rights Report Published",
-        excerpt: "Our latest research on digital rights and gender justice in Africa is now available.",
-        date: "2024-02-01",
-        image: "/images/place1 (10).jpg",
-        category: "Publications",
-        featured: false
-      }
-    ];
-
-    setEvents(mockEvents);
-    setNews(mockNews);
-    setLoading(false);
+    })();
   }, []);
 
   // Filter events based on category and search
   const filteredEvents = events.filter(event => {
-    const matchesCategory = filter === "All" || event.category === filter;
-    const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         event.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = filter === "All" || event.category.toLowerCase() === filter.toLowerCase();
+    const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) || event.description.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
