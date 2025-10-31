@@ -52,13 +52,17 @@ export default function EventCard({ event, onClick }: EventCardProps) {
       <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden">
         {/* Image */}
         <div className="relative h-48 overflow-hidden">
-          <Image
-            src={event.image}
-            alt={event.title}
-            fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            className="object-cover group-hover:scale-110 transition-transform duration-500"
-          />
+          {event.image ? (
+            <Image
+              src={event.image}
+              alt={event.title}
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              className="object-cover group-hover:scale-110 transition-transform duration-500"
+            />
+          ) : (
+            <div className="w-full h-full bg-gray-200" />
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
           
           {/* Category badge */}

@@ -56,6 +56,9 @@ const EventSchema = new Schema({
   featuredImage: String,
   images: [String],
   bannerImage: String,
+  // Controls inclusion and order in Past Events carousel
+  showInPastCarousel: { type: Boolean, default: false },
+  pastCarouselOrder: { type: Number, default: 0 },
   tags: [String],
   organizer: {
     name: String,

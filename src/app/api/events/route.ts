@@ -46,6 +46,8 @@ const createEventSchema = z.object({
   featuredImage: z.string().optional(),
   bannerImage: z.string().optional(),
   images: z.array(z.string()).optional(),
+  showInPastCarousel: z.boolean().optional(),
+  pastCarouselOrder: z.number().optional(),
   tags: z.array(z.string()).optional(),
   organizer: z.object({ name: z.string().optional(), email: z.string().email().optional(), phone: z.string().optional() }).optional(),
   registration: z.object({

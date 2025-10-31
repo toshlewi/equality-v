@@ -28,6 +28,8 @@ const updateSchema = z.object({
   featuredImage: z.string().optional(),
   bannerImage: z.string().optional(),
   images: z.array(z.string()).optional(),
+  showInPastCarousel: z.boolean().optional(),
+  pastCarouselOrder: z.number().optional(),
   tags: z.array(z.string()).optional(),
   organizer: z.any().optional(),
   registration: z.any().optional(),

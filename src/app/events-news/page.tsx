@@ -166,14 +166,40 @@ export default function EventsNewsPage() {
 
           {/* Events Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredEvents.map((event) => (
-              <div key={event.id} className="event-card">
-                <EventCard
-                  event={event}
-                  onClick={() => setSelectedEvent(event)}
-                />
-              </div>
-            ))}
+            {filteredEvents.map((event) => {
+              const start = event.startDate ? new Date(event.startDate) : null;
+              const time = start
+                ? start.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })
+                : "";
+              const locationLabel = event.location
+                ? (event.location.isVirtual
+                    ? "Virtual"
+                    : [event.location.name, event.location.city, event.location.country]
+                        .filter(Boolean)
+                        .join(", "))
+                : "";
+              const mappedEvent = {
+                id: event._id,
+                title: event.title,
+                date: event.startDate,
+                time,
+                location: locationLabel,
+                price: event.isFree ? null : (event.price ?? null),
+                image: event.featuredImage || "",
+                category: event.category,
+                description: event.description,
+                instructor: undefined,
+                featured: false,
+              };
+              return (
+                <div key={event._id} className="event-card">
+                  <EventCard
+                    event={mappedEvent}
+                    onClick={() => setSelectedEvent(event)}
+                  />
+                </div>
+              );
+            })}
           </div>
 
           {filteredEvents.length === 0 && (

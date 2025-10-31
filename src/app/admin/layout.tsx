@@ -63,8 +63,11 @@ const navItems: NavItem[] = [
   },
   {
     label: "Events",
-    href: "/admin/events",
     icon: <Calendar className="w-5 h-5" />,
+    children: [
+      { label: "All Events", href: "/admin/events" },
+      { label: "Past Events Carousel", href: "/admin/events/past" },
+    ],
   },
   {
     label: "Donations & Payment",
