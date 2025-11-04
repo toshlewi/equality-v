@@ -12,12 +12,14 @@ interface NewsItem {
   _id?: string; // API
   title: string;
   excerpt?: string;
+  content?: string; // API - full article content
   date?: string; // legacy mock
   publishedAt?: string; // API
   image?: string; // legacy mock
   featuredImage?: string; // API
   category: string;
   featured?: boolean;
+  author?: string | { name?: string }; // API - author can be string or object
 }
 
 interface NewsGridProps {
@@ -200,13 +202,29 @@ export default function NewsGrid({ news }: NewsGridProps) {
       </div>
 
       {/* News Modal */}
-      {selectedNews && (
-        <NewsModal
-          news={selectedNews}
-          isOpen={isModalOpen}
-          onClose={handleCloseModal}
-        />
-      )}
+      {selectedNews && (() => {
+        const modalNews = {
+          id: selectedNews._id || selectedNews.id || '',
+          title: selectedNews.title,
+          excerpt: selectedNews.excerpt || '',
+          date: (selectedNews.publishedAt || selectedNews.date || ''),
+          image: selectedNews.featuredImage || selectedNews.image || '',
+          category: selectedNews.category,
+          featured: !!selectedNews.featured,
+          content: selectedNews.content || selectedNews.excerpt || '', // Use content if available, fallback to excerpt
+          author: (typeof selectedNews.author === 'object'
+            ? selectedNews.author?.name
+            : selectedNews.author) || undefined,
+          readTime: undefined,
+        };
+        return (
+          <NewsModal
+            news={modalNews as any}
+            isOpen={isModalOpen}
+            onClose={handleCloseModal}
+          />
+        );
+      })()}
     </section>
   );
 }

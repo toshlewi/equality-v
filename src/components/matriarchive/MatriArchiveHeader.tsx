@@ -23,7 +23,7 @@ export default function MatriArchiveHeader() {
     },
     { 
       href: '/matriarchive/alkah-library', 
-      label: 'Alkah Library', 
+      label: 'ALKAH Library', 
       icon: <Book className="w-5 h-5" /> 
     },
     { 

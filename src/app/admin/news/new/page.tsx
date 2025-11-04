@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 
 export default function NewNewsPage() {
   const router = useRouter();
-  const [form, setForm] = useState<any>({ title: '', content: '', category: 'announcement', author: { name: '' }, featuredImage: '' });
+  const [form, setForm] = useState<any>({ title: '', content: '', excerpt: '', category: 'announcement', author: { name: '' }, featuredImage: '' });
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
 
@@ -51,6 +51,19 @@ export default function NewNewsPage() {
           <Input placeholder="Title" value={form.title} onChange={(e) => update('title', e.target.value)} />
           <Input placeholder="Author name" value={form.author?.name || ''} onChange={(e) => update('author', { ...(form.author||{}), name: e.target.value })} />
           <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">Excerpt (Short Summary)</label>
+            <Textarea 
+              placeholder="Write a brief summary or excerpt of the news article (optional)..."
+              value={form.excerpt || ''} 
+              onChange={(e) => update('excerpt', e.target.value)}
+              rows={3}
+              className="text-sm"
+            />
+            <p className="text-xs text-gray-500">
+              This will be displayed in the news grid preview. Leave empty to auto-generate from content.
+            </p>
+          </div>
+          <div className="space-y-2">
             <div className="flex items-center gap-3">
               <input
                 type="file"
@@ -66,7 +79,20 @@ export default function NewNewsPage() {
               </div>
             )}
           </div>
-          <Textarea placeholder="Content" value={form.content} onChange={(e) => update('content', e.target.value)} />
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">Content</label>
+            <Textarea 
+              placeholder="Write your news article content here..."
+              value={form.content} 
+              onChange={(e) => update('content', e.target.value)}
+              className="min-h-[400px] font-mono text-sm"
+              rows={20}
+            />
+            <p className="text-xs text-gray-500">
+              You can write your article content directly here. Use line breaks for paragraphs. 
+              HTML formatting is supported.
+            </p>
+          </div>
           <Select value={form.category} onValueChange={(v) => update('category', v)}>
             <SelectTrigger className="w-full md:w-64"><SelectValue placeholder="Category" /></SelectTrigger>
             <SelectContent>

@@ -164,6 +164,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { data: session, status } = useSession();
+  const isAuthPage = pathname === '/admin/login';
 
   // Close mobile menu when pathname changes (navigation occurs)
   useEffect(() => {
@@ -172,19 +173,20 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   // Redirect to login if not authenticated
   useEffect(() => {
+    if (isAuthPage) return; // Allow login page without session
     if (status === 'loading') return; // Still loading
-    
-    if (!session) {
-      router.push('/admin/login');
-      return;
-    }
-
+    if (!session) { router.push('/admin/login'); return; }
     // Check if user has admin access
     if (session.user?.role && !['admin', 'editor', 'reviewer', 'finance'].includes(session.user.role)) {
       router.push('/admin/login?error=AccessDenied');
       return;
     }
   }, [session, status, router]);
+
+  // Allow login page to render without sidebar/auth chrome
+  if (isAuthPage) {
+    return <div className="min-h-screen">{children}</div>;
+  }
 
   // Show loading while checking authentication
   if (status === 'loading') {

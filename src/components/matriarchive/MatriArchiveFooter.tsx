@@ -77,7 +77,7 @@ export default function MatriArchiveFooter() {
               </li>
               <li>
                 <Link href="/matriarchive/alkah-library" className="text-sm text-gray-600 hover:text-brand-yellow transition-colors font-spartan">
-                  Alkah Library
+                  ALKAH Library
                 </Link>
               </li>
               <li>

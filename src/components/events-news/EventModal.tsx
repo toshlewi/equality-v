@@ -143,13 +143,17 @@ export default function EventModal({ event, isOpen, onClose }: EventModalProps) 
             <div className="p-6 space-y-6">
               {/* Event Image */}
               <div className="relative h-64 rounded-lg overflow-hidden">
-                <Image
-                  src={event.image}
-                  alt={event.title}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 75vw"
-                  className="object-cover"
-                />
+                {event.image ? (
+                  <Image
+                    src={event.image}
+                    alt={event.title}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 75vw"
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gray-200" />
+                )}
                 <div className="absolute top-4 left-4">
                   <span className="bg-brand-yellow text-brand-teal px-3 py-1 rounded-full text-sm font-medium">
                     {event.category}

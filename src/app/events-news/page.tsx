@@ -43,13 +43,25 @@ export default function EventsNewsPage() {
     (async () => {
       try {
         const [evRes, newsRes] = await Promise.all([
-          fetch('/api/events?status=published'),
-          fetch('/api/news?status=published')
+          fetch('/api/events?status=published', { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } }).catch(() => null),
+          fetch('/api/news?status=published', { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } }).catch(() => null)
         ]);
-        const evJson = await evRes.json();
-        const newsJson = await newsRes.json();
-        if (evJson.success) setEvents(evJson.data.events);
-        if (newsJson.success) setNews(newsJson.data.news);
+        if (evRes && evRes.ok) {
+          const evJson = await evRes.json();
+          if (evJson?.success) setEvents(evJson.data.events || []);
+        } else {
+          setEvents([]);
+        }
+        if (newsRes && newsRes.ok) {
+          const newsJson = await newsRes.json();
+          if (newsJson?.success) setNews(newsJson.data.news || []);
+        } else {
+          setNews([]);
+        }
+      } catch (error) {
+        console.error('Failed to fetch events/news:', error);
+        setEvents([]);
+        setNews([]);
       } finally {
         setLoading(false);
       }
@@ -219,13 +231,39 @@ export default function EventsNewsPage() {
       </section>
 
       {/* Event Modal */}
-      {selectedEvent && (
-        <EventModal
-          event={selectedEvent}
-          isOpen={!!selectedEvent}
-          onClose={() => setSelectedEvent(null)}
-        />
-      )}
+      {selectedEvent && (() => {
+        const start = selectedEvent.startDate ? new Date(selectedEvent.startDate) : null;
+        const time = start
+          ? start.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })
+          : "";
+        const locationLabel = selectedEvent.location
+          ? (selectedEvent.location.isVirtual
+              ? "Virtual"
+              : [selectedEvent.location.name, selectedEvent.location.city, selectedEvent.location.country]
+                  .filter(Boolean)
+                  .join(", "))
+          : "";
+        const modalEvent = {
+          id: selectedEvent._id,
+          title: selectedEvent.title,
+          date: selectedEvent.startDate,
+          time,
+          location: locationLabel,
+          price: selectedEvent.isFree ? null : (selectedEvent.price ?? null),
+          image: selectedEvent.featuredImage || "",
+          category: selectedEvent.category,
+          description: selectedEvent.description,
+          instructor: undefined,
+          featured: false,
+        };
+        return (
+          <EventModal
+            event={modalEvent as any}
+            isOpen={!!selectedEvent}
+            onClose={() => setSelectedEvent(null)}
+          />
+        );
+      })()}
 
       <LocalFooter />
     </div>

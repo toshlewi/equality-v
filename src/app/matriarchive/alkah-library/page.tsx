@@ -91,7 +91,7 @@ export default function AlkahLibraryPage() {
             className="text-center"
           >
             <h1 className="font-fredoka text-5xl md:text-6xl font-bold mb-6">
-              Alkah Library
+              ALKAH Library
             </h1>
             <p className="text-xl md:text-2xl text-blue-100 mb-8 max-w-3xl mx-auto">
               A transformative space where knowledge becomes alchemy, where silence becomes voice, 

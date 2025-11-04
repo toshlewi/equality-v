@@ -15,6 +15,12 @@ interface AdminEventItem {
   showInPastCarousel?: boolean;
   pastCarouselOrder?: number;
   status?: string;
+  recap?: {
+    enabled?: boolean;
+    type?: 'gallery' | 'video';
+    galleryImages?: string[];
+    videoUrl?: string;
+  };
 }
 
 export default function AdminPastEventsCarouselPage() {
@@ -23,6 +29,9 @@ export default function AdminPastEventsCarouselPage() {
   const [saving, setSaving] = useState(false);
   const [items, setItems] = useState<AdminEventItem[]>([]);
   const bcRef = useRef<BroadcastChannel | null>(null);
+  const [uploadingMap, setUploadingMap] = useState<Record<string, boolean>>({});
+  const [uploadingVideoMap, setUploadingVideoMap] = useState<Record<string, boolean>>({});
+  const [expandedMap, setExpandedMap] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     bcRef.current = new BroadcastChannel('ev-events');
@@ -46,6 +55,12 @@ export default function AdminPastEventsCarouselPage() {
               showInPastCarousel: !!e.showInPastCarousel,
               pastCarouselOrder: e.pastCarouselOrder || 0,
               status: e.status || 'draft',
+              recap: {
+                enabled: !!e.recap?.enabled,
+                type: e.recap?.type || 'gallery',
+                galleryImages: Array.isArray(e.recap?.galleryImages) ? e.recap.galleryImages : [],
+                videoUrl: e.recap?.videoUrl || undefined,
+              }
             }))
             .sort((a, b) => (a.pastCarouselOrder || 0) - (b.pastCarouselOrder || 0));
           setItems(rows);
@@ -106,6 +121,12 @@ export default function AdminPastEventsCarouselPage() {
         const body = {
           showInPastCarousel: !!i.showInPastCarousel,
           pastCarouselOrder: Number(i.pastCarouselOrder) || 0,
+          recap: i.recap ? {
+            enabled: i.recap.enabled ?? true,
+            type: i.recap.type || 'gallery',
+            galleryImages: i.recap.galleryImages || [],
+            videoUrl: i.recap.videoUrl || undefined,
+          } : undefined,
         };
         const res = await fetch(`/api/events/${i._id}`, { 
           method: 'PUT', 
@@ -141,6 +162,72 @@ export default function AdminPastEventsCarouselPage() {
     }
   };
 
+  const handleRecapImagesUpload = async (id: string, files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    setUploadingMap((m) => ({ ...m, [id]: true }));
+    try {
+      const uploaded: string[] = [];
+      for (const file of Array.from(files)) {
+        const fd = new FormData();
+        fd.append('file', file);
+        fd.append('folder', 'images/events/recap');
+        const r = await fetch('/api/uploads/direct', { method: 'POST', body: fd });
+        const j = await r.json();
+        if (!j.success) throw new Error('Upload failed');
+        uploaded.push(j.data.url);
+      }
+      setItems((prev) => prev.map((e) => e._id === id ? {
+        ...e,
+        recap: {
+          enabled: e.recap?.enabled ?? true,
+          type: e.recap?.type || 'gallery',
+          galleryImages: [ ...(e.recap?.galleryImages || []), ...uploaded ],
+          videoUrl: e.recap?.videoUrl,
+        }
+      } : e));
+    } catch (err) {
+      alert('Failed to upload images');
+    } finally {
+      setUploadingMap((m) => ({ ...m, [id]: false }));
+    }
+  };
+
+  const handleRecapVideoUpload = async (id: string, file: File | null) => {
+    if (!file) return;
+    setUploadingVideoMap((m) => ({ ...m, [id]: true }));
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('folder', 'videos/events/recap');
+      const r = await fetch('/api/uploads/direct', { method: 'POST', body: fd });
+      const j = await r.json();
+      if (!j.success) throw new Error('Upload failed');
+      setItems((prev) => prev.map((e) => e._id === id ? {
+        ...e,
+        recap: {
+          enabled: e.recap?.enabled ?? true,
+          type: 'video',
+          galleryImages: e.recap?.galleryImages || [],
+          videoUrl: j.data.url,
+        }
+      } : e));
+    } catch (err) {
+      alert('Failed to upload video');
+    } finally {
+      setUploadingVideoMap((m) => ({ ...m, [id]: false }));
+    }
+  };
+
+  const removeGalleryImage = (id: string, url: string) => {
+    setItems((prev) => prev.map((e) => e._id === id ? {
+      ...e,
+      recap: {
+        ...e.recap,
+        galleryImages: (e.recap?.galleryImages || []).filter((u) => u !== url),
+      }
+    } : e));
+  };
+
   const formatDate = (s?: string) => s ? new Date(s).toLocaleDateString() : '';
 
   return (
@@ -171,7 +258,8 @@ export default function AdminPastEventsCarouselPage() {
                   <div className="col-span-1">Actions</div>
                 </div>
                 {items.map((e) => (
-                  <div key={e._id} className="grid grid-cols-12 gap-2 p-3 border-b items-center">
+                  <div key={e._id}>
+                  <div className="grid grid-cols-12 gap-2 p-3 border-b items-center">
                     <div className="col-span-5 flex items-center gap-3">
                       {e.featuredImage && (
                         <img src={e.featuredImage} className="w-12 h-12 object-cover rounded" />
@@ -213,6 +301,63 @@ export default function AdminPastEventsCarouselPage() {
                         {e.status === 'published' ? 'Unpublish' : 'Publish'}
                       </Button>
                     </div>
+                  </div>
+                  {/** Recap editor */}
+                  <div className="p-3 bg-gray-50 border-t">
+                    <div className="flex items-center justify-between">
+                      <div className="text-sm font-medium">Recap Gallery / Video</div>
+                      <button
+                        onClick={() => setExpandedMap((m) => ({ ...m, [e._id]: !m[e._id] }))}
+                        className="text-sm text-blue-600 hover:underline"
+                      >
+                        {expandedMap[e._id] ? 'Hide' : 'Manage'}
+                      </button>
+                    </div>
+                    {expandedMap[e._id] && (
+                      <div className="mt-3 space-y-3">
+                        <div className="flex flex-wrap items-center gap-3">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            multiple
+                            onChange={(ev) => handleRecapImagesUpload(e._id, ev.target.files)}
+                          />
+                          <Button type="button" variant="outline" disabled={!!uploadingMap[e._id]}>
+                            {uploadingMap[e._id] ? 'Uploading…' : 'Upload images'}
+                          </Button>
+                        </div>
+                        {Array.isArray(e.recap?.galleryImages) && e.recap!.galleryImages!.length > 0 && (
+                          <div className="grid grid-cols-4 gap-2">
+                            {e.recap!.galleryImages!.map((url) => (
+                              <div key={url} className="relative">
+                                <img src={url} className="w-20 h-20 object-cover rounded" />
+                                <button
+                                  type="button"
+                                  onClick={() => removeGalleryImage(e._id, url)}
+                                  className="absolute -top-2 -right-2 bg-white border rounded-full w-6 h-6 text-xs"
+                                >
+                                  ×
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        <div className="flex flex-wrap items-center gap-3 pt-2 border-t">
+                          <input
+                            type="file"
+                            accept="video/*"
+                            onChange={(ev) => handleRecapVideoUpload(e._id, ev.target.files?.[0] || null)}
+                          />
+                          <Button type="button" variant="outline" disabled={!!uploadingVideoMap[e._id]}>
+                            {uploadingVideoMap[e._id] ? 'Uploading…' : (e.recap?.videoUrl ? 'Replace video' : 'Upload video')}
+                          </Button>
+                          {e.recap?.videoUrl && (
+                            <span className="text-xs text-gray-600">Video uploaded</span>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                   </div>
                 ))}
               </div>

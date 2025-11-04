@@ -14,6 +14,7 @@ interface PastEvent {
   type: 'gallery' | 'video';
   recapUrl?: string;
   featured?: boolean;
+  galleryImages?: string[];
 }
 
 export default function PastEventsCarousel() {
@@ -23,6 +24,7 @@ export default function PastEventsCarousel() {
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const hoverRef = useRef(false);
   const bcRef = useRef<BroadcastChannel | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -70,6 +72,7 @@ export default function PastEventsCarousel() {
               type,
               recapUrl: e.recap?.videoUrl,
               featured: !!e.featured,
+              galleryImages: Array.isArray(e.recap?.galleryImages) ? e.recap.galleryImages : [],
             };
           });
           setPastEvents(mapped);
@@ -101,6 +104,23 @@ export default function PastEventsCarousel() {
       }
     };
   }, []);
+
+  // Attempt to autoplay when a video recap modal opens
+  useEffect(() => {
+    if (!selectedEvent?.recapUrl) return;
+    const tryPlay = () => {
+      const el = videoRef.current;
+      if (!el) return;
+      const playPromise = el.play();
+      if (playPromise && typeof (playPromise as any).then === 'function') {
+        (playPromise as Promise<void>).catch((err: unknown) => {
+          console.warn('Autoplay failed; user interaction may be required', err);
+        });
+      }
+    };
+    const id = requestAnimationFrame(tryPlay);
+    return () => cancelAnimationFrame(id);
+  }, [selectedEvent?.recapUrl]);
 
   // Auto-scroll the horizontal carousel
   useEffect(() => {
@@ -287,7 +307,7 @@ export default function PastEventsCarousel() {
                       whileTap={{ scale: 0.95 }}
                       className="w-full bg-brand-yellow text-brand-teal py-2 rounded-lg font-semibold transition-colors hover:bg-brand-orange hover:text-white"
                     >
-                      {event.type === 'video' ? 'Watch Recap' : 'View Gallery'}
+                      View Recap
                     </motion.button>
                   </div>
                 </div>
@@ -335,10 +355,10 @@ export default function PastEventsCarousel() {
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
-            className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden"
+            className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="p-6 border-b">
+            <div className="p-6 border-b flex-shrink-0">
               <div className="flex items-center justify-between">
                 <h3 className="font-fredoka text-2xl font-bold text-brand-teal">
                   {selectedEvent.title}
@@ -352,29 +372,49 @@ export default function PastEventsCarousel() {
               </div>
             </div>
             
-            <div className="p-6">
-              {selectedEvent.type === 'video' ? (
-                <div className="aspect-video bg-gray-100 rounded-lg flex items-center justify-center">
-                  <div className="text-center">
-                    <Play className="w-16 h-16 text-brand-orange mx-auto mb-4" />
-                    <p className="text-gray-600">Video recap available</p>
+            <div className="p-6 overflow-y-auto flex-1">
+              {/* Video recap (if any) */}
+              {selectedEvent.recapUrl && (
+                <div className="mb-6">
+                  <div className="aspect-video bg-black rounded-lg overflow-hidden">
+                    <video
+                      key={selectedEvent.id}
+                      ref={videoRef}
+                      src={selectedEvent.recapUrl}
+                      autoPlay
+                      muted
+                      playsInline
+                      controls
+                      preload="metadata"
+                      crossOrigin="anonymous"
+                      poster={selectedEvent.image}
+                      className="w-full h-full"
+                    />
                   </div>
                 </div>
-              ) : (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {selectedEvent.recapUrl ? (
-                    <div className="col-span-full text-center text-gray-500 py-8">
-                      <ImageIcon className="w-12 h-12 mx-auto mb-2 text-gray-400" />
-                      <p>Gallery images coming soon</p>
-                    </div>
-                  ) : (
-                    <div className="col-span-full text-center text-gray-500 py-8">
-                      <ImageIcon className="w-12 h-12 mx-auto mb-2 text-gray-400" />
-                      <p>No gallery images available</p>
-                    </div>
-                  )}
-                </div>
               )}
+
+              {/* Gallery images (if any) */}
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {Array.isArray(selectedEvent.galleryImages) && selectedEvent.galleryImages.length > 0 ? (
+                  selectedEvent.galleryImages.map((url, idx) => (
+                    <div key={url + idx} className="relative aspect-square rounded-lg overflow-hidden bg-gray-100">
+                      <Image
+                        src={url}
+                        alt={`${selectedEvent.title} photo ${idx + 1}`}
+                        fill
+                        sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                        className="object-cover"
+                      />
+                    </div>
+                  ))
+                ) : (
+                  <div className="col-span-full text-center text-gray-500 py-8">
+                    <ImageIcon className="w-12 h-12 mx-auto mb-2 text-gray-400" />
+                    <p>No gallery images available</p>
+                  </div>
+                )}
+              </div>
             </div>
           </motion.div>
         </motion.div>

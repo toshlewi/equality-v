@@ -105,13 +105,17 @@ export default function NewsModal({ news, isOpen, onClose }: NewsModalProps) {
             <div className="p-6 space-y-6">
               {/* Featured Image */}
               <div className="relative h-80 rounded-lg overflow-hidden">
-                <Image
-                  src={news.image}
-                  alt={news.title}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 75vw"
-                  className="object-cover"
-                />
+                {news.image ? (
+                  <Image
+                    src={news.image}
+                    alt={news.title}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 75vw"
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gray-200" />
+                )}
                 {news.featured && (
                   <div className="absolute top-4 right-4">
                     <span className="bg-brand-orange text-white px-3 py-1 rounded-full text-sm font-medium">
@@ -144,29 +148,20 @@ export default function NewsModal({ news, isOpen, onClose }: NewsModalProps) {
 
               {/* Article Content */}
               <div className="prose prose-lg max-w-none">
-                <p className="text-gray-600 text-lg leading-relaxed mb-6">
-                  {news.content || news.excerpt}
-                </p>
-                
-                {/* Extended content placeholder */}
-                <div className="space-y-4 text-gray-600">
-                  <p>
-                    This is a detailed article about {news.title.toLowerCase()}. 
-                    In a real implementation, this would be fetched from the database 
-                    and could include rich text formatting, images, and more content.
+                {news.content ? (
+                  <div 
+                    className="text-gray-600 text-lg leading-relaxed whitespace-pre-wrap"
+                    dangerouslySetInnerHTML={{ 
+                      __html: news.content.includes('<') 
+                        ? news.content 
+                        : news.content.replace(/\n/g, '<br />') 
+                    }}
+                  />
+                ) : (
+                  <p className="text-gray-600 text-lg leading-relaxed mb-6">
+                    {news.excerpt || 'No content available.'}
                   </p>
-                  
-                  <p>
-                    The content would be stored in the MongoDB "news" collection 
-                    with fields like content, author, tags, and more metadata 
-                    for a complete news management system.
-                  </p>
-                  
-                  <p>
-                    This modal demonstrates the layout and structure for displaying 
-                    full news articles with proper typography and spacing.
-                  </p>
-                </div>
+                )}
               </div>
 
               {/* Action Buttons */}

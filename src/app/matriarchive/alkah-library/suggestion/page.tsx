@@ -182,7 +182,7 @@ export default function BookSuggestionPage() {
               className="inline-flex items-center space-x-2 text-blue-100 hover:text-white mb-6 transition-colors"
             >
               <ArrowLeft className="w-5 h-5" />
-              <span>Back to Alkah Library</span>
+              <span>Back to ALKAH Library</span>
             </Link>
             <h1 className="font-fredoka text-4xl md:text-5xl font-bold mb-4">
               Suggest a Book
