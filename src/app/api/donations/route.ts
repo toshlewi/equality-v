@@ -6,6 +6,8 @@ import { createPaymentIntent } from '@/lib/stripe';
 import { initiateSTKPush } from '@/lib/mpesa';
 import { verifyRecaptcha } from '@/lib/security';
 import { sanitizeInput } from '@/lib/auth';
+import { createAdminNotification } from '@/lib/notifications';
+import { formRateLimit } from '@/middleware/rate-limit';
 
 const donationSchema = z.object({
   donorName: z.string().min(2, 'Name must be at least 2 characters').max(100),
@@ -24,6 +26,12 @@ const donationSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  // Apply rate limiting
+  const rateLimitResponse = formRateLimit(request);
+  if (rateLimitResponse) {
+    return rateLimitResponse;
+  }
+
   try {
     const body = await request.json();
     const validatedData = donationSchema.parse(body);
@@ -73,6 +81,30 @@ export async function POST(request: NextRequest) {
     });
 
     await donation.save();
+
+    // Create admin notification for new donation submission
+    try {
+      await createAdminNotification({
+        type: 'donation_submitted',
+        title: 'New Donation Submitted',
+        message: `New donation of ${validatedData.currency || 'USD'}${validatedData.amount} from ${sanitizedData.donorName}${validatedData.anonymous ? ' (Anonymous)' : ''}`,
+        metadata: {
+          donationId: donation._id.toString(),
+          donorName: validatedData.anonymous ? 'Anonymous' : sanitizedData.donorName,
+          donorEmail: validatedData.anonymous ? 'N/A' : sanitizedData.donorEmail,
+          amount: validatedData.amount,
+          currency: validatedData.currency || 'USD',
+          donationType: validatedData.donationType,
+          paymentMethod: validatedData.paymentMethod
+        },
+        priority: 'medium',
+        category: 'donations',
+        actionUrl: `/admin/payments/donations/${donation._id}`
+      });
+    } catch (notificationError) {
+      console.error('Error creating admin notification:', notificationError);
+      // Don't fail the request if notification fails
+    }
 
     // Create payment based on method
     if (validatedData.paymentMethod === 'stripe') {

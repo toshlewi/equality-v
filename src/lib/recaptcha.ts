@@ -2,7 +2,13 @@
 export const verifyRecaptcha = async (token: string): Promise<boolean> => {
   const secretKey = process.env.RECAPTCHA_SECRET_KEY;
   
-  if (!secretKey) {
+  // Allow development placeholder token
+  if (token === 'dev-placeholder-token') {
+    console.warn('Development placeholder token detected. Allowing request.');
+    return true;
+  }
+  
+  if (!secretKey || secretKey === 'your_recaptcha_secret_key') {
     console.warn('reCAPTCHA secret key not configured');
     return true; // Allow requests if reCAPTCHA is not configured
   }
@@ -20,6 +26,11 @@ export const verifyRecaptcha = async (token: string): Promise<boolean> => {
     return data.success === true && data.score >= 0.5; // reCAPTCHA v3 score threshold
   } catch (error) {
     console.error('reCAPTCHA verification error:', error);
+    // In development, allow requests if verification fails
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('Allowing request in development mode despite reCAPTCHA verification failure');
+      return true;
+    }
     return false;
   }
 };

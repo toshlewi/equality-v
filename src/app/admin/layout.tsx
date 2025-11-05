@@ -99,6 +99,16 @@ const navItems: NavItem[] = [
     href: "/admin/site-management",
     icon: <Settings className="w-5 h-5" />,
   },
+  {
+    label: "Settings",
+    href: "/admin/settings",
+    icon: <Settings className="w-5 h-5" />,
+  },
+  {
+    label: "Audit Logs",
+    href: "/admin/logs/audit",
+    icon: <FileText className="w-5 h-5" />,
+  },
 ];
 
 function SidebarItem({ item, onNavigate }: { item: NavItem; onNavigate?: () => void }) {

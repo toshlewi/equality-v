@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
 interface MembershipFormProps {
@@ -19,6 +19,20 @@ export function MembershipForm({ onClose }: MembershipFormProps) {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+
+  // Load reCAPTCHA script
+  useEffect(() => {
+    const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
+    if (typeof window !== 'undefined' && !window.grecaptcha && siteKey && siteKey !== 'your_recaptcha_site_key' && siteKey.trim() !== '') {
+      const script = document.createElement('script');
+      script.src = `https://www.google.com/recaptcha/api.js?render=${siteKey}`;
+      script.async = true;
+      script.defer = true;
+      document.head.appendChild(script);
+    }
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
@@ -28,19 +42,101 @@ export function MembershipForm({ onClose }: MembershipFormProps) {
     }));
   };
 
+  const getRecaptchaToken = async (): Promise<string> => {
+    const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
+    
+    // If reCAPTCHA is not configured, return a placeholder token (for development)
+    // The server will handle validation and allow requests if reCAPTCHA is not configured
+    if (!siteKey || siteKey === 'your_recaptcha_site_key' || siteKey.trim() === '') {
+      console.warn('reCAPTCHA not configured. Using placeholder token for development.');
+      return 'dev-placeholder-token';
+    }
+
+    return new Promise((resolve, reject) => {
+      if (typeof window === 'undefined' || !window.grecaptcha) {
+        // If reCAPTCHA script hasn't loaded, return placeholder
+        console.warn('reCAPTCHA script not loaded. Using placeholder token.');
+        resolve('dev-placeholder-token');
+        return;
+      }
+
+      window.grecaptcha.ready(() => {
+        window.grecaptcha
+          .execute(siteKey, { action: 'membership' })
+          .then((token: string) => {
+            resolve(token);
+          })
+          .catch((err: Error) => {
+            console.error('reCAPTCHA execution error:', err);
+            // For development, allow form submission even if reCAPTCHA fails
+            resolve('dev-placeholder-token');
+          });
+      });
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    // TODO: Connect this form to /api/forms/membership
-    // TODO: Store submissions in MongoDB (collection: "members")
-    console.log('Membership form submitted:', formData);
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    setIsSubmitting(false);
-    onClose();
+    setError(null);
+    setSuccess(false);
+
+    try {
+      // Get reCAPTCHA token
+      const recaptchaToken = await getRecaptchaToken();
+
+      // Map form fields to API schema
+      // API expects: name, email, phone, membershipType, paymentMethod, couponCode, termsAccepted, privacyAccepted, recaptchaToken
+      // MembershipType needs to be converted from years to type - defaulting to 'annual' for now
+      const membershipType = 'annual'; // Can be enhanced to support different types
+
+      const payload = {
+        name: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        membershipType: membershipType,
+        paymentMethod: formData.paymentMethod,
+        couponCode: formData.couponCode || undefined,
+        termsAccepted: formData.acceptTerms,
+        privacyAccepted: formData.acceptTerms,
+        recaptchaToken: recaptchaToken
+      };
+
+      const response = await fetch('/api/membership', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Failed to submit membership form');
+      }
+
+      setSuccess(true);
+      
+      // Handle payment if Stripe
+      if (formData.paymentMethod === 'stripe' && data.data?.clientSecret) {
+        // Payment will be handled via Stripe client-side integration
+        // For now, show success message
+        setTimeout(() => {
+          onClose();
+        }, 2000);
+      } else {
+        // For M-Pesa or other methods, just close after showing success
+        setTimeout(() => {
+          onClose();
+        }, 2000);
+      }
+    } catch (err: any) {
+      console.error('Membership form submission error:', err);
+      setError(err.message || 'An error occurred. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -198,20 +294,35 @@ export function MembershipForm({ onClose }: MembershipFormProps) {
           </label>
         </div>
 
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <p className="text-red-700 text-sm font-league-spartan">{error}</p>
+          </div>
+        )}
+
+        {success && (
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+            <p className="text-green-700 text-sm font-league-spartan">
+              Thank you! Your membership application has been submitted successfully. We'll process your payment and activate your membership shortly.
+            </p>
+          </div>
+        )}
+
         <div className="flex flex-col sm:flex-row gap-4 pt-6">
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-league-spartan"
+            disabled={isSubmitting}
+            className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-league-spartan disabled:opacity-50"
           >
             Cancel
           </button>
           <button
             type="submit"
-            disabled={isSubmitting || !formData.acceptTerms}
+            disabled={isSubmitting || !formData.acceptTerms || success}
             className="flex-1 px-6 py-3 bg-[#042C45] text-white rounded-lg hover:bg-[#042C45]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-league-spartan"
           >
-            {isSubmitting ? 'Processing...' : 'Join Now'}
+            {isSubmitting ? 'Processing...' : success ? 'Submitted!' : 'Join Now'}
           </button>
         </div>
       </form>

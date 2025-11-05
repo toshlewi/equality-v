@@ -42,6 +42,13 @@ export interface ListMember {
 }
 
 /**
+ * Get subscriber hash for email
+ */
+export function getSubscriberHash(email: string): string {
+  return email.toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
+/**
  * Add subscriber to list
  */
 export async function addSubscriber(
@@ -75,6 +82,82 @@ export async function addSubscriber(
       };
     }
 
+    return {
+      success: false,
+      error: error.response?.body?.detail || error.message || 'Unknown error'
+    };
+  }
+}
+
+/**
+ * Get subscriber by email
+ */
+export async function getSubscriber(
+  listId: string,
+  subscriberHash: string
+): Promise<{ success: boolean; subscriber?: ListMember; error?: string }> {
+  try {
+    const response = await mailchimp.lists.getListMember(listId, subscriberHash);
+    return {
+      success: true,
+      subscriber: response as ListMember
+    };
+  } catch (error: any) {
+    if (error.status === 404) {
+      return {
+        success: true,
+        subscriber: undefined
+      };
+    }
+    console.error('Error getting subscriber from Mailchimp:', error);
+    return {
+      success: false,
+      error: error.response?.body?.detail || error.message || 'Unknown error'
+    };
+  }
+}
+
+/**
+ * Get subscribers from list
+ */
+export async function getSubscribers(
+  listId: string,
+  options: {
+    status?: 'subscribed' | 'unsubscribed' | 'cleaned' | 'pending';
+    count?: number;
+    offset?: number;
+    search?: string;
+  } = {}
+): Promise<{ success: boolean; subscribers?: ListMember[]; total?: number; error?: string }> {
+  try {
+    const params: any = {
+      status: options.status || 'subscribed',
+      count: options.count || 100,
+      offset: options.offset || 0
+    };
+
+    const response = await mailchimp.lists.getListMembersInfo(listId, params);
+    
+    let subscribers = response.members as ListMember[];
+    
+    // Filter by search if provided
+    if (options.search) {
+      const searchLower = options.search.toLowerCase();
+      subscribers = subscribers.filter((member: ListMember) => {
+        const email = member.email_address?.toLowerCase() || '';
+        const fname = member.merge_fields?.FNAME?.toLowerCase() || '';
+        const lname = member.merge_fields?.LNAME?.toLowerCase() || '';
+        return email.includes(searchLower) || fname.includes(searchLower) || lname.includes(searchLower);
+      });
+    }
+
+    return {
+      success: true,
+      subscribers,
+      total: response.total_items || subscribers.length
+    };
+  } catch (error: any) {
+    console.error('Error getting subscribers from Mailchimp:', error);
     return {
       success: false,
       error: error.response?.body?.detail || error.message || 'Unknown error'
@@ -176,68 +259,13 @@ export async function removeTags(
 }
 
 /**
- * Get subscriber information
- */
-export async function getSubscriber(
-  listId: string,
-  subscriberHash: string
-): Promise<{ success: boolean; subscriber?: ListMember; error?: string }> {
-  try {
-    const subscriber = await mailchimp.lists.getListMember(listId, subscriberHash);
-    return {
-      success: true,
-      subscriber: subscriber as ListMember
-    };
-  } catch (error: any) {
-    console.error('Error getting subscriber from Mailchimp:', error);
-    return {
-      success: false,
-      error: error.response?.body?.detail || error.message || 'Unknown error'
-    };
-  }
-}
-
-/**
- * Get list members with pagination
- */
-export async function getListMembers(
-  listId: string,
-  options: {
-    count?: number;
-    offset?: number;
-    status?: 'subscribed' | 'unsubscribed' | 'cleaned' | 'pending';
-    tags?: string[];
-  } = {}
-): Promise<{ success: boolean; members?: ListMember[]; totalItems?: number; error?: string }> {
-  try {
-    const response = await mailchimp.lists.getListMembersInfo(listId, {
-      count: options.count || 10,
-      offset: options.offset || 0,
-      status: options.status
-    });
-
-    return {
-      success: true,
-      members: response.members as ListMember[],
-      totalItems: response.total_items
-    };
-  } catch (error: any) {
-    console.error('Error getting list members from Mailchimp:', error);
-    return {
-      success: false,
-      error: error.response?.body?.detail || error.message || 'Unknown error'
-    };
-  }
-}
-
-/**
- * Create a campaign
+ * Create campaign
  */
 export async function createCampaign(
   campaignData: CampaignData
 ): Promise<{ success: boolean; campaignId?: string; error?: string }> {
   try {
-    const campaign = await mailchimp.campaigns.create({
+    const response = await mailchimp.campaigns.create({
       type: 'regular',
       recipients: campaignData.recipients,
       settings: {
@@ -246,37 +274,19 @@ export async function createCampaign(
         from_name: campaignData.fromName,
         reply_to: campaignData.fromEmail,
         to_name: campaignData.toName
+      },
+      content_type: 'html',
+      content: {
+        html: campaignData.content
       }
     });
 
     return {
       success: true,
-      campaignId: campaign.id
+      campaignId: response.id
     };
   } catch (error: any) {
     console.error('Error creating campaign in Mailchimp:', error);
-    return {
-      success: false,
-      error: error.response?.body?.detail || error.message || 'Unknown error'
-    };
-  }
-}
-
-/**
- * Set campaign content
- */
-export async function setCampaignContent(
-  campaignId: string,
-  content: string
-): Promise<{ success: boolean; error?: string }> {
-  try {
-    await mailchimp.campaigns.setContent(campaignId, {
-      html: content
-    });
-
-    return { success: true };
-  } catch (error: any) {
-    console.error('Error setting campaign content in Mailchimp:', error);
     return {
       success: false,
       error: error.response?.body?.detail || error.message || 'Unknown error'
@@ -303,135 +313,34 @@ export async function sendCampaign(
 }
 
 /**
- * Get list information
- */
-export async function getListInfo(
-  listId: string
-): Promise<{ success: boolean; list?: any; error?: string }> {
-  try {
-    const list = await mailchimp.lists.getList(listId);
-    return {
-      success: true,
-      list
-    };
-  } catch (error: any) {
-    console.error('Error getting list info from Mailchimp:', error);
-    return {
-      success: false,
-      error: error.response?.body?.detail || error.message || 'Unknown error'
-    };
-  }
-}
-
-/**
- * Create a segment
- */
-export async function createSegment(
-  listId: string,
-  name: string,
-  conditions: any[]
-): Promise<{ success: boolean; segmentId?: number; error?: string }> {
-  try {
-    const segment = await mailchimp.lists.createSegment(listId, {
-      name,
-      options: {
-        match: 'all',
-        conditions
-      }
-    });
-
-    return {
-      success: true,
-      segmentId: segment.id
-    };
-  } catch (error: any) {
-    console.error('Error creating segment in Mailchimp:', error);
-    return {
-      success: false,
-      error: error.response?.body?.detail || error.message || 'Unknown error'
-    };
-  }
-}
-
-/**
- * Get subscriber hash from email
- */
-export function getSubscriberHash(email: string): string {
-  const crypto = require('crypto');
-  return crypto.createHash('md5').update(email.toLowerCase()).digest('hex');
-}
-
-/**
- * Sync member to Mailchimp with appropriate tags
+ * Sync member to Mailchimp (add or update)
  */
 export async function syncMemberToMailchimp(
-  memberData: {
-    email: string;
-    name: string;
-    membershipType: string;
-    isActive: boolean;
-    tags?: string[];
-  }
-): Promise<{ success: boolean; error?: string }> {
-  try {
-    const listId = process.env.MAILCHIMP_LIST_ID!;
-    const subscriberHash = getSubscriberHash(memberData.email);
-    
-    // Determine tags based on membership type and status
-    const tags = [
-      'member',
-      `member_${memberData.membershipType}`,
-      memberData.isActive ? 'active' : 'inactive',
-      ...(memberData.tags || [])
-    ];
-
-    // Add or update subscriber
-    const result = await addSubscriber(listId, {
-      email: memberData.email,
-      name: memberData.name,
-      tags,
-      status: memberData.isActive ? 'subscribed' : 'unsubscribed'
-    });
-
-    if (!result.success) {
-      return result;
-    }
-
-    // If member exists, update tags
-    if (result.memberId === 'existing') {
-      const updateResult = await addTags(listId, subscriberHash, tags);
-      return updateResult;
-    }
-
-    return { success: true };
-  } catch (error: any) {
-    console.error('Error syncing member to Mailchimp:', error);
-    return {
-      success: false,
-      error: error.message || 'Unknown error'
-    };
+  listId: string,
+  subscriberData: SubscriberData
+): Promise<{ success: boolean; memberId?: string; error?: string }> {
+  const subscriberHash = getSubscriberHash(subscriberData.email);
+  const existing = await getSubscriber(listId, subscriberHash);
+  
+  if (existing.success && existing.subscriber) {
+    // Update existing subscriber
+    return await updateSubscriber(listId, subscriberHash, subscriberData);
+  } else {
+    // Add new subscriber
+    return await addSubscriber(listId, subscriberData);
   }
 }
-
-// Add subscriber to default list (alias for addSubscriber)
-export const addSubscriberToDefaultList = async (subscriberData: SubscriberData): Promise<{ success: boolean; memberId?: string; error?: string }> => {
-  const listId = process.env.MAILCHIMP_LIST_ID!;
-  return addSubscriber(listId, subscriberData);
-};
 
 export default {
   addSubscriber,
+  getSubscriber,
+  getSubscribers,
+  getSubscriberHash,
   updateSubscriber,
   removeSubscriber,
   addTags,
   removeTags,
-  getSubscriber,
-  getListMembers,
   createCampaign,
-  setCampaignContent,
   sendCampaign,
-  getListInfo,
-  createSegment,
-  getSubscriberHash,
   syncMemberToMailchimp
 };

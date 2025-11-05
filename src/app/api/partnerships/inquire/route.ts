@@ -5,6 +5,7 @@ import { sendEmail } from '@/lib/email';
 import { createAdminNotification } from '@/lib/notifications';
 import { verifyRecaptcha } from '@/lib/security';
 import { sanitizeInput } from '@/lib/auth';
+import { formRateLimit } from '@/middleware/rate-limit';
 
 const partnershipInquirySchema = z.object({
   organizationName: z.string().min(2, 'Organization name must be at least 2 characters').max(200),
@@ -25,6 +26,12 @@ const partnershipInquirySchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  // Apply rate limiting
+  const rateLimitResponse = formRateLimit(request);
+  if (rateLimitResponse) {
+    return rateLimitResponse;
+  }
+
   try {
     const body = await request.json();
     const validatedData = partnershipInquirySchema.parse(body);

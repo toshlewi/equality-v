@@ -4,6 +4,7 @@ import { addSubscriber, syncMemberToMailchimp } from '@/lib/mailchimp';
 import { sendEmail } from '@/lib/email';
 import { verifyRecaptcha } from '@/lib/security';
 import { sanitizeInput } from '@/lib/auth';
+import { formRateLimit } from '@/middleware/rate-limit';
 
 const newsletterSubscribeSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -14,6 +15,12 @@ const newsletterSubscribeSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  // Apply rate limiting
+  const rateLimitResponse = formRateLimit(request);
+  if (rateLimitResponse) {
+    return rateLimitResponse;
+  }
+
   try {
     const body = await request.json();
     const validatedData = newsletterSubscribeSchema.parse(body);

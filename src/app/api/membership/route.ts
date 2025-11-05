@@ -5,6 +5,7 @@ import Member from '@/models/Member';
 import { createPaymentIntent, createCheckoutSession } from '@/lib/stripe';
 import { verifyRecaptcha } from '@/lib/security';
 import { sanitizeInput } from '@/lib/auth';
+import { formRateLimit } from '@/middleware/rate-limit';
 
 const membershipSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters').max(100),
@@ -26,6 +27,12 @@ const MEMBERSHIP_PRICES = {
 } as const;
 
 export async function POST(request: NextRequest) {
+  // Apply rate limiting
+  const rateLimitResponse = formRateLimit(request);
+  if (rateLimitResponse) {
+    return rateLimitResponse;
+  }
+
   try {
     const body = await request.json();
     const validatedData = membershipSchema.parse(body);
@@ -87,23 +94,26 @@ export async function POST(request: NextRequest) {
       endDate.setFullYear(endDate.getFullYear() + 1);
     }
 
+    // Split name into firstName and lastName
+    const nameParts = sanitizedData.name.trim().split(/\s+/);
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || '';
+
     // Create member record with pending status
     const member = new Member({
-      name: sanitizedData.name,
+      firstName: firstName,
+      lastName: lastName,
       email: sanitizedData.email,
       phone: sanitizedData.phone,
       membershipType: validatedData.membershipType,
-      subscriptionStart: startDate,
-      subscriptionEnd: endDate,
+      joinDate: startDate,
+      expiryDate: endDate,
       isActive: false, // Will be activated after payment
+      status: 'pending',
       paymentStatus: 'pending',
-      paymentProvider: validatedData.paymentMethod,
+      paymentMethod: validatedData.paymentMethod,
       amount: amount,
-      currency: 'USD',
-      termsAccepted: validatedData.termsAccepted,
-      termsVersion: '1.0',
-      privacyAccepted: validatedData.privacyAccepted,
-      privacyVersion: '1.0'
+      currency: 'USD'
     });
 
     await member.save();

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/lib/auth-config';
 import { connectDB } from '@/lib/mongodb';
 import BookMeeting from '@/models/BookMeeting';
 import Book from '@/models/Book';

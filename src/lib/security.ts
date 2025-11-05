@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import rateLimit from 'express-rate-limit';
 import { verifyRecaptcha } from './recaptcha'; // We'll create this
+import { createAuditLog } from './audit';
 
 // Re-export verifyRecaptcha for convenience
 export { verifyRecaptcha };
@@ -65,19 +66,35 @@ export const sanitizeInput = (input: string): string => {
 };
 
 // Security audit logging
-export const logSecurityEvent = (event: {
+export const logSecurityEvent = async (event: {
   type: string;
   userId?: string;
   ip: string;
   userAgent: string;
   details: any;
+  severity?: 'low' | 'medium' | 'high' | 'critical';
 }) => {
   console.log('Security Event:', {
     timestamp: new Date().toISOString(),
     ...event,
   });
-  // In production, this would be sent to a security monitoring service
-  // like Sentry, DataDog, or a custom security dashboard.
+
+  // Log to audit log
+  try {
+    await createAuditLog({
+      eventType: 'security_event',
+      description: `Security event: ${event.type}`,
+      userId: event.userId,
+      ipAddress: event.ip,
+      userAgent: event.userAgent,
+      metadata: event.details || {},
+      severity: event.severity || 'medium',
+      isSecurityEvent: true,
+      status: 'success'
+    });
+  } catch (error) {
+    console.error('Failed to log security event to audit log:', error);
+  }
 };
 
 // Password strength validation

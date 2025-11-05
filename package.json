@@ -19,6 +19,8 @@
     "test:security": "tsx src/scripts/test-security.ts",
     "test:nextauth": "tsx src/scripts/test-nextauth.ts",
     "test": "echo \"No tests specified\" && exit 0",
+    "test:integration": "jest --testPathPattern=tests/integration",
+    "test:smoke": "bash scripts/smoke-tests.sh",
     "type-check": "tsc --noEmit",
     "clean": "rm -rf .next out",
     "postinstall": "next telemetry disable"
