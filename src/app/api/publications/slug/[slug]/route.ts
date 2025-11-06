@@ -5,12 +5,12 @@ import Publication from '@/models/Publication';
 // GET /api/publications/slug/[slug] - Get a single publication by slug
 export async function GET(
   request: NextRequest,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
     await connectDB();
 
-    const { slug } = params;
+    const { slug } = await params;
 
     // Find publication by slug
     const publication = await Publication.findOne({ slug }).lean();

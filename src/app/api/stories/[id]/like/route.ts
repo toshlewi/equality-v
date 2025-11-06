@@ -5,9 +5,10 @@ import Story from '@/models/Story';
 // POST /api/stories/[id]/like - Like/unlike a story
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     await connectDB();
 
     const body = await request.json();
@@ -20,7 +21,7 @@ export async function POST(
       );
     }
 
-    const story = await Story.findById(params.id);
+    const story = await Story.findById(id);
     
     if (!story) {
       return NextResponse.json(
@@ -32,7 +33,7 @@ export async function POST(
     // Update like count
     const increment = action === 'like' ? 1 : -1;
     const updatedStory = await Story.findByIdAndUpdate(
-      params.id,
+      id,
       { $inc: { likeCount: increment } },
       { new: true }
     );

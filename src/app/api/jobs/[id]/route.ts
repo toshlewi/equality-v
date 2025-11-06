@@ -26,13 +26,14 @@ const updateJobSchema = z.object({
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     await connectDB();
 
     const job = await Job.findOne({ 
-      $or: [{ _id: params.id }, { slug: params.id }]
+      $or: [{ _id: id }, { slug: id }]
     }).lean();
 
     if (!job) {
@@ -67,9 +68,10 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     
     if (!session?.user?.id) {
@@ -91,7 +93,7 @@ export async function PATCH(
     const body = await request.json();
     const validatedData = updateJobSchema.parse(body);
 
-    const job = await Job.findById(params.id);
+    const job = await Job.findById(id);
 
     if (!job) {
       return NextResponse.json(
@@ -142,9 +144,10 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     
     if (!session?.user?.id) {
@@ -163,7 +166,7 @@ export async function DELETE(
 
     await connectDB();
 
-    const job = await Job.findById(params.id);
+    const job = await Job.findById(id);
 
     if (!job) {
       return NextResponse.json(

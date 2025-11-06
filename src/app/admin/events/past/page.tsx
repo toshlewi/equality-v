@@ -62,7 +62,7 @@ export default function AdminPastEventsCarouselPage() {
                 videoUrl: e.recap?.videoUrl || undefined,
               }
             }))
-            .sort((a, b) => (a.pastCarouselOrder || 0) - (b.pastCarouselOrder || 0));
+            .sort((a: any, b: any) => (a.pastCarouselOrder || 0) - (b.pastCarouselOrder || 0));
           setItems(rows);
           console.log('Loaded events for carousel management:', rows.length);
         } else {

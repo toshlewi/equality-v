@@ -35,12 +35,11 @@ function generateSlug(title: string): string {
 // GET /api/publications/[id] - Get a single publication
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     await connectDB();
-
-    const { id } = params;
 
     // Validate ObjectId
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -84,9 +83,10 @@ export async function GET(
 // PUT /api/publications/[id] - Update a publication
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     
     if (!session?.user?.id) {
@@ -105,8 +105,6 @@ export async function PUT(
     }
 
     await connectDB();
-
-    const { id } = params;
 
     // Validate ObjectId
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -197,9 +195,10 @@ export async function PUT(
 // DELETE /api/publications/[id] - Delete a publication
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     
     if (!session?.user?.id) {
@@ -218,8 +217,6 @@ export async function DELETE(
     }
 
     await connectDB();
-
-    const { id } = params;
 
     // Validate ObjectId
     if (!mongoose.Types.ObjectId.isValid(id)) {

@@ -22,9 +22,10 @@ const refundSchema = z.object({
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     
     if (!session?.user?.id) {
@@ -37,7 +38,7 @@ export async function GET(
 
     await connectDB();
 
-    const donation = await Donation.findById(params.id).lean();
+    const donation = await Donation.findById(id).lean();
 
     if (!donation) {
       return ApiResponse.notFound('Donation not found');
@@ -80,9 +81,10 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     
     if (!session?.user?.id) {
@@ -102,7 +104,7 @@ export async function PATCH(
       return ApiResponse.validationError(validation.errors);
     }
 
-    const donation = await Donation.findById(params.id);
+    const donation = await Donation.findById(id);
 
     if (!donation) {
       return ApiResponse.notFound('Donation not found');
@@ -163,9 +165,10 @@ export async function PATCH(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     
     if (!session?.user?.id) {
@@ -182,7 +185,7 @@ export async function POST(
     const action = body.action;
 
     if (action === 'resend_receipt') {
-      const donation = await Donation.findById(params.id);
+      const donation = await Donation.findById(id);
 
       if (!donation) {
         return ApiResponse.notFound('Donation not found');
@@ -235,7 +238,7 @@ export async function POST(
         return ApiResponse.validationError(validation.errors);
       }
 
-      const donation = await Donation.findById(params.id);
+      const donation = await Donation.findById(id);
 
       if (!donation) {
         return ApiResponse.notFound('Donation not found');

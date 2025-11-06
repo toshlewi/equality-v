@@ -20,16 +20,17 @@ const updateSchema = z.object({
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     await connectDB();
     const body = await request.json();
     const updates = updateSchema.parse(body);
     if (updates.publishedAt) {
       (updates as any).publishedAt = new Date(updates.publishedAt);
     }
-    const item = await AudioPodcast.findByIdAndUpdate(params.id, updates, { new: true });
+    const item = await AudioPodcast.findByIdAndUpdate(id, updates, { new: true });
     if (!item) return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 });
     return NextResponse.json({ success: true, data: item });
   } catch (error) {
@@ -42,11 +43,12 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     await connectDB();
-    const item = await AudioPodcast.findByIdAndDelete(params.id);
+    const item = await AudioPodcast.findByIdAndDelete(id);
     if (!item) return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 });
     return NextResponse.json({ success: true });
   } catch (error) {

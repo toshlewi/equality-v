@@ -19,12 +19,13 @@ const updateSchema = z.object({
 // GET /api/stories/[id]
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     await connectDB();
 
-    const story = await Story.findById(params.id)
+    const story = await Story.findById(id)
       .populate('reviewerId', 'name email')
       .lean();
 
@@ -34,10 +35,10 @@ export async function GET(
 
     const mediaFiles = await Media.find({
       'associatedContent.type': 'story',
-      'associatedContent.contentId': params.id
+      'associatedContent.contentId': id
     }).lean();
 
-    await Story.findByIdAndUpdate(params.id, { $inc: { viewCount: 1 } });
+    await Story.findByIdAndUpdate(id, { $inc: { viewCount: 1 } });
 
     return NextResponse.json({ success: true, data: { ...story, mediaFiles } });
   } catch (error) {
@@ -48,9 +49,10 @@ export async function GET(
 // PUT /api/stories/[id]
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     await connectDB();
     const body = await request.json();
     const parsed = updateSchema.parse(body);
@@ -64,7 +66,7 @@ export async function PUT(
       updateData.publishedAt = new Date();
     }
 
-    const story = await Story.findByIdAndUpdate(params.id, updateData, { new: true });
+    const story = await Story.findByIdAndUpdate(id, updateData, { new: true });
     if (!story) {
       return NextResponse.json({ success: false, error: 'Story not found' }, { status: 404 });
     }
@@ -80,20 +82,21 @@ export async function PUT(
 // DELETE /api/stories/[id]
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     await connectDB();
-    const story = await Story.findById(params.id);
+    const story = await Story.findById(id);
     if (!story) {
       return NextResponse.json({ success: false, error: 'Story not found' }, { status: 404 });
     }
 
     await Media.deleteMany({
       'associatedContent.type': 'story',
-      'associatedContent.contentId': params.id
+      'associatedContent.contentId': id
     });
-    await Story.findByIdAndDelete(params.id);
+    await Story.findByIdAndDelete(id);
 
     return NextResponse.json({ success: true, message: 'Story deleted successfully' });
   } catch (error) {

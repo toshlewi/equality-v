@@ -5,9 +5,10 @@ import { markAsRead } from '@/lib/notifications';
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     
     if (!session?.user?.id) {
@@ -16,8 +17,6 @@ export async function PUT(
         { status: 401 }
       );
     }
-
-    const { id } = params;
 
     const result = await markAsRead(id, session.user.id);
 

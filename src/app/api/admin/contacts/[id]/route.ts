@@ -17,29 +17,30 @@ const updateContactSchema = z.object({
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     
-    if (!session?.user?.id) {
+    if (!session?.user || !(session.user as any)?.id) {
       return ApiResponse.unauthorized('Authentication required');
     }
 
-    if (!['admin', 'editor', 'reviewer'].includes(session.user.role)) {
+    if (!['admin', 'editor', 'reviewer'].includes((session.user as any).role)) {
       return ApiResponse.forbidden('Insufficient permissions');
     }
 
     await connectDB();
 
-    const contact = await Contact.findById(params.id).lean();
+    const contact = await Contact.findById(id).lean();
 
     if (!contact) {
       return ApiResponse.notFound('Contact not found');
     }
 
     return ApiResponse.success({
-      id: contact._id.toString(),
+      id: (contact as any)._id.toString(),
       name: contact.name,
       email: contact.email,
       phone: contact.phone,
@@ -68,16 +69,17 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     
-    if (!session?.user?.id) {
+    if (!session?.user || !(session.user as any)?.id) {
       return ApiResponse.unauthorized('Authentication required');
     }
 
-    if (!['admin', 'editor', 'reviewer'].includes(session.user.role)) {
+    if (!['admin', 'editor', 'reviewer'].includes((session.user as any).role)) {
       return ApiResponse.forbidden('Insufficient permissions');
     }
 
@@ -95,7 +97,7 @@ export async function PATCH(
       );
     }
 
-    const contact = await Contact.findById(params.id);
+    const contact = await Contact.findById(id);
 
     if (!contact) {
       return ApiResponse.notFound('Contact not found');
@@ -121,9 +123,9 @@ export async function PATCH(
     await createAuditLog({
       eventType: 'contact_updated',
       description: `Contact ${contact.subject} updated`,
-      userId: session.user.id,
+      userId: (session.user as any).id,
       userEmail: session.user.email || '',
-      userRole: session.user.role,
+      userRole: (session.user as any).role,
       ipAddress: request.headers.get('x-forwarded-for') || request.ip || 'unknown',
       userAgent: request.headers.get('user-agent') || 'unknown',
       requestMethod: 'PATCH',

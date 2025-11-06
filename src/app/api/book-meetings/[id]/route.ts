@@ -62,12 +62,11 @@ function generateSlug(title: string): string {
 // GET /api/book-meetings/[id] - Get a single book meeting
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     await connectDB();
-
-    const { id } = params;
 
     // Validate ObjectId
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -106,9 +105,10 @@ export async function GET(
 // PUT /api/book-meetings/[id] - Update a book meeting
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     
     if (!session?.user?.id) {
@@ -127,8 +127,6 @@ export async function PUT(
     }
 
     await connectDB();
-
-    const { id } = params;
 
     // Validate ObjectId
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -230,9 +228,10 @@ export async function PUT(
 // DELETE /api/book-meetings/[id] - Delete a book meeting
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     
     if (!session?.user?.id) {
@@ -251,8 +250,6 @@ export async function DELETE(
     }
 
     await connectDB();
-
-    const { id } = params;
 
     // Validate ObjectId
     if (!mongoose.Types.ObjectId.isValid(id)) {

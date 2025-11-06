@@ -56,7 +56,7 @@ export default function SettingsPage() {
         setSettingsData(data.data);
         // Initialize edited settings with current values
         const edited: Record<string, any> = {};
-        Object.values(data.data.settings).flat().forEach((setting: Setting) => {
+        (Object.values(data.data.settings).flat() as Setting[]).forEach((setting: Setting) => {
           edited[setting.key] = setting.value;
         });
         setEditedSettings(edited);

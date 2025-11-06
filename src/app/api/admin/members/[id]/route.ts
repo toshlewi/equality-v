@@ -17,9 +17,10 @@ const updateMemberSchema = z.object({
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     
     if (!session?.user?.id) {
@@ -32,7 +33,7 @@ export async function GET(
 
     await connectDB();
 
-    const member = await Member.findById(params.id).lean();
+    const member = await Member.findById(id).lean();
 
     if (!member) {
       return ApiResponse.notFound('Member not found');
@@ -92,9 +93,10 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     
     if (!session?.user?.id) {
@@ -114,7 +116,7 @@ export async function PATCH(
       return ApiResponse.validationError(validation.errors);
     }
 
-    const member = await Member.findById(params.id);
+    const member = await Member.findById(id);
 
     if (!member) {
       return ApiResponse.notFound('Member not found');
@@ -252,9 +254,10 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     
     if (!session?.user?.id) {
@@ -267,7 +270,7 @@ export async function DELETE(
 
     await connectDB();
 
-    const member = await Member.findById(params.id);
+    const member = await Member.findById(id);
 
     if (!member) {
       return ApiResponse.notFound('Member not found');

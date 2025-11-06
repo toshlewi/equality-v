@@ -160,18 +160,74 @@ export async function POST(request: NextRequest) {
         }
       });
     } else if (validatedData.paymentMethod === 'mpesa') {
-      // For M-Pesa, don't initiate STK Push here
-      // The user will initiate it from the payment step
-      // This allows the membership to be created first, then payment can be initiated
-      return NextResponse.json({
-        success: true,
-        data: {
-          memberId: member._id.toString(),
-          amount: amount,
-          currency: 'KES',
-          message: 'Membership created. Please proceed to payment.'
+      // Initiate M-Pesa STK Push
+      try {
+        // Format phone number (ensure it starts with country code)
+        let phoneNumber = sanitizedData.phone.trim();
+        if (!phoneNumber.startsWith('254')) {
+          // Assume Kenyan number, add country code if missing
+          if (phoneNumber.startsWith('0')) {
+            phoneNumber = '254' + phoneNumber.substring(1);
+          } else if (phoneNumber.startsWith('7')) {
+            phoneNumber = '254' + phoneNumber;
+          } else {
+            phoneNumber = '254' + phoneNumber;
+          }
         }
-      });
+
+        // Generate callback URL
+        const callbackUrl = `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/webhooks/mpesa`;
+        
+        // Create account reference in format: membership_{memberId}
+        const accountReference = `membership_${member._id.toString()}`;
+        
+        // Initiate STK Push
+        const stkPushResponse = await initiateSTKPush({
+          phone: phoneNumber,
+          amount: amount,
+          accountReference: accountReference,
+          transactionDesc: `Equality Vanguard ${validatedData.membershipType} membership (${membershipYears} year${membershipYears > 1 ? 's' : ''})`,
+          callbackUrl: callbackUrl
+        });
+
+        // Update member with checkout request ID for tracking
+        member.paymentId = stkPushResponse.CheckoutRequestID;
+        member.paymentProvider = 'mpesa';
+        await member.save();
+
+        return NextResponse.json({
+          success: true,
+          data: {
+            memberId: member._id.toString(),
+            checkoutRequestId: stkPushResponse.CheckoutRequestID,
+            merchantRequestId: stkPushResponse.MerchantRequestID,
+            customerMessage: stkPushResponse.CustomerMessage,
+            amount: amount,
+            currency: 'KES',
+            phone: phoneNumber
+          }
+        });
+      } catch (stkError) {
+        console.error('M-Pesa STK Push error:', stkError);
+        
+        // Update member status to indicate payment initiation failed
+        member.paymentStatus = 'failed';
+        member.status = 'failed';
+        await member.save();
+
+        const errorMessage = stkError instanceof Error 
+          ? stkError.message 
+          : 'Failed to initiate M-Pesa payment';
+        
+        return NextResponse.json({
+          success: false,
+          error: errorMessage,
+          data: {
+            memberId: member._id.toString(),
+            message: 'Membership created but payment initiation failed. Please try again or contact support.'
+          }
+        }, { status: 500 });
+      }
     }
 
   } catch (error) {

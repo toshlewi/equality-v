@@ -17,9 +17,10 @@ const updateApplicationSchema = z.object({
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     
     if (!session?.user?.id) {
@@ -32,7 +33,7 @@ export async function GET(
 
     await connectDB();
 
-    const application = await VolunteerApplication.findById(params.id)
+    const application = await VolunteerApplication.findById(id)
       .populate('jobId', 'title slug department type')
       .populate('reviewedBy', 'name email')
       .lean();
@@ -81,9 +82,10 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     
     if (!session?.user?.id) {
@@ -103,7 +105,7 @@ export async function PATCH(
       return ApiResponse.validationError(validation.errors);
     }
 
-    const application = await VolunteerApplication.findById(params.id)
+    const application = await VolunteerApplication.findById(id)
       .populate('jobId', 'title');
 
     if (!application) {

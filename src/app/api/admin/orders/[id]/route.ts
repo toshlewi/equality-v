@@ -29,9 +29,10 @@ const refundOrderSchema = z.object({
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     
     if (!session?.user?.id) {
@@ -46,8 +47,8 @@ export async function GET(
 
     const order = await Order.findOne({
       $or: [
-        { _id: params.id },
-        { orderNumber: params.id }
+        { _id: id },
+        { orderNumber: id }
       ]
     })
       .populate('processedBy', 'name email')
@@ -108,9 +109,10 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     
     if (!session?.user?.id) {
@@ -130,7 +132,7 @@ export async function PATCH(
       return ApiResponse.validationError(validation.errors);
     }
 
-    const order = await Order.findById(params.id);
+    const order = await Order.findById(id);
 
     if (!order) {
       return ApiResponse.notFound('Order not found');
@@ -232,9 +234,10 @@ export async function PATCH(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     
     if (!session?.user?.id) {
@@ -257,7 +260,7 @@ export async function POST(
         return ApiResponse.validationError(validation.errors);
       }
 
-      const order = await Order.findById(params.id);
+      const order = await Order.findById(id);
 
       if (!order) {
         return ApiResponse.notFound('Order not found');

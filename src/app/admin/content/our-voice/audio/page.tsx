@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Edit, Trash2, Eye, EyeOff, ArrowLeft, Upload } from "lucide-react";
+import { Plus, Edit, Trash2, Eye, EyeOff as EyeOffIcon, ArrowLeft, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface AudioItem {
@@ -154,8 +154,8 @@ export default function AdminAudioPage() {
               <div className="flex items-center justify-between mt-3 text-sm">
                 <span className="uppercase text-gray-500">{item.status}</span>
                 <div className="flex items-center gap-2">
-                  <button onClick={()=>setEditing(item) || setForm(item)} className="p-2 border rounded" title="Edit"><Edit className="w-4 h-4" /></button>
-                  <button onClick={()=>toggleVisibility(item)} className="p-2 border rounded" title="Toggle visibility">{item.visible ? <Eye className="w-4 h-4"/> : <EyeOff className="w-4 h-4"/>}</button>
+                  <button onClick={()=>{setEditing(item); setForm(item);}} className="p-2 border rounded" title="Edit"><Edit className="w-4 h-4" /></button>
+                  <button onClick={()=>toggleVisibility(item)} className="p-2 border rounded" title="Toggle visibility">{item.visible ? <Eye className="w-4 h-4"/> : <EyeOffIcon className="w-4 h-4"/>}</button>
                   <button onClick={()=>item._id && onDelete(item._id)} className="p-2 border rounded text-red-600" title="Delete"><Trash2 className="w-4 h-4" /></button>
                 </div>
               </div>

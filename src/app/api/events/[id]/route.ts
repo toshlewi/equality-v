@@ -44,10 +44,11 @@ const updateSchema = z.object({
   seoKeywords: z.array(z.string()).optional()
 });
 
-export async function GET(_request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     await connectDB();
-    const event = await Event.findById(params.id).lean();
+    const event = await Event.findById(id).lean();
     if (!event) return NextResponse.json({ success: false, message: 'Not found' }, { status: 404 });
     return NextResponse.json({ success: true, data: event });
   } catch (error) {
@@ -55,8 +56,9 @@ export async function GET(_request: NextRequest, { params }: { params: { id: str
   }
 }
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) return NextResponse.json({ success: false, message: 'Authentication required' }, { status: 401 });
     if (!['admin', 'editor'].includes(session.user.role)) return NextResponse.json({ success: false, message: 'Insufficient permissions' }, { status: 403 });
@@ -69,7 +71,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     if (payload.endDate) (payload as any).endDate = new Date(payload.endDate as any);
 
     const updated = await Event.findByIdAndUpdate(
-      params.id,
+      id,
       { ...payload, updatedAt: new Date(), updatedBy: session.user.id },
       { new: true }
     );
@@ -83,14 +85,15 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function DELETE(_request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) return NextResponse.json({ success: false, message: 'Authentication required' }, { status: 401 });
     if (!['admin', 'editor'].includes(session.user.role)) return NextResponse.json({ success: false, message: 'Insufficient permissions' }, { status: 403 });
 
     await connectDB();
-    await Event.findByIdAndDelete(params.id);
+    await Event.findByIdAndDelete(id);
     return NextResponse.json({ success: true, message: 'Event deleted' });
   } catch (error) {
     return NextResponse.json({ success: false, message: 'Failed to delete event' }, { status: 500 });

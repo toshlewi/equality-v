@@ -390,10 +390,10 @@ export default function BooksPage() {
                   className="border rounded-lg overflow-hidden hover:shadow-md transition-shadow"
                 >
                   {/* Book Cover */}
-                  <div className="aspect-[3/4] bg-gray-100 relative">
-                    {book.coverUrl || book.coverImage ? (
+                  <div className="aspect-[3/4] bg-gray-100 relative">   
+                    {book.coverUrl || (book as any).coverImage ? (
                       <img
-                        src={book.coverUrl || book.coverImage}
+                        src={book.coverUrl || (book as any).coverImage}
                         alt={book.title}
                         className="w-full h-full object-cover"
                       />

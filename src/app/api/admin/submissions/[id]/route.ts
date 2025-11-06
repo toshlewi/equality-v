@@ -6,9 +6,10 @@ import Article from '@/models/Article';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     
     if (!session?.user?.id) {
@@ -25,8 +26,6 @@ export async function GET(
         { status: 403 }
       );
     }
-
-    const { id } = params;
 
     await connectDB();
 

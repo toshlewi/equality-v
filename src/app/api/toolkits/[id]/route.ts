@@ -9,11 +9,10 @@ function isValidObjectId(id: string) {
   return mongoose.Types.ObjectId.isValid(id);
 }
 
-export async function GET(_request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     await connectDB();
-
-    const { id } = params;
     const query = isValidObjectId(id) ? { _id: id } : { slug: id };
 
     const toolkit = await Toolkit.findOne(query).lean();
@@ -28,8 +27,9 @@ export async function GET(_request: NextRequest, { params }: { params: { id: str
   }
 }
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
       return NextResponse.json({ success: false, error: 'Authentication required' }, { status: 401 });
@@ -42,8 +42,6 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     const updates = await request.json();
     updates.updatedBy = (session as any).user.id;
     updates.lastUpdated = new Date();
-
-    const { id } = params;
     const query = isValidObjectId(id) ? { _id: id } : { slug: id };
 
     const updated = await Toolkit.findOneAndUpdate(query, updates, { new: true }).lean();
@@ -58,8 +56,9 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function DELETE(_request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
       return NextResponse.json({ success: false, error: 'Authentication required' }, { status: 401 });
@@ -69,7 +68,6 @@ export async function DELETE(_request: NextRequest, { params }: { params: { id: 
     }
 
     await connectDB();
-    const { id } = params;
     const query = isValidObjectId(id) ? { _id: id } : { slug: id };
 
     const deleted = await Toolkit.findOneAndDelete(query).lean();

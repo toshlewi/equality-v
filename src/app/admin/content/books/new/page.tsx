@@ -255,7 +255,10 @@ export default function AddBookPage() {
                       id="pages"
                       type="number"
                       value={formData.pages || ''}
-                      onChange={(e) => handleInputChange('pages', parseInt(e.target.value) || undefined)}
+                      onChange={(e) => {
+                        const value = e.target.value ? parseInt(e.target.value) : undefined;
+                        handleInputChange('pages', value !== undefined ? value : '');
+                      }}
                       placeholder="300"
                     />
                   </div>

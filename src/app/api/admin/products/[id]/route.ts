@@ -40,9 +40,10 @@ const updateProductSchema = z.object({
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     
     if (!session?.user?.id) {
@@ -55,7 +56,7 @@ export async function GET(
 
     await connectDB();
 
-    const product = await Product.findById(params.id)
+    const product = await Product.findById(id)
       .populate('createdBy', 'name email')
       .populate('updatedBy', 'name email')
       .lean();
@@ -114,9 +115,10 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     
     if (!session?.user?.id) {
@@ -136,7 +138,7 @@ export async function PATCH(
       return ApiResponse.validationError(validation.errors);
     }
 
-    const product = await Product.findById(params.id);
+    const product = await Product.findById(id);
 
     if (!product) {
       return ApiResponse.notFound('Product not found');
@@ -196,9 +198,10 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     
     if (!session?.user?.id) {
@@ -211,7 +214,7 @@ export async function DELETE(
 
     await connectDB();
 
-    const product = await Product.findById(params.id);
+    const product = await Product.findById(id);
 
     if (!product) {
       return ApiResponse.notFound('Product not found');

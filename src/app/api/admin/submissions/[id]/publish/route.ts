@@ -7,9 +7,10 @@ import { sendEmail } from '@/lib/email';
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     
     if (!session?.user?.id) {
@@ -26,8 +27,6 @@ export async function POST(
         { status: 403 }
       );
     }
-
-    const { id } = params;
     const body = await request.json();
     const { reviewNotes, featured } = body;
 

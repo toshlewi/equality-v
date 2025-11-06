@@ -187,7 +187,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     if (status === 'loading') return; // Still loading
     if (!session) { router.push('/admin/login'); return; }
     // Check if user has admin access
-    if (session.user?.role && !['admin', 'editor', 'reviewer', 'finance'].includes(session.user.role)) {
+    const userRole = (session.user as any)?.role;
+    if (userRole && !['admin', 'editor', 'reviewer', 'finance'].includes(userRole)) {
       router.push('/admin/login?error=AccessDenied');
       return;
     }
@@ -261,7 +262,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         <div className="p-4 border-t border-gray-800">
           <div className="mb-3">
             <div className="text-sm font-medium">{session.user?.name || 'Admin'}</div>
-            <div className="text-xs text-gray-400 capitalize">{session.user?.role || 'Administrator'}</div>
+            <div className="text-xs text-gray-400 capitalize">{(session.user as any)?.role || 'Administrator'}</div>
           </div>
           <div className="flex items-center justify-between gap-2">
             <Link

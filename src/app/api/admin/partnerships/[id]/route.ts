@@ -18,9 +18,10 @@ const updatePartnershipSchema = z.object({
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     
     if (!session?.user?.id) {
@@ -34,7 +35,7 @@ export async function GET(
     await connectDB();
 
     const inquiry = await Contact.findOne({ 
-      _id: params.id,
+      _id: id,
       category: 'partnership'
     }).lean();
 
@@ -72,9 +73,10 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     
     if (!session?.user?.id) {
@@ -95,7 +97,7 @@ export async function PATCH(
     }
 
     const inquiry = await Contact.findOne({ 
-      _id: params.id,
+      _id: id,
       category: 'partnership'
     });
 
