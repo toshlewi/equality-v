@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { connectDB } from '@/lib/mongodb';
+import mongoose from 'mongoose';
 import Order from '@/models/Order';
 import Product from '@/models/Product';
 import { createPaymentIntent, createCheckoutSession } from '@/lib/stripe';
@@ -14,7 +15,10 @@ const orderSchema = z.object({
   items: z.array(z.object({
     productId: z.string(),
     quantity: z.number().min(1, 'Quantity must be at least 1'),
-    variant: z.string().optional()
+    variant: z.string().optional(),
+    // Optional fields to support demo mode without DB products
+    name: z.string().optional(),
+    price: z.number().positive().optional(),
   })).min(1, 'At least one item is required'),
   customerInfo: z.object({
     name: z.string().min(2, 'Name must be at least 2 characters').max(100),
@@ -34,6 +38,9 @@ const orderSchema = z.object({
   termsAccepted: z.boolean().refine(val => val === true, 'Terms must be accepted'),
   privacyAccepted: z.boolean().refine(val => val === true, 'Privacy policy must be accepted'),
   recaptchaToken: z.string().min(1, 'reCAPTCHA token is required')
+}).extend({
+  // Allow client to request skipping product validation in demo mode
+  skipValidation: z.boolean().optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -73,47 +80,65 @@ export async function POST(request: NextRequest) {
     };
 
     // Validate products and calculate totals
-    const orderItems = [];
+    const orderItems = [] as any[];
     let subtotal = 0;
     let totalItems = 0;
 
-    for (const item of sanitizedData.items) {
-      const product = await Product.findById(item.productId);
-      
-      if (!product) {
-        return NextResponse.json(
-          { success: false, error: `Product not found: ${item.productId}` },
-          { status: 400 }
-        );
+    const isDemoMode = process.env.SHOP_DEMO_MODE === 'true' || !!(validatedData as any).skipValidation;
+
+    for (const item of sanitizedData.items as Array<any>) {
+      if (isDemoMode) {
+        // In demo mode, use provided name/price or sensible defaults
+        const unitPrice = typeof item.price === 'number' && item.price > 0 ? item.price : 0;
+        const productName = item.name || `Item ${item.productId}`;
+        const itemTotal = unitPrice * item.quantity;
+        subtotal += itemTotal;
+        totalItems += item.quantity;
+
+        orderItems.push({
+          productId: item.productId,
+          productName,
+          productSlug: undefined,
+          variant: item.variant,
+          quantity: item.quantity,
+          unitPrice,
+          totalPrice: itemTotal,
+        });
+      } else {
+        const product = await Product.findById(item.productId);
+        if (!product) {
+          return NextResponse.json(
+            { success: false, error: `Product not found: ${item.productId}` },
+            { status: 400 }
+          );
+        }
+        if (!product.isActive) {
+          return NextResponse.json(
+            { success: false, error: `Product is not available: ${product.name}` },
+            { status: 400 }
+          );
+        }
+        if (product.stockQuantity < item.quantity) {
+          return NextResponse.json(
+            { success: false, error: `Insufficient stock for ${product.name}. Available: ${product.stockQuantity}` },
+            { status: 400 }
+          );
+        }
+
+        const itemTotal = product.price * item.quantity;
+        subtotal += itemTotal;
+        totalItems += item.quantity;
+
+        orderItems.push({
+          productId: product._id,
+          productName: product.name,
+          productSlug: product.slug,
+          variant: item.variant,
+          quantity: item.quantity,
+          unitPrice: product.price,
+          totalPrice: itemTotal
+        });
       }
-
-      if (!product.isActive) {
-        return NextResponse.json(
-          { success: false, error: `Product is not available: ${product.name}` },
-          { status: 400 }
-        );
-      }
-
-      if (product.stockQuantity < item.quantity) {
-        return NextResponse.json(
-          { success: false, error: `Insufficient stock for ${product.name}. Available: ${product.stockQuantity}` },
-          { status: 400 }
-        );
-      }
-
-      const itemTotal = product.price * item.quantity;
-      subtotal += itemTotal;
-      totalItems += item.quantity;
-
-      orderItems.push({
-        productId: product._id,
-        productName: product.name,
-        productSlug: product.slug,
-        variant: item.variant,
-        quantity: item.quantity,
-        unitPrice: product.price,
-        totalPrice: itemTotal
-      });
     }
 
     // Calculate shipping (simplified)
@@ -121,11 +146,48 @@ export async function POST(request: NextRequest) {
     const tax = subtotal * 0.1; // 10% tax
     const total = subtotal + shippingCost + tax;
 
+    // Map customer info to model shape (first/last & billingAddress)
+    const [firstName, ...lastParts] = sanitizedData.customerInfo.name.split(' ');
+    const lastName = lastParts.join(' ') || firstName;
+
+    const customerInfoForModel = {
+      firstName,
+      lastName,
+      email: sanitizedData.customerInfo.email,
+      phone: sanitizedData.customerInfo.phone,
+      billingAddress: {
+        street: sanitizedData.customerInfo.address.street,
+        city: sanitizedData.customerInfo.address.city,
+        state: sanitizedData.customerInfo.address.state,
+        country: sanitizedData.customerInfo.address.country,
+        postalCode: sanitizedData.customerInfo.address.postalCode,
+      },
+      // mirror as shippingAddress for now
+      shippingAddress: {
+        firstName,
+        lastName,
+        street: sanitizedData.customerInfo.address.street,
+        city: sanitizedData.customerInfo.address.city,
+        state: sanitizedData.customerInfo.address.state,
+        country: sanitizedData.customerInfo.address.country,
+        postalCode: sanitizedData.customerInfo.address.postalCode,
+        phone: sanitizedData.customerInfo.phone,
+      }
+    } as any;
+
+    // Map items to model shape
+    const itemsForModel = orderItems.map((it: any) => ({
+      productId: isDemoMode ? new mongoose.Types.ObjectId() : it.productId,
+      name: it.productName,
+      price: it.unitPrice,
+      quantity: it.quantity,
+    }));
+
     // Create order record
     const order = new Order({
       orderNumber: `EV-${Date.now()}`,
-      customerInfo: sanitizedData.customerInfo,
-      items: orderItems,
+      customerInfo: customerInfoForModel,
+      items: itemsForModel,
       subtotal,
       shippingCost,
       tax,
@@ -174,29 +236,16 @@ export async function POST(request: NextRequest) {
         }
       });
     } else if (validatedData.paymentMethod === 'mpesa') {
-      // Initiate M-Pesa STK Push
-      const stkPushResponse = await initiateSTKPush({
-        phone: sanitizedData.customerInfo.phone || sanitizedData.customerInfo.email,
-        amount: total,
-        accountReference: `order_${order._id.toString()}`,
-        transactionDesc: `Order ${order.orderNumber}`,
-        callbackUrl: `${process.env.NEXTAUTH_URL}/api/webhooks/mpesa`
-      });
-
-      // Update order with checkout request ID
-      order.paymentId = stkPushResponse.CheckoutRequestID;
-      await order.save();
-
+      // For M-Pesa, don't initiate STK Push here
+      // The user will initiate it from the payment step
       return NextResponse.json({
         success: true,
         data: {
           orderId: order._id.toString(),
           orderNumber: order.orderNumber,
-          checkoutRequestId: stkPushResponse.CheckoutRequestID,
-          merchantRequestId: stkPushResponse.MerchantRequestID,
-          total,
-          currency: 'USD',
-          message: stkPushResponse.CustomerMessage
+          amount: total,
+          currency: 'KES',
+          message: 'Order created. Please proceed to payment.'
         }
       });
     }

@@ -202,29 +202,17 @@ export async function POST(request: NextRequest) {
         });
 
       } else if (validatedData.paymentMethod === 'mpesa') {
-        // Initiate M-Pesa STK Push
-        const stkPushResponse = await initiateSTKPush({
-          phone: validatedData.attendeePhone || sanitizedData.attendeeEmail,
-          amount: totalPrice,
-          accountReference: `event_${registration._id.toString()}`,
-          transactionDesc: `Event Registration: ${event.title}`,
-          callbackUrl: `${process.env.NEXTAUTH_URL}/api/webhooks/mpesa`
-        });
-
-        registration.paymentId = stkPushResponse.CheckoutRequestID;
-        await registration.save();
-
+        // For M-Pesa, don't initiate STK Push here
+        // The user will initiate it from the payment step
         return NextResponse.json({
           success: true,
           data: {
             registrationId: registration._id.toString(),
             confirmationCode: registration.confirmationCode,
             status: 'pending_payment',
-            checkoutRequestId: stkPushResponse.CheckoutRequestID,
-            merchantRequestId: stkPushResponse.MerchantRequestID,
             amount: totalPrice,
-            currency,
-            message: stkPushResponse.CustomerMessage
+            currency: 'KES',
+            message: 'Registration created. Please proceed to payment.'
           }
         });
       }

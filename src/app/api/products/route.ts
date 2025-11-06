@@ -2,6 +2,40 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/mongodb';
 import Product from '@/models/Product';
 
+export async function GET(_request: NextRequest) {
+  try {
+    await connectDB();
+
+    const products = await Product.find({ isActive: true })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    return NextResponse.json({
+      success: true,
+      data: products.map((p: any) => ({
+        id: p._id.toString(),
+        name: p.name,
+        price: p.price,
+        image: p.images?.[0] || p.image || null,
+        category: p.category || 'general',
+        description: p.description || '',
+        inStock: (p.stockQuantity ?? 0) > 0,
+        sizes: p.sizes || [],
+        colors: p.colors || [],
+        rating: p.rating || 0,
+        reviews: p.reviewsCount || 0,
+      }))
+    });
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    return NextResponse.json({ success: false, error: 'Failed to fetch products' }, { status: 500 });
+  }
+}
+
+import { NextRequest, NextResponse } from 'next/server';
+import { connectDB } from '@/lib/mongodb';
+import Product from '@/models/Product';
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);

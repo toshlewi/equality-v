@@ -6,7 +6,7 @@ import Setting from '@/models/Setting';
 import { ApiResponse } from '@/lib/api-utils';
 import { createAuditLog } from '@/lib/audit';
 
-export async function GET(request: NextRequest) {
+export const GET = async (request: NextRequest) => {
   try {
     const session = await getServerSession(authOptions);
     

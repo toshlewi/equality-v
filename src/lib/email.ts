@@ -141,7 +141,7 @@ export async function sendBulkEmails(bulkData: BulkEmailData): Promise<{ success
 export async function trackDelivery(messageId: string): Promise<any> {
   try {
     const response = await mg.events.get(process.env.MAILGUN_DOMAIN!, {
-      messageId
+      'message-id': messageId
     });
     return response;
   } catch (error) {
@@ -833,6 +833,152 @@ async function renderOrderConfirmation(data: any): Promise<string> {
   </div>
 </body>
 </html>
+  `.trim();
+}
+
+async function renderContactConfirmation(data: any): Promise<string> {
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>We've received your message</title>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background: #4f46e5; color: white; padding: 20px; text-align: center; }
+    .content { padding: 20px; background: #f9fafb; }
+    .footer { padding: 20px; text-align: center; font-size: 12px; color: #666; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Thanks for reaching out!</h1>
+    </div>
+    <div class="content">
+      <p>Hi ${data.name || 'there'},</p>
+      <p>We have received your message and our team will get back to you shortly.</p>
+      ${data.subject ? `<p><strong>Subject:</strong> ${data.subject}</p>` : ''}
+      ${data.ticketId ? `<p><strong>Ticket ID:</strong> ${data.ticketId}</p>` : ''}
+      <p>Best regards,<br>The Equality Vanguard Team</p>
+    </div>
+    <div class="footer">
+      <p>Equality Vanguard | Building a more equitable future</p>
+    </div>
+  </div>
+</body>
+</html>
+  `.trim();
+}
+
+async function renderNewsletterWelcome(data: any): Promise<string> {
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Welcome to our newsletter</title>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background: #059669; color: white; padding: 20px; text-align: center; }
+    .content { padding: 20px; background: #f0fdf4; }
+    .footer { padding: 20px; text-align: center; font-size: 12px; color: #666; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Welcome!</h1>
+    </div>
+    <div class="content">
+      <p>Hi ${data.name || 'friend'},</p>
+      <p>Thanks for subscribing to our newsletter. You'll receive updates on events, publications, and ways to get involved.</p>
+      <p>If you ever wish to unsubscribe, visit ${data.unsubscribeUrl || 'our unsubscribe page'}.</p>
+      <p>With gratitude,<br>The Equality Vanguard Team</p>
+    </div>
+    <div class="footer">
+      <p>Equality Vanguard | Building a more equitable future</p>
+    </div>
+  </div>
+</body>
+</html>
+  `.trim();
+}
+
+async function renderPartnershipConfirmation(data: any): Promise<string> {
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Partnership Inquiry Received</title>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background: #f59e0b; color: white; padding: 20px; text-align: center; }
+    .content { padding: 20px; background: #fffbeb; }
+    .footer { padding: 20px; text-align: center; font-size: 12px; color: #666; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Thank you for your interest</h1>
+    </div>
+    <div class="content">
+      <p>Hi ${data.name || data.company || 'there'},</p>
+      <p>We have received your partnership inquiry and will review it promptly.</p>
+      ${data.company ? `<p><strong>Company:</strong> ${data.company}</p>` : ''}
+      <p>We appreciate your support in advancing gender justice.</p>
+      <p>Best regards,<br>The Equality Vanguard Team</p>
+    </div>
+    <div class="footer">
+      <p>Equality Vanguard | Building a more equitable future</p>
+    </div>
+  </div>
+</body>
+</html>
+  `.trim();
+}
+
+async function renderPartnershipStatusUpdate(data: any): Promise<string> {
+  const color = data.status === 'in_progress' ? '#059669' : (data.status === 'declined' ? '#dc2626' : '#4f46e5');
+  const bg = data.status === 'in_progress' ? '#f0fdf4' : (data.status === 'declined' ? '#fef2f2' : '#f9fafb');
+  const title = data.status === 'in_progress' ? 'Partnership Update' : (data.status === 'declined' ? 'Partnership Update' : 'Partnership Status');
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>${title}</title>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background: ${color}; color: white; padding: 20px; text-align: center; }
+    .content { padding: 20px; background: ${bg}; }
+    .footer { padding: 20px; text-align: center; font-size: 12px; color: #666; }
+  </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>${title}</h1>
+      </div>
+      <div class="content">
+        <p>Hi ${data.name || data.company || 'there'},</p>
+        <p>Your partnership inquiry status has been updated to <strong>${data.status}</strong>.</p>
+        ${data.notes ? `<p><strong>Notes:</strong><br>${data.notes}</p>` : ''}
+        <p>Thank you for your interest in working with us.</p>
+        <p>Best regards,<br>The Equality Vanguard Team</p>
+      </div>
+      <div class="footer">
+        <p>Equality Vanguard | Building a more equitable future</p>
+      </div>
+    </div>
+  </body>
+  </html>
   `.trim();
 }
 

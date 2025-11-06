@@ -115,8 +115,29 @@ async function handleMembershipPayment(
     return;
   }
 
-  // Update member status
+  // Verify payment amount matches expected amount (M-Pesa amounts are in KSh)
+  // Convert to USD if needed (assuming 1 USD = 100 KSh, adjust as needed)
+  const expectedAmount = member.amount;
+  const paidAmount = amount; // M-Pesa amount in KSh
+  
+  // Allow for currency conversion (assuming 1 USD = 100 KSh)
+  // You may need to adjust this conversion rate
+  const conversionRate = 100; // 1 USD = 100 KSh
+  const expectedAmountInKSh = expectedAmount * conversionRate;
+  
+  // Allow small rounding differences (e.g., KSh 10)
+  if (Math.abs(paidAmount - expectedAmountInKSh) > 10) {
+    console.error(`Payment amount mismatch for member ${memberId}. Expected: ${expectedAmountInKSh} KSh, Received: ${paidAmount} KSh`);
+    // Don't activate membership if amount doesn't match
+    member.paymentStatus = 'failed';
+    member.paymentError = `Payment amount mismatch. Expected: ${expectedAmountInKSh} KSh, Received: ${paidAmount} KSh`;
+    await member.save();
+    return;
+  }
+
+  // Only activate membership after payment is verified
   member.paymentStatus = 'paid';
+  member.status = 'active'; // Set status to active
   member.isActive = true;
   member.paymentId = transactionId;
   member.paymentDate = new Date();

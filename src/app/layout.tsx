@@ -7,6 +7,11 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Equality Vanguard",
   description: "Pan-African feminist collective dismantling oppression through law, art, and radical community",
+  icons: {
+    icon: "/images/EV ROUND LOGO.png",
+    shortcut: "/images/EV ROUND LOGO.png",
+    apple: "/images/EV ROUND LOGO.png",
+  },
 };
 
 export default function RootLayout({

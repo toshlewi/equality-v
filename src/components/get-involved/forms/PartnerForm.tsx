@@ -53,7 +53,7 @@ export function PartnerForm({ onClose }: PartnerFormProps) {
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
     if (file) {
-      setFormData(prev => ({ ...prev, logo: file }));
+    setFormData(prev => ({ ...prev, logo: file }));
       
       // Upload logo to get URL (simplified - in production, use signed URL)
       // For now, we'll handle it in the API
@@ -154,7 +154,7 @@ export function PartnerForm({ onClose }: PartnerFormProps) {
         privacyAccepted: formData.acceptTerms,
         recaptchaToken: recaptchaToken
       };
-      
+    
       // Only include optional fields if they have valid values
       if (logoUrl && logoUrl.trim() !== '') {
         payload.logoUrl = logoUrl;
@@ -183,7 +183,7 @@ export function PartnerForm({ onClose }: PartnerFormProps) {
       console.error('Partnership form submission error:', err);
       setError(err.message || 'An error occurred. Please try again.');
     } finally {
-      setIsSubmitting(false);
+    setIsSubmitting(false);
     }
   };
 

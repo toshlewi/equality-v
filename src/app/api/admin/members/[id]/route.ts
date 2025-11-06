@@ -124,9 +124,38 @@ export async function PATCH(
     const wasActive = member.isActive;
     const statusChanged = body.status && body.status !== member.status;
 
+    // Prevent manual activation without verified payment
+    if (body.isActive === true && member.paymentStatus !== 'paid') {
+      return ApiResponse.validationError({
+        isActive: 'Cannot activate membership without verified payment. Payment status must be "paid".'
+      });
+    }
+
+    // Prevent setting status to 'active' without verified payment
+    if (body.status === 'active' && member.paymentStatus !== 'paid') {
+      return ApiResponse.validationError({
+        status: 'Cannot set status to "active" without verified payment. Payment status must be "paid".'
+      });
+    }
+
+    // If activating, ensure payment was verified
+    if ((body.isActive === true || body.status === 'active') && member.paymentStatus !== 'paid') {
+      return ApiResponse.validationError({
+        isActive: 'Membership can only be activated after payment is verified and confirmed. Current payment status: ' + member.paymentStatus
+      });
+    }
+
     // Update member
     if (body.status !== undefined) member.status = body.status;
-    if (body.isActive !== undefined) member.isActive = body.isActive;
+    if (body.isActive !== undefined) {
+      // Only allow activation if payment is verified
+      if (body.isActive === true && member.paymentStatus !== 'paid') {
+        return ApiResponse.validationError({
+          isActive: 'Cannot activate membership. Payment must be verified first.'
+        });
+      }
+      member.isActive = body.isActive;
+    }
     if (body.notes !== undefined) member.notes = body.notes;
 
     await member.save();

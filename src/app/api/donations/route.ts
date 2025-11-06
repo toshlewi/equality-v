@@ -137,28 +137,15 @@ export async function POST(request: NextRequest) {
         }
       });
     } else if (validatedData.paymentMethod === 'mpesa') {
-      // Initiate M-Pesa STK Push
-      const stkPushResponse = await initiateSTKPush({
-        phone: validatedData.donorPhone,
-        amount: validatedData.amount,
-        accountReference: `donation_${donation._id.toString()}`,
-        transactionDesc: `Donation to Equality Vanguard`,
-        callbackUrl: `${process.env.NEXTAUTH_URL}/api/webhooks/mpesa`
-      });
-
-      // Update donation with checkout request ID
-      donation.paymentId = stkPushResponse.CheckoutRequestID;
-      await donation.save();
-
+      // For M-Pesa, don't initiate STK Push here
+      // The user will initiate it from the payment step
       return NextResponse.json({
         success: true,
         data: {
           donationId: donation._id.toString(),
-          checkoutRequestId: stkPushResponse.CheckoutRequestID,
-          merchantRequestId: stkPushResponse.MerchantRequestID,
           amount: validatedData.amount,
-          currency: 'USD',
-          message: stkPushResponse.CustomerMessage
+          currency: 'KES',
+          message: 'Donation created. Please proceed to payment.'
         }
       });
     }

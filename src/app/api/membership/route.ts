@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { connectDB } from '@/lib/mongodb';
 import Member from '@/models/Member';
 import { createPaymentIntent, createCheckoutSession } from '@/lib/stripe';
+import { initiateSTKPush } from '@/lib/mpesa';
 import { verifyRecaptcha } from '@/lib/security';
 import { sanitizeInput } from '@/lib/auth';
 import { formRateLimit } from '@/middleware/rate-limit';
@@ -12,6 +13,7 @@ const membershipSchema = z.object({
   email: z.string().email('Invalid email address'),
   phone: z.string().min(10, 'Phone number must be at least 10 characters'),
   membershipType: z.enum(['annual', 'lifetime', 'student', 'supporter']),
+  membershipYears: z.string().optional().transform(val => val ? parseInt(val) : 1),
   paymentMethod: z.enum(['stripe', 'mpesa']),
   couponCode: z.string().optional(),
   termsAccepted: z.boolean().refine(val => val === true, 'Terms must be accepted'),
@@ -52,7 +54,10 @@ export async function POST(request: NextRequest) {
     const existingMember = await Member.findOne({
       email: validatedData.email.toLowerCase(),
       isActive: true,
-      subscriptionEnd: { $gt: new Date() }
+      $or: [
+        { expiryDate: { $gt: new Date() } },
+        { expiryDate: null } // For lifetime memberships
+      ]
     });
 
     if (existingMember) {
@@ -71,8 +76,10 @@ export async function POST(request: NextRequest) {
       paymentMethod: validatedData.paymentMethod
     };
 
-    // Calculate amount
-    let amount = MEMBERSHIP_PRICES[validatedData.membershipType];
+    // Calculate amount based on membership years
+    // Membership is KSh 5,000 per year
+    const membershipYears = validatedData.membershipYears || 1;
+    let amount = membershipYears * 5000; // KSh 5,000 per year
     
     // TODO: Apply coupon discount if valid
     if (validatedData.couponCode) {
@@ -80,18 +87,15 @@ export async function POST(request: NextRequest) {
       console.log('Coupon code:', validatedData.couponCode);
     }
 
-    // Calculate subscription dates
+    // Calculate subscription dates based on membership years
     const startDate = new Date();
     const endDate = new Date();
     
-    if (validatedData.membershipType === 'annual') {
-      endDate.setFullYear(endDate.getFullYear() + 1);
-    } else if (validatedData.membershipType === 'lifetime') {
+    if (validatedData.membershipType === 'lifetime') {
       endDate.setFullYear(endDate.getFullYear() + 100); // 100 years = lifetime
-    } else if (validatedData.membershipType === 'student') {
-      endDate.setFullYear(endDate.getFullYear() + 1);
-    } else if (validatedData.membershipType === 'supporter') {
-      endDate.setFullYear(endDate.getFullYear() + 1);
+    } else {
+      // For annual, student, supporter - use membershipYears
+      endDate.setFullYear(endDate.getFullYear() + membershipYears);
     }
 
     // Split name into firstName and lastName
@@ -100,6 +104,7 @@ export async function POST(request: NextRequest) {
     const lastName = nameParts.slice(1).join(' ') || '';
 
     // Create member record with pending status
+    // IMPORTANT: Member is NOT active until payment is verified via webhook
     const member = new Member({
       firstName: firstName,
       lastName: lastName,
@@ -108,12 +113,12 @@ export async function POST(request: NextRequest) {
       membershipType: validatedData.membershipType,
       joinDate: startDate,
       expiryDate: endDate,
-      isActive: false, // Will be activated after payment
-      status: 'pending',
-      paymentStatus: 'pending',
+      isActive: false, // CRITICAL: Will ONLY be activated after payment is verified via webhook
+      status: 'pending', // CRITICAL: Will ONLY be set to 'active' after payment is verified
+      paymentStatus: 'pending', // Will be updated to 'paid' by webhook after payment
       paymentMethod: validatedData.paymentMethod,
       amount: amount,
-      currency: 'USD'
+      currency: 'KES'
     });
 
     await member.save();
@@ -121,17 +126,23 @@ export async function POST(request: NextRequest) {
     // Create payment based on method
     if (validatedData.paymentMethod === 'stripe') {
       // Create Stripe payment intent
+      // Convert KES to USD for Stripe (approximate conversion, adjust as needed)
+      // 1 USD ≈ 150 KES (update this rate as needed)
+      const usdAmount = Math.round((amount / 150) * 100) / 100; // Convert to USD and round to 2 decimals
       const paymentIntent = await createPaymentIntent({
-        amount: amount,
+        amount: Math.round(usdAmount * 100), // Convert to cents
         currency: 'usd',
         metadata: {
           memberId: member._id.toString(),
           membershipType: validatedData.membershipType,
+          membershipYears: membershipYears.toString(),
+          originalAmount: amount.toString(),
+          originalCurrency: 'KES',
           type: 'membership'
         },
         customerEmail: sanitizedData.email,
         customerName: sanitizedData.name,
-        description: `Equality Vanguard ${validatedData.membershipType} membership`
+        description: `Equality Vanguard ${validatedData.membershipType} membership (${membershipYears} year${membershipYears > 1 ? 's' : ''})`
       });
 
       // Update member with payment ID
@@ -144,21 +155,21 @@ export async function POST(request: NextRequest) {
           memberId: member._id.toString(),
           paymentIntentId: paymentIntent.id,
           clientSecret: paymentIntent.client_secret,
-          amount: amount,
-          currency: 'USD'
+        amount: amount,
+        currency: 'KES'
         }
       });
     } else if (validatedData.paymentMethod === 'mpesa') {
-      // TODO: Implement M-Pesa STK Push
-      // For now, return success with pending status
+      // For M-Pesa, don't initiate STK Push here
+      // The user will initiate it from the payment step
+      // This allows the membership to be created first, then payment can be initiated
       return NextResponse.json({
         success: true,
         data: {
           memberId: member._id.toString(),
-          status: 'pending_mpesa',
           amount: amount,
-          currency: 'USD',
-          message: 'M-Pesa integration coming soon'
+          currency: 'KES',
+          message: 'Membership created. Please proceed to payment.'
         }
       });
     }
@@ -173,8 +184,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Provide more specific error messages
+    const errorMessage = error instanceof Error 
+      ? error.message 
+      : 'Failed to create membership';
+    
     return NextResponse.json(
-      { success: false, error: 'Failed to create membership' },
+      { success: false, error: errorMessage },
       { status: 500 }
     );
   }

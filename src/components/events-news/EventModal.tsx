@@ -1,13 +1,120 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { Calendar, MapPin, Clock, Users, CreditCard, Smartphone, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { loadStripe, StripeElementsOptions } from '@stripe/stripe-js';
+import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+
+// Initialize Stripe
+const stripeKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || process.env.STRIPE_PUBLISHABLE_KEY || '';
+const stripePromise = stripeKey ? loadStripe(stripeKey) : null;
+
+// Card payment form component
+function CardPaymentForm({ 
+  clientSecret, 
+  onPaymentSuccess, 
+  onPaymentError,
+  amount 
+}: { 
+  clientSecret: string; 
+  onPaymentSuccess: (paymentIntentId: string) => void;
+  onPaymentError: (error: string) => void;
+  amount: number;
+}) {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!stripe || !elements) {
+      return;
+    }
+
+    setIsProcessing(true);
+    setError(null);
+
+    const cardElement = elements.getElement(CardElement);
+    if (!cardElement) {
+      setError('Card element not found');
+      setIsProcessing(false);
+      return;
+    }
+
+    try {
+      const { error: confirmError, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: {
+          card: cardElement,
+        }
+      });
+
+      if (confirmError) {
+        setError(confirmError.message || 'Payment failed');
+        onPaymentError(confirmError.message || 'Payment failed');
+      } else if (paymentIntent && paymentIntent.status === 'succeeded') {
+        onPaymentSuccess(paymentIntent.id);
+      } else {
+        setError('Payment was not successful');
+        onPaymentError('Payment was not successful');
+      }
+    } catch (err: any) {
+      const errorMessage = err.message || 'An error occurred during payment';
+      setError(errorMessage);
+      onPaymentError(errorMessage);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const cardElementOptions = {
+    style: {
+      base: {
+        fontSize: '16px',
+        color: '#424770',
+        '::placeholder': {
+          color: '#aab7c4',
+        },
+        fontFamily: 'League Spartan, sans-serif',
+      },
+      invalid: {
+        color: '#9e2146',
+      },
+    },
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="border border-gray-300 rounded-lg p-4 bg-white">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Card Details *
+        </label>
+        <CardElement options={cardElementOptions} />
+      </div>
+      
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+          <p className="text-red-700 text-sm">{error}</p>
+        </div>
+      )}
+
+      <button
+        type="submit"
+        disabled={!stripe || isProcessing}
+        className="w-full px-6 py-3 bg-brand-yellow text-brand-teal rounded-lg hover:bg-brand-orange hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-semibold"
+      >
+        {isProcessing ? 'Processing Payment...' : `Pay KSh ${amount.toLocaleString()}`}
+      </button>
+    </form>
+  );
+}
 
 interface Event {
   id: string;
@@ -36,10 +143,30 @@ export default function EventModal({ event, isOpen, onClose }: EventModalProps) 
     email: '',
     phone: '',
     tickets: 1,
-    paymentMethod: '',
+    paymentMethod: 'stripe' as 'stripe' | 'mpesa',
     memberCode: ''
   });
+  const [paymentData, setPaymentData] = useState<{
+    clientSecret?: string;
+    registrationId?: string;
+    checkoutRequestId?: string;
+    amount: number;
+  } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [paymentConfirmed, setPaymentConfirmed] = useState(false);
+  const [mpesaPhone, setMpesaPhone] = useState('');
+  const paymentPollInterval = useRef<NodeJS.Timeout | null>(null);
+
+  // Cleanup polling on unmount
+  useEffect(() => {
+    return () => {
+      if (paymentPollInterval.current) {
+        clearInterval(paymentPollInterval.current);
+      }
+    };
+  }, []);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -61,24 +188,208 @@ export default function EventModal({ event, isOpen, onClose }: EventModalProps) 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setError(null);
     
-    // TODO: Implement actual registration API call
-    // POST /api/events/register
-    // {
-    //   eventId: event.id,
-    //   attendeeName: formData.name,
-    //   email: formData.email,
-    //   phone: formData.phone,
-    //   ticketCount: formData.tickets,
-    //   paymentMethod: formData.paymentMethod,
-    //   memberCode: formData.memberCode
-    // }
-    
-    // Simulate API call
-    setTimeout(() => {
-      setRegistrationStep('confirmation');
+    try {
+      // Client-side validation
+      if (!formData.name || formData.name.trim().length < 2) {
+        throw new Error('Please enter your name (at least 2 characters).');
+      }
+      
+      if (!formData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+        throw new Error('Please enter a valid email address.');
+      }
+      
+      if (!formData.phone || formData.phone.trim().length < 10) {
+        throw new Error('Please enter a valid phone number (at least 10 characters).');
+      }
+
+      // If event is free, skip payment
+      if (!event.price || event.price === 0) {
+        const response = await fetch('/api/events/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            eventId: event.id,
+            attendeeName: formData.name,
+            email: formData.email,
+            phone: formData.phone,
+            ticketCount: formData.tickets,
+            paymentMethod: 'free',
+            memberCode: formData.memberCode || undefined
+          }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.error || 'Failed to register for event');
+        }
+
+        setRegistrationStep('confirmation');
+        return;
+      }
+
+      // For paid events, create registration and move to payment
+      const response = await fetch('/api/events/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          eventId: event.id,
+          attendeeName: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          ticketCount: formData.tickets,
+          paymentMethod: formData.paymentMethod,
+          memberCode: formData.memberCode || undefined
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        const errorMessage = data.details 
+          ? Array.isArray(data.details) 
+            ? data.details.map((err: any) => `${err.path?.join('.')}: ${err.message}`).join(', ')
+            : data.error || 'Failed to register for event'
+          : data.error || 'Failed to register for event';
+        throw new Error(errorMessage);
+      }
+
+      // Store payment data and move to payment step
+      setPaymentData({
+        clientSecret: data.data?.clientSecret,
+        registrationId: data.data?.registrationId,
+        checkoutRequestId: data.data?.checkoutRequestId,
+        amount: totalPrice
+      });
+
+      // For M-Pesa, use the phone number from form
+      if (formData.paymentMethod === 'mpesa') {
+        let phoneNumber = formData.phone.trim();
+        if (!phoneNumber.startsWith('254')) {
+          if (phoneNumber.startsWith('0')) {
+            phoneNumber = '254' + phoneNumber.substring(1);
+          } else if (phoneNumber.startsWith('7')) {
+            phoneNumber = '254' + phoneNumber;
+          } else {
+            phoneNumber = '254' + phoneNumber;
+          }
+        }
+        setMpesaPhone(phoneNumber);
+      }
+
+      setRegistrationStep('payment');
+    } catch (err: any) {
+      console.error('Event registration error:', err);
+      setError(err.message || 'An error occurred. Please try again.');
+    } finally {
       setIsSubmitting(false);
-    }, 2000);
+    }
+  };
+
+  // Handle Stripe payment success
+  const handleStripePaymentSuccess = async (paymentIntentId: string) => {
+    setPaymentConfirmed(true);
+    setRegistrationStep('confirmation');
+  };
+
+  // Handle M-Pesa STK Push
+  const handleMpesaPayment = async () => {
+    if (!mpesaPhone || mpesaPhone.trim().length < 10) {
+      setError('Please enter a valid M-Pesa phone number (e.g., 254712345678)');
+      return;
+    }
+
+    setIsProcessingPayment(true);
+    setError(null);
+
+    try {
+      const response = await fetch('/api/mpesa/stk-push', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          phone: mpesaPhone.trim(),
+          amount: totalPrice,
+          accountReference: `event_${paymentData?.registrationId}`,
+          transactionDesc: `Event Registration: ${event.title}`
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        const errorMessage = data.details 
+          ? Array.isArray(data.details) 
+            ? data.details.map((err: any) => `${err.path?.join('.')}: ${err.message}`).join(', ')
+            : data.error || 'Failed to initiate M-Pesa payment'
+          : data.error || 'Failed to initiate M-Pesa payment';
+        throw new Error(errorMessage);
+      }
+
+      if (data.data?.checkoutRequestId) {
+        setPaymentData(prev => prev ? {
+          ...prev,
+          checkoutRequestId: data.data.checkoutRequestId
+        } : null);
+
+        startPaymentPolling(data.data.checkoutRequestId);
+      }
+    } catch (err: any) {
+      console.error('M-Pesa payment error:', err);
+      setError(err.message || 'Failed to initiate M-Pesa payment');
+      setIsProcessingPayment(false);
+    }
+  };
+
+  // Poll for M-Pesa payment status
+  const startPaymentPolling = (checkoutRequestId: string) => {
+    if (paymentPollInterval.current) {
+      clearInterval(paymentPollInterval.current);
+    }
+
+    paymentPollInterval.current = setInterval(async () => {
+      try {
+        const response = await fetch(`/api/mpesa/query-status?checkoutRequestId=${checkoutRequestId}`);
+        const data = await response.json();
+
+        if (data.success && data.data?.resultCode === 0) {
+          if (paymentPollInterval.current) {
+            clearInterval(paymentPollInterval.current);
+            paymentPollInterval.current = null;
+          }
+          setPaymentConfirmed(true);
+          setIsProcessingPayment(false);
+          setRegistrationStep('confirmation');
+        } else if (data.data?.resultCode && data.data.resultCode !== 1032) {
+          if (paymentPollInterval.current) {
+            clearInterval(paymentPollInterval.current);
+            paymentPollInterval.current = null;
+          }
+          setError(data.data.resultDesc || 'Payment failed');
+          setIsProcessingPayment(false);
+        }
+      } catch (err) {
+        console.error('Error polling payment status:', err);
+      }
+    }, 3000);
+
+    setTimeout(() => {
+      if (paymentPollInterval.current) {
+        clearInterval(paymentPollInterval.current);
+        paymentPollInterval.current = null;
+      }
+      if (!paymentConfirmed) {
+        setError('Payment timeout. Please try again.');
+        setIsProcessingPayment(false);
+      }
+    }, 120000);
   };
 
   const resetModal = () => {
@@ -284,6 +595,30 @@ export default function EventModal({ event, isOpen, onClose }: EventModalProps) 
                       />
                     </div>
 
+                    {event.price && event.price > 0 && (
+                      <div>
+                        <Label htmlFor="paymentMethod">Payment Method *</Label>
+                        <Select
+                          value={formData.paymentMethod}
+                          onValueChange={(value: 'stripe' | 'mpesa') => setFormData({ ...formData, paymentMethod: value })}
+                        >
+                          <SelectTrigger id="paymentMethod">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="stripe">Credit/Debit Card (Stripe)</SelectItem>
+                            <SelectItem value="mpesa">M-Pesa</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+
+                    {error && (
+                      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                        <p className="text-red-700 text-sm">{error}</p>
+                      </div>
+                    )}
+
                     <div className="flex justify-end space-x-4">
                       <Button
                         type="button"
@@ -297,7 +632,7 @@ export default function EventModal({ event, isOpen, onClose }: EventModalProps) 
                         disabled={isSubmitting}
                         className="bg-brand-yellow text-brand-teal hover:bg-brand-orange hover:text-white"
                       >
-                        {isSubmitting ? 'Processing...' : 'Continue to Payment'}
+                        {isSubmitting ? 'Processing...' : (event.price && event.price > 0 ? 'Continue to Payment' : 'Complete Registration')}
                       </Button>
                     </div>
                   </form>
@@ -305,77 +640,135 @@ export default function EventModal({ event, isOpen, onClose }: EventModalProps) 
               )}
 
               {/* Payment Selection */}
-              {registrationStep === 'payment' && (
+              {registrationStep === 'payment' && paymentData && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="border-t pt-6"
                 >
-                  <h3 className="font-fredoka text-lg font-semibold text-white mb-4">
-                    Payment Method
-                  </h3>
+                  <div className="flex items-center justify-between mb-6">
+                    <button
+                      onClick={() => setRegistrationStep('form')}
+                      className="text-white hover:text-brand-yellow transition-colors flex items-center gap-2"
+                    >
+                      ← Back
+                    </button>
+                    <div className="text-sm text-white/70">
+                      Step 2 of 2
+                    </div>
+                  </div>
+
+                  <div className="bg-brand-yellow/20 rounded-xl p-6 border-2 border-brand-yellow/50 mb-6">
+                    <div className="text-center">
+                      <h3 className="text-xl font-bold text-white mb-2 font-fredoka">
+                        Payment Amount
+                      </h3>
+                      <div className="text-3xl font-bold text-white font-fredoka">
+                        {formatPrice(paymentData.amount)}
+                      </div>
+                    </div>
+                  </div>
+
+                  {formData.paymentMethod === 'stripe' && paymentData.clientSecret && stripePromise && (
+                    <Elements stripe={stripePromise} options={{
+                      clientSecret: paymentData.clientSecret,
+                      appearance: { theme: 'stripe' },
+                    }}>
+                      <CardPaymentForm
+                        clientSecret={paymentData.clientSecret}
+                        onPaymentSuccess={handleStripePaymentSuccess}
+                        onPaymentError={(err) => setError(err)}
+                        amount={paymentData.amount}
+                      />
+                    </Elements>
+                  )}
                   
-                  <div className="space-y-4">
-                    <div className="text-center text-xl font-semibold text-white mb-6">
-                      Total: {formatPrice(totalPrice)}
+                  {formData.paymentMethod === 'stripe' && !stripePromise && (
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                      <p className="text-yellow-700 text-sm">
+                        Stripe is not configured. Please set NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY in your environment variables.
+                      </p>
                     </div>
+                  )}
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => setFormData({ ...formData, paymentMethod: 'stripe' })}
-                        className={`p-6 border-2 rounded-lg text-left transition-all ${
-                          formData.paymentMethod === 'stripe'
-                            ? 'border-brand-yellow bg-brand-yellow/10'
-                            : 'border-gray-200 hover:border-gray-300'
-                        }`}
-                      >
-                        <div className="flex items-center space-x-3">
-                          <CreditCard className="w-6 h-6 text-brand-orange" />
-                          <div>
-                            <div className="font-semibold">Stripe</div>
-                            <div className="text-sm text-gray-500">Credit/Debit Card</div>
-                          </div>
-                        </div>
-                      </motion.button>
+                  {formData.paymentMethod === 'mpesa' && (
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="mpesaPhone">M-Pesa Phone Number *</Label>
+                        <Input
+                          id="mpesaPhone"
+                          type="tel"
+                          value={mpesaPhone}
+                          onChange={(e) => setMpesaPhone(e.target.value)}
+                          required
+                          placeholder="254712345678"
+                        />
+                        <p className="text-xs text-white/70 mt-1">
+                          Format: 254712345678 (include country code)
+                        </p>
+                      </div>
 
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => setFormData({ ...formData, paymentMethod: 'mpesa' })}
-                        className={`p-6 border-2 rounded-lg text-left transition-all ${
-                          formData.paymentMethod === 'mpesa'
-                            ? 'border-brand-yellow bg-brand-yellow/10'
-                            : 'border-gray-200 hover:border-gray-300'
-                        }`}
-                      >
-                        <div className="flex items-center space-x-3">
-                          <Smartphone className="w-6 h-6 text-brand-orange" />
-                          <div>
-                            <div className="font-semibold">M-Pesa</div>
-                            <div className="text-sm text-gray-500">Mobile Money</div>
-                          </div>
-                        </div>
-                      </motion.button>
-                    </div>
-
-                    <div className="flex justify-end space-x-4">
                       <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => setRegistrationStep('form')}
+                        onClick={handleMpesaPayment}
+                        disabled={!mpesaPhone || isProcessingPayment || paymentConfirmed}
+                        className="w-full bg-brand-yellow text-brand-teal hover:bg-brand-orange hover:text-white disabled:opacity-50"
                       >
-                        Back
+                        {isProcessingPayment 
+                          ? 'Processing STK Push...' 
+                          : paymentConfirmed 
+                          ? 'Payment Confirmed!' 
+                          : 'Send M-Pesa STK Push'}
                       </Button>
-                      <Button
-                        onClick={() => setRegistrationStep('confirmation')}
-                        disabled={!formData.paymentMethod}
-                        className="bg-brand-yellow text-brand-teal hover:bg-brand-orange hover:text-white"
-                      >
-                        Complete Registration
-                      </Button>
+
+                      {isProcessingPayment && !paymentConfirmed && (
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                          <p className="text-blue-700 text-sm">
+                            Please check your phone and complete the M-Pesa payment. We're waiting for confirmation...
+                          </p>
+                        </div>
+                      )}
+
+                      {error && error.includes('not configured') && (
+                        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                          <p className="text-yellow-800 text-sm font-semibold mb-2">
+                            M-Pesa Configuration Required
+                          </p>
+                          <p className="text-yellow-700 text-sm">
+                            {error}
+                          </p>
+                        </div>
+                      )}
                     </div>
+                  )}
+
+                  {error && !error.includes('not configured') && (
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                      <p className="text-red-700 text-sm">{error}</p>
+                    </div>
+                  )}
+
+                  {paymentConfirmed && (
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                      <p className="text-green-700 text-sm">
+                        ✅ Payment confirmed! Your registration is being processed. You'll receive a confirmation email shortly.
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="flex justify-end space-x-4 mt-6">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setRegistrationStep('form')}
+                    >
+                      Back
+                    </Button>
+                    <Button
+                      onClick={handleClose}
+                      className="bg-brand-yellow text-brand-teal hover:bg-brand-orange hover:text-white"
+                    >
+                      Cancel
+                    </Button>
                   </div>
                 </motion.div>
               )}

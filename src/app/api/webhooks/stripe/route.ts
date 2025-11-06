@@ -116,8 +116,32 @@ async function handleMembershipPayment(paymentIntent: any, memberId: string) {
     return;
   }
 
-  // Update member status
+  // Verify payment amount matches expected amount (convert from cents to dollars)
+  const paidAmount = paymentIntent.amount / 100; // Stripe amounts are in cents
+  const expectedAmount = member.amount;
+  
+  // Allow small rounding differences (e.g., $0.01)
+  if (Math.abs(paidAmount - expectedAmount) > 0.01) {
+    console.error(`Payment amount mismatch for member ${memberId}. Expected: ${expectedAmount}, Received: ${paidAmount}`);
+    // Don't activate membership if amount doesn't match
+    member.paymentStatus = 'failed';
+    member.paymentError = `Payment amount mismatch. Expected: ${expectedAmount}, Received: ${paidAmount}`;
+    await member.save();
+    return;
+  }
+
+  // Verify payment status from Stripe
+  if (paymentIntent.status !== 'succeeded') {
+    console.error(`Payment not succeeded for member ${memberId}. Status: ${paymentIntent.status}`);
+    member.paymentStatus = 'failed';
+    member.paymentError = `Payment status: ${paymentIntent.status}`;
+    await member.save();
+    return;
+  }
+
+  // Only activate membership after payment is verified
   member.paymentStatus = 'paid';
+  member.status = 'active'; // Set status to active
   member.isActive = true;
   member.paymentId = paymentIntent.id;
   member.paymentDate = new Date();

@@ -125,7 +125,7 @@ export function ContactForm({ onClose }: ContactFormProps) {
       console.error('Contact form submission error:', err);
       setError(err.message || 'An error occurred. Please try again.');
     } finally {
-      setIsSubmitting(false);
+    setIsSubmitting(false);
     }
   };
 

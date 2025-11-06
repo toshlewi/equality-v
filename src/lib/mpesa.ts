@@ -42,15 +42,48 @@ class MpesaClient {
   private baseUrl: string;
 
   constructor() {
-    this.consumerKey = process.env.MPESA_CONSUMER_KEY!;
-    this.consumerSecret = process.env.MPESA_CONSUMER_SECRET!;
-    this.shortCode = process.env.MPESA_SHORTCODE!;
-    this.passkey = process.env.MPESA_PASSKEY!;
+    this.consumerKey = process.env.MPESA_CONSUMER_KEY || '';
+    this.consumerSecret = process.env.MPESA_CONSUMER_SECRET || '';
+    // Use MPESA_BUSINESS_SHORTCODE if available, otherwise fall back to MPESA_SHORTCODE
+    this.shortCode = process.env.MPESA_BUSINESS_SHORTCODE || process.env.MPESA_SHORTCODE || '';
+    this.passkey = process.env.MPESA_PASSKEY || '';
     this.environment = (process.env.MPESA_ENVIRONMENT as 'sandbox' | 'production') || 'sandbox';
     
     this.baseUrl = this.environment === 'production' 
       ? 'https://api.safaricom.co.ke'
       : 'https://sandbox.safaricom.co.ke';
+    
+    // Debug logging (only in development)
+    if (process.env.NODE_ENV === 'development') {
+      console.log('M-Pesa Configuration:', {
+        shortCode: this.shortCode ? `${this.shortCode.substring(0, 3)}***` : 'NOT SET',
+        hasConsumerKey: !!this.consumerKey,
+        hasConsumerSecret: !!this.consumerSecret,
+        hasPasskey: !!this.passkey,
+        environment: this.environment,
+        baseUrl: this.baseUrl
+      });
+    }
+  }
+
+  /**
+   * Check if M-Pesa is configured
+   */
+  isConfigured(): boolean {
+    // Check if shortcode is a valid numeric string (M-Pesa shortcodes are numeric)
+    const isValidShortCode = this.shortCode && 
+      this.shortCode !== 'your_mpesa_shortcode' &&
+      /^\d+$/.test(this.shortCode); // Should be numeric only
+    
+    return !!(
+      this.consumerKey && 
+      this.consumerKey !== 'your_mpesa_consumer_key' &&
+      this.consumerSecret && 
+      this.consumerSecret !== 'your_mpesa_consumer_secret' &&
+      isValidShortCode &&
+      this.passkey && 
+      this.passkey !== 'your_mpesa_passkey'
+    );
   }
 
   /**
@@ -58,6 +91,11 @@ class MpesaClient {
    */
   async generateAccessToken(): Promise<string> {
     try {
+      // Check if credentials are configured
+      if (!this.isConfigured()) {
+        throw new Error('M-Pesa is not configured. Please set MPESA_CONSUMER_KEY, MPESA_CONSUMER_SECRET, MPESA_SHORTCODE, and MPESA_PASSKEY in your environment variables.');
+      }
+
       const auth = Buffer.from(`${this.consumerKey}:${this.consumerSecret}`).toString('base64');
       
       const response = await fetch(`${this.baseUrl}/oauth/v1/generate?grant_type=client_credentials`, {
@@ -70,12 +108,21 @@ class MpesaClient {
       const data = await response.json();
       
       if (!response.ok) {
-        throw new Error(`Failed to get access token: ${data.errorMessage || 'Unknown error'}`);
+        const errorMsg = data.errorMessage || data.error_description || data.error || 'Unknown error';
+        throw new Error(`Failed to get access token: ${errorMsg}`);
+      }
+
+      if (!data.access_token) {
+        throw new Error('Access token not received from M-Pesa API');
       }
 
       return data.access_token;
     } catch (error) {
       console.error('Error generating M-Pesa access token:', error);
+      // Re-throw the error with its original message if it's already an Error
+      if (error instanceof Error) {
+        throw error;
+      }
       throw new Error('Failed to generate access token');
     }
   }
@@ -85,7 +132,12 @@ class MpesaClient {
    */
   private generatePassword(): string {
     const timestamp = new Date().toISOString().replace(/[^0-9]/g, '').slice(0, -3);
-    const password = Buffer.from(`${this.shortCode}${this.passkey}${timestamp}`).toString('base64');
+    // Ensure shortCode is numeric for password generation
+    const businessShortCode = this.shortCode.trim();
+    if (!/^\d+$/.test(businessShortCode)) {
+      throw new Error(`Invalid BusinessShortCode for password generation: ${businessShortCode}. M-Pesa shortcode must be numeric only.`);
+    }
+    const password = Buffer.from(`${businessShortCode}${this.passkey}${timestamp}`).toString('base64');
     return password;
   }
 
@@ -101,18 +153,40 @@ class MpesaClient {
    */
   async initiateSTKPush(data: STKPushData): Promise<STKPushResponse> {
     try {
+      // Check if M-Pesa is configured
+      if (!this.isConfigured()) {
+        throw new Error('M-Pesa is not configured. Please set MPESA_CONSUMER_KEY, MPESA_CONSUMER_SECRET, MPESA_SHORTCODE, and MPESA_PASSKEY in your environment variables.');
+      }
+
       const accessToken = await this.generateAccessToken();
       const timestamp = this.generateTimestamp();
       const password = this.generatePassword();
 
+      // Ensure shortCode is numeric (required by M-Pesa API)
+      const businessShortCode = this.shortCode.trim();
+      if (!/^\d+$/.test(businessShortCode)) {
+        throw new Error(`Invalid BusinessShortCode: ${businessShortCode}. M-Pesa shortcode must be numeric only (e.g., 174379). Current value: "${this.shortCode}". Please check MPESA_BUSINESS_SHORTCODE or MPESA_SHORTCODE in your environment variables.`);
+      }
+
+      // Log the shortcode being used (for debugging)
+      if (process.env.NODE_ENV === 'development') {
+        console.log('M-Pesa STK Push - Using BusinessShortCode:', businessShortCode, 'Type:', typeof businessShortCode);
+        console.log('M-Pesa STK Push - Payload:', {
+          BusinessShortCode: businessShortCode,
+          Amount: Math.round(data.amount),
+          PhoneNumber: data.phone,
+          AccountReference: data.accountReference
+        });
+      }
+
       const payload = {
-        BusinessShortCode: this.shortCode,
+        BusinessShortCode: businessShortCode,
         Password: password,
         Timestamp: timestamp,
         TransactionType: 'CustomerPayBillOnline',
         Amount: Math.round(data.amount),
         PartyA: data.phone,
-        PartyB: this.shortCode,
+        PartyB: businessShortCode,
         PhoneNumber: data.phone,
         CallBackURL: data.callbackUrl || `${process.env.NEXTAUTH_URL}/api/webhooks/mpesa`,
         AccountReference: data.accountReference,
@@ -130,13 +204,38 @@ class MpesaClient {
 
       const result = await response.json();
 
+      // Log the full response in development for debugging
+      if (process.env.NODE_ENV === 'development') {
+        console.log('M-Pesa STK Push Response:', {
+          status: response.status,
+          statusText: response.statusText,
+          responseCode: result.ResponseCode,
+          responseDescription: result.ResponseDescription,
+          customerMessage: result.CustomerMessage,
+          errorMessage: result.errorMessage,
+          error: result.error,
+          fullResponse: result
+        });
+      }
+
       if (!response.ok) {
-        throw new Error(`STK Push failed: ${result.errorMessage || 'Unknown error'}`);
+        // M-Pesa API returns errorMessage or error_description
+        const errorMsg = result.errorMessage || result.error_description || result.error || 'Unknown error';
+        throw new Error(`STK Push failed: ${errorMsg}`);
+      }
+
+      // Check if M-Pesa API returned an error response code
+      if (result.ResponseCode && result.ResponseCode !== '0') {
+        throw new Error(`M-Pesa error: ${result.ResponseDescription || result.CustomerMessage || 'Transaction failed'}`);
       }
 
       return result;
     } catch (error) {
       console.error('Error initiating STK Push:', error);
+      // Re-throw the error with its original message if it's already an Error
+      if (error instanceof Error) {
+        throw error;
+      }
       throw new Error('Failed to initiate STK Push');
     }
   }
@@ -150,8 +249,14 @@ class MpesaClient {
       const timestamp = this.generateTimestamp();
       const password = this.generatePassword();
 
+      // Ensure shortCode is numeric (required by M-Pesa API)
+      const businessShortCode = this.shortCode.trim();
+      if (!/^\d+$/.test(businessShortCode)) {
+        throw new Error(`Invalid BusinessShortCode: ${businessShortCode}. M-Pesa shortcode must be numeric only (e.g., 174379). Please check MPESA_BUSINESS_SHORTCODE or MPESA_SHORTCODE in your environment variables.`);
+      }
+
       const payload = {
-        BusinessShortCode: this.shortCode,
+        BusinessShortCode: businessShortCode,
         Password: password,
         Timestamp: timestamp,
         CheckoutRequestID: checkoutRequestId,

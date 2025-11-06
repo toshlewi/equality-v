@@ -1,5 +1,10 @@
 import mongoose, { Schema, model, models } from 'mongoose';
 
+// Clear model from cache if it exists to ensure schema changes take effect
+if (models.Member) {
+  delete models.Member;
+}
+
 const MemberSchema = new Schema({
   email: { type: String, required: true, unique: true },
   firstName: { type: String, required: true },
@@ -7,7 +12,7 @@ const MemberSchema = new Schema({
   phone: { type: String },
   membershipType: { 
     type: String, 
-    enum: ['individual', 'student', 'organization', 'supporter'],
+    enum: ['annual', 'lifetime', 'student', 'supporter'],
     required: true 
   },
   status: { 
@@ -15,7 +20,7 @@ const MemberSchema = new Schema({
     enum: ['pending', 'active', 'suspended', 'cancelled'],
     default: 'pending' 
   },
-  isActive: { type: Boolean, default: true },
+  isActive: { type: Boolean, default: false }, // CRITICAL: Only activated after payment verification
   joinDate: { type: Date, default: Date.now },
   expiryDate: { type: Date },
   paymentStatus: { 
@@ -29,6 +34,9 @@ const MemberSchema = new Schema({
     default: 'stripe' 
   },
   paymentId: { type: String },
+  paymentDate: { type: Date }, // Date when payment was confirmed
+  paymentPhone: { type: String }, // For M-Pesa payments
+  paymentError: { type: String }, // Error message if payment fails
   amount: { type: Number, required: true },
   currency: { type: String, default: 'USD' },
   address: {
@@ -68,4 +76,5 @@ const MemberSchema = new Schema({
   ]
 });
 
-export default models.Member || model('Member', MemberSchema);
+// Create model (will use cached version if exists, but we cleared it above)
+export default model('Member', MemberSchema);

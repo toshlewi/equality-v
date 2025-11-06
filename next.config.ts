@@ -23,6 +23,10 @@ const nextConfig: NextConfig = {
             value: 'DENY',
           },
           {
+            key: 'x-vercel-toolbar',
+            value: '0',
+          },
+          {
             key: 'X-Content-Type-Options',
             value: 'nosniff',
           },
