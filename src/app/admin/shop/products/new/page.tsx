@@ -278,7 +278,7 @@ export default function NewProductPage() {
                   }}
                   disabled={uploading}
                 />
-                {uploading && <p className="text-sm text-gray-500 mt-1">Uploading...</p>}
+                {uploading && <p className="text-sm text-brand-teal mt-1">Uploading...</p>}
               </div>
               {form.images.length > 0 && (
                 <div className="grid grid-cols-3 gap-4">
@@ -290,24 +290,22 @@ export default function NewProductPage() {
                         className="w-full h-full object-cover"
                       />
                       {image.isPrimary && (
-                        <div className="absolute top-2 left-2 bg-blue-600 text-white text-xs px-2 py-1 rounded">
+                        <div className="absolute top-2 left-2 bg-brand-orange text-white text-xs px-2 py-1 rounded">
                           Primary
                         </div>
                       )}
                       <div className="absolute top-2 right-2 flex gap-1">
                         <Button
-                          variant="ghost"
                           size="sm"
                           onClick={() => setPrimaryImage(idx)}
-                          className="bg-white/90 hover:bg-white"
+                          className="bg-brand-yellow/90 text-brand-teal hover:bg-brand-orange hover:text-white"
                         >
                           Set Primary
                         </Button>
                         <Button
-                          variant="ghost"
                           size="sm"
                           onClick={() => removeImage(idx)}
-                          className="bg-red-500/90 hover:bg-red-600 text-white"
+                          className="bg-brand-orange/90 hover:bg-brand-orange text-white"
                         >
                           <X className="w-4 h-4" />
                         </Button>
@@ -493,12 +491,12 @@ export default function NewProductPage() {
               {form.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                   {form.tags.map((tag, idx) => (
-                    <div key={idx} className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded">
+                    <div key={idx} className="flex items-center gap-1 bg-brand-yellow/30 border border-brand-yellow px-2 py-1 rounded text-brand-teal">
                       <span className="text-sm">{tag}</span>
                       <button
                         type="button"
                         onClick={() => removeTag(tag)}
-                        className="text-red-500 hover:text-red-700"
+                        className="text-brand-orange hover:text-brand-teal"
                       >
                         <X className="w-3 h-3" />
                       </button>

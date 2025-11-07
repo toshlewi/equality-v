@@ -54,13 +54,13 @@ export default function LocalFooter() {
                 Equality Vanguard
               </span>
             </Link>
-            <p className="text-gray-600 text-sm leading-relaxed mb-4">
+            <p className="text-brand-teal text-sm leading-relaxed mb-4">
               A Pan-African feminist collective dismantling oppression through law, art, 
               and radical community. We fuse legal advocacy with creative expression.
             </p>
             
             {/* Contact Info */}
-            <div className="flex items-center text-gray-600 text-sm mb-2">
+            <div className="flex items-center text-brand-teal text-sm mb-2">
               <Mail className="w-4 h-4 mr-2 text-brand-orange" />
               <span>info@equalityvanguard.org</span>
             </div>
@@ -82,7 +82,7 @@ export default function LocalFooter() {
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className="text-gray-600 hover:text-brand-orange transition-colors text-sm"
+                    className="text-brand-teal hover:text-brand-orange transition-colors text-sm"
                   >
                     {link.name}
                   </Link>
@@ -106,7 +106,7 @@ export default function LocalFooter() {
               <li>
                 <Link
                   href="/our-work#alkah"
-                  className="text-gray-600 hover:text-brand-orange transition-colors text-sm"
+                  className="text-brand-teal hover:text-brand-orange transition-colors text-sm"
                 >
                   ALKAH Book Club
                 </Link>
@@ -114,7 +114,7 @@ export default function LocalFooter() {
               <li>
                 <Link
                   href="/our-work#legal"
-                  className="text-gray-600 hover:text-brand-orange transition-colors text-sm"
+                  className="text-brand-teal hover:text-brand-orange transition-colors text-sm"
                 >
                   Legal Vanguard
                 </Link>
@@ -122,7 +122,7 @@ export default function LocalFooter() {
               <li>
                 <Link
                   href="/our-work#digital"
-                  className="text-gray-600 hover:text-brand-orange transition-colors text-sm"
+                  className="text-brand-teal hover:text-brand-orange transition-colors text-sm"
                 >
                   Digital Rights
                 </Link>
@@ -130,7 +130,7 @@ export default function LocalFooter() {
               <li>
                 <Link
                   href="/our-work#economic"
-                  className="text-gray-600 hover:text-brand-orange transition-colors text-sm"
+                  className="text-brand-teal hover:text-brand-orange transition-colors text-sm"
                 >
                   Economic Justice
                 </Link>
@@ -138,7 +138,7 @@ export default function LocalFooter() {
               <li>
                 <Link
                   href="/our-work#srhr"
-                  className="text-gray-600 hover:text-brand-orange transition-colors text-sm"
+                  className="text-brand-teal hover:text-brand-orange transition-colors text-sm"
                 >
                   SRHR
                 </Link>
@@ -172,7 +172,7 @@ export default function LocalFooter() {
                     whileTap={{ scale: 0.95 }}
                     className="w-10 h-10 bg-gray-100 hover:bg-brand-yellow rounded-full flex items-center justify-center transition-colors group"
                   >
-                    <Icon className="w-5 h-5 text-gray-600 group-hover:text-brand-teal" />
+                    <Icon className="w-5 h-5 text-brand-teal group-hover:text-brand-teal" />
                   </motion.a>
                 );
               })}
@@ -180,7 +180,7 @@ export default function LocalFooter() {
 
             {/* Newsletter Signup */}
             <div>
-              <p className="text-gray-600 text-sm mb-3">
+              <p className="text-brand-teal text-sm mb-3">
                 Stay updated with our latest news and events
               </p>
               <div className="flex">
@@ -210,7 +210,7 @@ export default function LocalFooter() {
           className="border-t border-gray-200 mt-8 pt-8"
         >
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-            <div className="text-gray-600 text-sm">
+            <div className="text-brand-teal text-sm">
               © {currentYear} Equality Vanguard. All rights reserved.
             </div>
             
@@ -219,7 +219,7 @@ export default function LocalFooter() {
                 <Link
                   key={link.name}
                   href={link.href}
-                  className="text-gray-600 hover:text-brand-orange transition-colors text-sm"
+                  className="text-brand-teal hover:text-brand-orange transition-colors text-sm"
                 >
                   {link.name}
                 </Link>

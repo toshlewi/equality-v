@@ -108,4 +108,32 @@
   .scrollbar-none::-webkit-scrollbar {
     display: none; /* Chrome, Safari, Opera */
   }
+
+  .admin-theme .text-gray-600 {
+    @apply text-brand-teal;
+  }
+
+  .admin-theme .text-gray-500 {
+    @apply text-brand-brown;
+  }
+
+  .admin-theme .text-gray-400 {
+    @apply text-brand-yellow;
+  }
+
+  .admin-theme .border-gray-200 {
+    @apply border-brand-yellow/60;
+  }
+
+  .admin-theme .bg-gray-200 {
+    @apply bg-brand-yellow/20;
+  }
+
+  .admin-theme .bg-gray-100 {
+    @apply bg-brand-yellow/10;
+  }
+
+  .admin-theme .shadow-sm {
+    @apply shadow-brand-teal/10;
+  }
 }

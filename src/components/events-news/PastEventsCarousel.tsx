@@ -206,7 +206,7 @@ export default function PastEventsCarousel() {
           <h2 className="font-fredoka text-4xl md:text-5xl font-bold text-brand-teal mb-6">
             Past Events
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl text-brand-teal max-w-3xl mx-auto">
             Relive the moments from our previous events, workshops, and discussions. 
             Each event brings us closer to our vision of gender justice.
           </p>
@@ -216,10 +216,10 @@ export default function PastEventsCarousel() {
         {loading ? (
           <div className="text-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-teal mx-auto"></div>
-            <p className="text-gray-500 mt-4">Loading past events...</p>
+            <p className="text-brand-teal mt-4">Loading past events...</p>
           </div>
         ) : pastEvents.length === 0 ? (
-          <div className="text-center text-gray-500 py-12">
+          <div className="text-center text-brand-teal py-12">
             <p className="text-lg">No past events yet.</p>
             <p className="text-sm mt-2">Published past events will appear here automatically.</p>
           </div>
@@ -292,11 +292,11 @@ export default function PastEventsCarousel() {
                     </h3>
 
                     <div className="space-y-2 mb-4">
-                      <div className="flex items-center text-gray-600">
+                      <div className="flex items-center text-brand-teal">
                         <Calendar className="w-4 h-4 mr-2 text-brand-orange" />
                         <span className="text-sm">{formatDate(event.date)}</span>
                       </div>
-                      <div className="flex items-center text-gray-600">
+                      <div className="flex items-center text-brand-teal">
                         <MapPin className="w-4 h-4 mr-2 text-brand-orange" />
                         <span className="text-sm">{event.location}</span>
                       </div>
@@ -409,8 +409,8 @@ export default function PastEventsCarousel() {
                     </div>
                   ))
                 ) : (
-                  <div className="col-span-full text-center text-gray-500 py-8">
-                    <ImageIcon className="w-12 h-12 mx-auto mb-2 text-gray-400" />
+                  <div className="col-span-full text-center text-brand-teal py-8">
+                    <ImageIcon className="w-12 h-12 mx-auto mb-2 text-brand-teal/70" />
                     <p>No gallery images available</p>
                   </div>
                 )}

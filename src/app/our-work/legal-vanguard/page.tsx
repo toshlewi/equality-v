@@ -29,22 +29,10 @@ const staggerContainer = {
 
 const legalTeam = [
   {
-    name: "Mutheu Mutuku",
-    role: "Visionary Founder & Creative Director",
-    image: "/images/aMutheu.jpg",
-    bio: "A highly accomplished human rights lawyer focused on the intricate connections between gender justice, feminist macroeconomics, and climate justice. She possesses a remarkable ability to translate complex legal principles into tangible, public-facing initiatives."
-  },
-  {
     name: "Melvin Bosibori",
     role: "Policy and Advocacy Weaver",
     image: "/images/amelvin.jpg",
     bio: "A lawyer and Advocate in training passionate about the intersection of law and technology. With certification in Data Protection, she explores how emerging issues around privacy, digital rights and online governance affect people, particularly women."
-  },
-  {
-    name: "Purity Buyanzi",
-    role: "Feminist Justice Scribe",
-    image: "/images/abuyanzi.jpg",
-    bio: "The Feminist Justice Scribe at Equality Vanguard and currently a Trainee Advocate at the Kenya School of Law. She brings expertise in feminist legal writing, research, and editorial work to lead our development of feminist research and advocacy content."
   }
 ];
 

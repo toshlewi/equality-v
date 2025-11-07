@@ -93,7 +93,7 @@ function CardPaymentForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="border border-gray-300 rounded-lg p-4 bg-white">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-brand-teal mb-2">
           Card Details *
         </label>
         <CardElement options={cardElementOptions} />

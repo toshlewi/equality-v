@@ -80,7 +80,7 @@ export default function NewsModal({ news, isOpen, onClose }: NewsModalProps) {
                 <div className="flex items-center space-x-4">
                   <button
                     onClick={onClose}
-                    className="text-gray-500 hover:text-brand-teal transition-colors"
+                    className="text-brand-teal hover:text-brand-orange transition-colors"
                   >
                     <ArrowLeft className="w-6 h-6" />
                   </button>
@@ -92,7 +92,7 @@ export default function NewsModal({ news, isOpen, onClose }: NewsModalProps) {
                 </div>
                 <button
                   onClick={onClose}
-                  className="text-gray-500 hover:text-brand-teal transition-colors"
+                  className="text-brand-teal hover:text-brand-orange transition-colors"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -126,7 +126,7 @@ export default function NewsModal({ news, isOpen, onClose }: NewsModalProps) {
               </div>
 
               {/* Article Meta */}
-              <div className="flex items-center justify-between text-sm text-gray-500">
+              <div className="flex items-center justify-between text-sm text-brand-teal">
                 <div className="flex items-center space-x-4">
                   <div className="flex items-center">
                     <Calendar className="w-4 h-4 mr-2 text-brand-orange" />
@@ -150,7 +150,7 @@ export default function NewsModal({ news, isOpen, onClose }: NewsModalProps) {
               <div className="prose prose-lg max-w-none">
                 {news.content ? (
                   <div 
-                    className="text-gray-600 text-lg leading-relaxed whitespace-pre-wrap"
+                    className="text-brand-teal text-lg leading-relaxed whitespace-pre-wrap"
                     dangerouslySetInnerHTML={{ 
                       __html: news.content.includes('<') 
                         ? news.content 
@@ -158,7 +158,7 @@ export default function NewsModal({ news, isOpen, onClose }: NewsModalProps) {
                     }}
                   />
                 ) : (
-                  <p className="text-gray-600 text-lg leading-relaxed mb-6">
+                  <p className="text-brand-teal text-lg leading-relaxed mb-6">
                     {news.excerpt || 'No content available.'}
                   </p>
                 )}
@@ -175,7 +175,7 @@ export default function NewsModal({ news, isOpen, onClose }: NewsModalProps) {
                 </button>
                 
                 <div className="flex items-center space-x-4">
-                  <button className="text-gray-500 hover:text-brand-orange transition-colors">
+                  <button className="text-brand-teal hover:text-brand-orange transition-colors">
                     <ExternalLink className="w-5 h-5" />
                   </button>
                 </div>

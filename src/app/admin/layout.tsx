@@ -282,12 +282,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       </aside>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col bg-gray-50">
+      <div className="flex-1 flex flex-col bg-gradient-to-br from-white via-brand-yellow/10 to-brand-teal/10 admin-theme">
         {/* Top bar with hamburger (mobile) + breadcrumb/title and back link */}
-        <header className="h-14 border-b bg-white flex items-center justify-between px-4">
+        <header className="h-14 bg-gradient-to-r from-brand-teal via-brand-orange to-brand-yellow text-white shadow-sm flex items-center justify-between px-4">
           <div className="flex items-center gap-3">
             <button
-              className="md:hidden p-2 rounded border border-gray-200 bg-white shadow-sm"
+              className="md:hidden p-2 rounded border border-white/30 bg-white/10 shadow-sm"
               onClick={() => setMobileOpen(true)}
               aria-label="Open sidebar"
             >
@@ -295,11 +295,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             </button>
             <div className="flex items-center gap-2">
               <span className="text-base font-semibold">Admin</span>
-              <span className="text-gray-400">/</span>
-              <span className="text-sm text-gray-600">Section</span>
+              <span className="text-white/70">/</span>
+              <span className="text-sm text-white/90">Section</span>
             </div>
           </div>
-          <Link href="/" className="text-sm text-blue-600 hover:underline flex items-center gap-1">
+          <Link href="/" className="text-sm text-white hover:text-brand-yellow transition-colors flex items-center gap-1">
             <ArrowLeft className="w-4 h-4" /> Back to main site
           </Link>
         </header>

@@ -114,7 +114,7 @@ export default function NewsGrid({ news }: NewsGridProps) {
                     />
                   ) : (
                     <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                      <span className="text-gray-500 text-sm">No image</span>
+                      <span className="text-brand-teal text-sm">No image</span>
                     </div>
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
@@ -149,7 +149,7 @@ export default function NewsGrid({ news }: NewsGridProps) {
 
                 {/* Content */}
                 <div className="p-6">
-                  <div className="flex items-center text-gray-500 text-sm mb-3">
+                  <div className="flex items-center text-brand-teal text-sm mb-3">
                     <Calendar className="w-4 h-4 mr-2 text-brand-orange" />
                       <span>{getDate(item) ? formatDate(getDate(item)!) : '—'}</span>
                   </div>
@@ -158,7 +158,7 @@ export default function NewsGrid({ news }: NewsGridProps) {
                     {item.title}
                   </h3>
 
-                  <p className="text-gray-600 text-sm leading-relaxed line-clamp-3 mb-4">
+                  <p className="text-brand-teal text-sm leading-relaxed line-clamp-3 mb-4">
                     {item.excerpt}
                   </p>
 
@@ -179,7 +179,7 @@ export default function NewsGrid({ news }: NewsGridProps) {
                         e.stopPropagation();
                         handleNewsClick(item);
                       }}
-                      className="text-gray-400 hover:text-brand-orange transition-colors"
+                      className="text-brand-teal hover:text-brand-orange transition-colors"
                     >
                       <ExternalLink className="w-4 h-4" />
                     </button>

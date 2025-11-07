@@ -90,20 +90,20 @@ export default function EventCard({ event, onClick }: EventCardProps) {
 
           {/* Event details */}
           <div className="space-y-2 mb-4">
-            <div className="flex items-center text-gray-600">
+            <div className="flex items-center text-brand-teal">
               <Calendar className="w-4 h-4 mr-2 text-brand-orange" />
               <span className="text-sm">{formatDate(event.date)}</span>
             </div>
-            <div className="flex items-center text-gray-600">
+            <div className="flex items-center text-brand-teal">
               <Clock className="w-4 h-4 mr-2 text-brand-orange" />
               <span className="text-sm">{event.time}</span>
             </div>
-            <div className="flex items-center text-gray-600">
+            <div className="flex items-center text-brand-teal">
               <MapPin className="w-4 h-4 mr-2 text-brand-orange" />
               <span className="text-sm">{event.location}</span>
             </div>
             {event.instructor && (
-              <div className="flex items-center text-gray-600">
+              <div className="flex items-center text-brand-teal">
                 <Users className="w-4 h-4 mr-2 text-brand-orange" />
                 <span className="text-sm">{event.instructor}</span>
               </div>
@@ -111,7 +111,7 @@ export default function EventCard({ event, onClick }: EventCardProps) {
           </div>
 
           {/* Description */}
-          <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+          <p className="text-brand-teal text-sm mb-4 line-clamp-2">
             {event.description}
           </p>
 
