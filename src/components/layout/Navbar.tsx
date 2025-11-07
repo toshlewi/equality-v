@@ -1,5 +1,6 @@
 'use client';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
@@ -24,11 +25,19 @@ export default function Navbar() {
   }, [pathname]);
 
   return (
-    <nav className="bg-brand-teal text-white sticky top-0 z-50 shadow-lg">
+    <nav className="bg-[#042C45] text-white sticky top-0 z-50 shadow-lg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          <Link href="/" className="font-fredoka text-2xl font-bold text-brand-yellow">
-            Equality Vanguard
+        <div className="flex justify-between items-center h-14 sm:h-16">
+          <Link href="/" className="flex items-center">
+            <span className="sr-only">Equality Vanguard</span>
+            <Image
+              src="/images/EV ROUND LOGO.png"
+              alt="Equality Vanguard logo"
+              width={150}
+              height={150}
+              priority
+              className="w-[5.9rem] h-[5.9rem] sm:w-[6rem] sm:h-[6rem] object-contain"
+            />
           </Link>
           
           {/* Desktop Nav */}
