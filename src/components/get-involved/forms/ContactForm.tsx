@@ -157,7 +157,7 @@ export function ContactForm({ onClose }: ContactFormProps) {
               value={formData.name}
               onChange={handleInputChange}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F9D960] focus:border-transparent transition-colors font-league-spartan"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFD935] focus:border-transparent transition-colors font-league-spartan"
               placeholder="Enter your full name"
             />
           </div>
@@ -173,7 +173,7 @@ export function ContactForm({ onClose }: ContactFormProps) {
               value={formData.email}
               onChange={handleInputChange}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F9D960] focus:border-transparent transition-colors font-league-spartan"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFD935] focus:border-transparent transition-colors font-league-spartan"
               placeholder="Enter your email"
             />
           </div>
@@ -189,7 +189,7 @@ export function ContactForm({ onClose }: ContactFormProps) {
             name="phone"
             value={formData.phone}
             onChange={handleInputChange}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F9D960] focus:border-transparent transition-colors font-league-spartan"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFD935] focus:border-transparent transition-colors font-league-spartan"
             placeholder="Enter your phone number"
           />
         </div>
@@ -205,7 +205,7 @@ export function ContactForm({ onClose }: ContactFormProps) {
             value={formData.subject}
             onChange={handleInputChange}
             required
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F9D960] focus:border-transparent transition-colors font-league-spartan"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFD935] focus:border-transparent transition-colors font-league-spartan"
             placeholder="What is this about?"
           />
         </div>
@@ -221,7 +221,7 @@ export function ContactForm({ onClose }: ContactFormProps) {
             onChange={handleInputChange}
             required
             rows={6}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F9D960] focus:border-transparent transition-colors font-league-spartan"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFD935] focus:border-transparent transition-colors font-league-spartan"
             placeholder="Tell us more about your inquiry, suggestion, or question"
           />
         </div>
@@ -234,7 +234,7 @@ export function ContactForm({ onClose }: ContactFormProps) {
             checked={formData.acceptTerms}
             onChange={handleInputChange}
             required
-            className="mt-1 h-4 w-4 text-[#F9D960] focus:ring-[#F9D960] border-gray-300 rounded"
+            className="mt-1 h-4 w-4 text-[#FFD935] focus:ring-[#FFD935] border-gray-300 rounded"
           />
           <label htmlFor="acceptTerms" className="text-sm text-gray-600 font-league-spartan">
             I accept the Terms and Conditions and Privacy Policy *

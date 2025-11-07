@@ -177,7 +177,7 @@ export default function GetInvolvedPage() {
                   transition={{ duration: 0.8, delay: 0.4 }}
                 >
                   <motion.button
-                    className="px-6 py-3 sm:px-8 sm:py-4 bg-[#F9D960] text-[#042C45] rounded-full font-semibold font-league-spartan text-base sm:text-lg hover:bg-[#F9D960]/90 transition-colors w-full sm:w-auto"
+                  className="px-6 py-3 sm:px-8 sm:py-4 bg-[#FFD935] text-[#042C45] rounded-full font-semibold font-league-spartan text-base sm:text-lg hover:bg-[#FFD935]/90 transition-colors w-full sm:w-auto"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => handleAction(heroSlides[currentSlide].buttonAction)}
@@ -207,7 +207,7 @@ export default function GetInvolvedPage() {
                 key={index}
                 className={`w-3 h-3 rounded-full transition-all duration-300 ${
                   index === currentSlide 
-                    ? 'bg-[#F9D960] scale-125' 
+                    ? 'bg-[#FFD935] scale-125' 
                     : 'bg-white/50 hover:bg-white/75'
                 }`}
                 onClick={() => goToSlide(index)}
@@ -314,9 +314,9 @@ export default function GetInvolvedPage() {
                     subtitle: "Become a member and help drive gender justice forward",
                     action: "membership",
                     bgColor: "bg-gradient-to-br from-[#042C45] to-[#042C45]/90",
-                    borderColor: "border-[#F9D960]",
+                    borderColor: "border-[#FFD935]",
                     textColor: "text-white",
-                    accentColor: "text-[#F9D960]",
+                    accentColor: "text-[#FFD935]",
                     icon: "👥"
                   },
                   {
@@ -324,7 +324,7 @@ export default function GetInvolvedPage() {
                     title: "Partner With Us",
                     subtitle: "Join forces to create lasting impact together",
                     action: "partner",
-                    bgColor: "bg-gradient-to-br from-[#F9D960] to-[#F9D960]/90",
+                    bgColor: "bg-gradient-to-br from-[#FFD935] to-[#FFD935]/90",
                     borderColor: "border-[#FF7D05]",
                     textColor: "text-[#042C45]",
                     accentColor: "text-[#042C45]",
@@ -393,9 +393,9 @@ export default function GetInvolvedPage() {
                     subtitle: "Become a member and help drive gender justice forward",
                     action: "membership",
                     bgColor: "bg-gradient-to-br from-[#042C45] to-[#042C45]/90",
-                    borderColor: "border-[#F9D960]",
+                    borderColor: "border-[#FFD935]",
                     textColor: "text-white",
-                    accentColor: "text-[#F9D960]",
+                    accentColor: "text-[#FFD935]",
                     icon: "👥"
                   },
                   {
@@ -403,7 +403,7 @@ export default function GetInvolvedPage() {
                     title: "Partner With Us",
                     subtitle: "Join forces to create lasting impact together",
                     action: "partner",
-                    bgColor: "bg-gradient-to-br from-[#F9D960] to-[#F9D960]/90",
+                    bgColor: "bg-gradient-to-br from-[#FFD935] to-[#FFD935]/90",
                     borderColor: "border-[#FF7D05]",
                     textColor: "text-[#042C45]",
                     accentColor: "text-[#042C45]",
@@ -487,9 +487,9 @@ export default function GetInvolvedPage() {
                     subtitle: "Show your support with our feminist merchandise",
                     action: "merch",
                     bgColor: "bg-gradient-to-br from-[#042C45] to-[#042C45]/90",
-                    borderColor: "border-[#F9D960]",
+                    borderColor: "border-[#FFD935]",
                     textColor: "text-white",
-                    accentColor: "text-[#F9D960]",
+                    accentColor: "text-[#FFD935]",
                     icon: "🛍️"
                   },
                   {
@@ -497,7 +497,7 @@ export default function GetInvolvedPage() {
                     title: "Jobs & Volunteer",
                     subtitle: "Join our team or volunteer your time",
                     action: "jobs",
-                    bgColor: "bg-gradient-to-br from-[#F9D960] to-[#F9D960]/90",
+                    bgColor: "bg-gradient-to-br from-[#FFD935] to-[#FFD935]/90",
                     borderColor: "border-[#FF7D05]",
                     textColor: "text-[#042C45]",
                     accentColor: "text-[#042C45]",
@@ -566,9 +566,9 @@ export default function GetInvolvedPage() {
                     subtitle: "Show your support with our feminist merchandise",
                     action: "merch",
                     bgColor: "bg-gradient-to-br from-[#042C45] to-[#042C45]/90",
-                    borderColor: "border-[#F9D960]",
+                    borderColor: "border-[#FFD935]",
                     textColor: "text-white",
-                    accentColor: "text-[#F9D960]",
+                    accentColor: "text-[#FFD935]",
                     icon: "🛍️"
                   },
                   {
@@ -576,7 +576,7 @@ export default function GetInvolvedPage() {
                     title: "Jobs & Volunteer",
                     subtitle: "Join our team or volunteer your time",
                     action: "jobs",
-                    bgColor: "bg-gradient-to-br from-[#F9D960] to-[#F9D960]/90",
+                    bgColor: "bg-gradient-to-br from-[#FFD935] to-[#FFD935]/90",
                     borderColor: "border-[#FF7D05]",
                     textColor: "text-[#042C45]",
                     accentColor: "text-[#042C45]",

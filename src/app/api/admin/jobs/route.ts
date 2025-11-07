@@ -4,16 +4,37 @@ import { authOptions } from '@/lib/auth-config';
 import { connectDB } from '@/lib/mongodb';
 import Job from '@/models/Job';
 import { getPaginationParams, ApiResponse } from '@/lib/api-utils';
+import { Types } from 'mongoose';
+
+type JobLean = {
+  _id: Types.ObjectId;
+  title: string;
+  slug: string;
+  description: string;
+  shortDescription?: string;
+  department: string;
+  type: string;
+  location: string;
+  status: string;
+  isPublic: boolean;
+  isFeatured: boolean;
+  applicationCount?: number;
+  applicationDeadline?: Date;
+  startDate?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+};
 
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
-    if (!session?.user?.id) {
+    const user = session?.user;
+
+    if (!user?.id) {
       return ApiResponse.unauthorized('Authentication required');
     }
 
-    if (!['admin', 'editor'].includes(session.user.role)) {
+    if (!user.role || !['admin', 'editor'].includes(user.role)) {
       return ApiResponse.forbidden('Insufficient permissions');
     }
 
@@ -60,13 +81,13 @@ export async function GET(request: NextRequest) {
     const total = await Job.countDocuments(query);
 
     // Fetch jobs with pagination
-    const jobs = await Job.find(query)
+    const jobs = ((await Job.find(query)
       .sort(sort)
       .skip(skip)
       .limit(limit)
       .populate('createdBy', 'name email')
       .select('-__v')
-      .lean();
+      .lean()) as unknown) as JobLean[];
 
     // Calculate pagination metadata
     const totalPages = Math.ceil(total / limit);

@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     
-    if (!session?.user?.id) {
+    if (!session?.user || !(session.user as any)?.id) {
       return NextResponse.json(
         { success: false, error: 'Authentication required' },
         { status: 401 }
@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Check if user has admin access
-    if (!['admin', 'editor', 'reviewer', 'finance'].includes(session.user.role)) {
+    if (!['admin', 'editor', 'reviewer', 'finance'].includes((session.user as any).role)) {
       return NextResponse.json(
         { success: false, error: 'Insufficient permissions' },
         { status: 403 }

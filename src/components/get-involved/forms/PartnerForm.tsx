@@ -215,7 +215,7 @@ export function PartnerForm({ onClose }: PartnerFormProps) {
               value={formData.name}
               onChange={handleInputChange}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F9D960] focus:border-transparent transition-colors font-league-spartan"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFD935] focus:border-transparent transition-colors font-league-spartan"
               placeholder="Enter your full name"
             />
           </div>
@@ -231,7 +231,7 @@ export function PartnerForm({ onClose }: PartnerFormProps) {
               value={formData.email}
               onChange={handleInputChange}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F9D960] focus:border-transparent transition-colors font-league-spartan"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFD935] focus:border-transparent transition-colors font-league-spartan"
               placeholder="Enter your email"
             />
           </div>
@@ -248,7 +248,7 @@ export function PartnerForm({ onClose }: PartnerFormProps) {
             value={formData.company}
             onChange={handleInputChange}
             required
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F9D960] focus:border-transparent transition-colors font-league-spartan"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFD935] focus:border-transparent transition-colors font-league-spartan"
             placeholder="Enter your company name"
           />
         </div>
@@ -263,7 +263,7 @@ export function PartnerForm({ onClose }: PartnerFormProps) {
             value={formData.partnershipMethod}
             onChange={handleInputChange}
             required
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F9D960] focus:border-transparent transition-colors font-league-spartan"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFD935] focus:border-transparent transition-colors font-league-spartan"
           >
             <option value="">Select partnership method</option>
             <option value="funding">Funding</option>
@@ -283,7 +283,7 @@ export function PartnerForm({ onClose }: PartnerFormProps) {
             name="logo"
             onChange={handleFileChange}
             accept="image/*"
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F9D960] focus:border-transparent transition-colors font-league-spartan"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFD935] focus:border-transparent transition-colors font-league-spartan"
           />
         </div>
 
@@ -298,7 +298,7 @@ export function PartnerForm({ onClose }: PartnerFormProps) {
             onChange={handleInputChange}
             required
             rows={4}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F9D960] focus:border-transparent transition-colors font-league-spartan"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFD935] focus:border-transparent transition-colors font-league-spartan"
             placeholder="Describe your company's activities and mission"
           />
         </div>
@@ -314,7 +314,7 @@ export function PartnerForm({ onClose }: PartnerFormProps) {
             onChange={handleInputChange}
             required
             rows={4}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F9D960] focus:border-transparent transition-colors font-league-spartan"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFD935] focus:border-transparent transition-colors font-league-spartan"
             placeholder="Explain how your values and work align with our mission"
           />
         </div>
@@ -327,7 +327,7 @@ export function PartnerForm({ onClose }: PartnerFormProps) {
             checked={formData.acceptTerms}
             onChange={handleInputChange}
             required
-            className="mt-1 h-4 w-4 text-[#F9D960] focus:ring-[#F9D960] border-gray-300 rounded"
+            className="mt-1 h-4 w-4 text-[#FFD935] focus:ring-[#FFD935] border-gray-300 rounded"
           />
           <label htmlFor="acceptTerms" className="text-sm text-gray-600 font-league-spartan">
             I accept the Terms and Conditions and Privacy Policy *

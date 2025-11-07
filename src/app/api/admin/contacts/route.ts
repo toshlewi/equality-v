@@ -9,11 +9,11 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     
-    if (!session?.user?.id) {
+    if (!session?.user || !(session.user as any)?.id) {
       return ApiResponse.unauthorized('Authentication required');
     }
 
-    if (!['admin', 'editor', 'reviewer'].includes(session.user.role)) {
+    if (!['admin', 'editor', 'reviewer'].includes((session.user as any).role)) {
       return ApiResponse.forbidden('Insufficient permissions');
     }
 
@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
 
     // Fetch contacts with pagination
     const contacts = await Contact.find(query)
-      .sort(sort)
+      .sort(sort as any)
       .skip(skip)
       .limit(limit)
       .select('-__v')
@@ -69,8 +69,8 @@ export async function GET(request: NextRequest) {
     const hasPrevPage = page > 1;
 
     return ApiResponse.success({
-      contacts: contacts.map(contact => ({
-        id: contact._id.toString(),
+      contacts: (contacts as any[]).map((contact: any) => ({
+        id: (contact._id as any).toString(),
         name: contact.name,
         email: contact.email,
         phone: contact.phone,

@@ -145,7 +145,7 @@ export async function POST(request: NextRequest) {
       dietaryRestrictions: validatedData.dietaryRestrictions ? sanitizeInput(validatedData.dietaryRestrictions) : undefined,
       emergencyContact: validatedData.emergencyContact,
       registrationData: validatedData.registrationData,
-      ipAddress: request.headers.get('x-forwarded-for') || request.ip || 'unknown',
+      ipAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown',
       userAgent: request.headers.get('user-agent') || 'unknown'
     };
 

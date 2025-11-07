@@ -298,7 +298,7 @@ export default function AudioPodcastsSection() {
                         onChange={handleSeek}
                         className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
                         style={{
-                          background: `linear-gradient(to right, #F9D960 0%, #F9D960 ${playingId === item.id ? (currentTime / item.duration) * 100 : 0}%, #E5E7EB ${playingId === item.id ? (currentTime / item.duration) * 100 : 0}%, #E5E7EB 100%)`
+                          background: `linear-gradient(to right, #FFD935 0%, #FFD935 ${playingId === item.id ? (currentTime / item.duration) * 100 : 0}%, #E5E7EB ${playingId === item.id ? (currentTime / item.duration) * 100 : 0}%, #E5E7EB 100%)`
                         }}
                       />
                       <div className="flex justify-between text-xs text-gray-500 mt-1">
@@ -364,7 +364,7 @@ export default function AudioPodcastsSection() {
           height: 16px;
           width: 16px;
           border-radius: 50%;
-          background: #F9D960;
+          background: #FFD935;
           cursor: pointer;
           border: 2px solid #042C45;
         }
@@ -372,7 +372,7 @@ export default function AudioPodcastsSection() {
           height: 16px;
           width: 16px;
           border-radius: 50%;
-          background: #F9D960;
+          background: #FFD935;
           cursor: pointer;
           border: 2px solid #042C45;
         }

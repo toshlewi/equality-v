@@ -33,14 +33,14 @@ export async function GET(
 
     await connectDB();
 
-    const contact = await Contact.findById(id).lean();
+    const contact = await Contact.findById(id).lean() as any;
 
     if (!contact) {
       return ApiResponse.notFound('Contact not found');
     }
 
     return ApiResponse.success({
-      id: (contact as any)._id.toString(),
+      id: contact._id.toString(),
       name: contact.name,
       email: contact.email,
       phone: contact.phone,
@@ -90,7 +90,7 @@ export async function PATCH(
     
     if (!validation.success) {
       return ApiResponse.validationError(
-        validation.errors.reduce((acc, err) => {
+        validation.errors.reduce((acc: Record<string, string>, err: { field: string; message: string }) => {
           acc[err.field] = err.message;
           return acc;
         }, {} as Record<string, string>)
@@ -126,7 +126,7 @@ export async function PATCH(
       userId: (session.user as any).id,
       userEmail: session.user.email || '',
       userRole: (session.user as any).role,
-      ipAddress: request.headers.get('x-forwarded-for') || request.ip || 'unknown',
+      ipAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown',
       userAgent: request.headers.get('user-agent') || 'unknown',
       requestMethod: 'PATCH',
       requestUrl: request.url,

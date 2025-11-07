@@ -41,21 +41,21 @@ export function FooterLocal() {
         >
           <Link 
             href="/about" 
-            className="text-[#F9D960] hover:text-[#F9D960]/80 transition-colors font-league-spartan"
+            className="text-[#FFD935] hover:text-[#FFD935]/80 transition-colors font-league-spartan"
           >
             Learn More About Us
           </Link>
           <span className="text-white/40">•</span>
           <Link 
             href="/our-work" 
-            className="text-[#F9D960] hover:text-[#F9D960]/80 transition-colors font-league-spartan"
+            className="text-[#FFD935] hover:text-[#FFD935]/80 transition-colors font-league-spartan"
           >
             Our Work
           </Link>
           <span className="text-white/40">•</span>
           <Link 
             href="/contact" 
-            className="text-[#F9D960] hover:text-[#F9D960]/80 transition-colors font-league-spartan"
+            className="text-[#FFD935] hover:text-[#FFD935]/80 transition-colors font-league-spartan"
           >
             Contact Us
           </Link>

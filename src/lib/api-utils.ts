@@ -111,7 +111,8 @@ export function getPaginationParams(request: NextRequest) {
   const skip = (page - 1) * limit;
   
   const sortBy = searchParams.get('sortBy') || 'createdAt';
-  const sortOrder = searchParams.get('sortOrder') === 'asc' ? 1 : -1;
+  const sortOrder: 1 | -1 = searchParams.get('sortOrder') === 'asc' ? 1 : -1;
+  const sort: Record<string, 1 | -1> = { [sortBy]: sortOrder };
   
   const search = searchParams.get('search') || '';
   const status = searchParams.get('status') || '';
@@ -121,7 +122,7 @@ export function getPaginationParams(request: NextRequest) {
     page,
     limit,
     skip,
-    sort: { [sortBy]: sortOrder },
+    sort,
     filters: {
       search,
       status,

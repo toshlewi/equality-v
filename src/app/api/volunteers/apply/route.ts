@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
       termsAccepted: validatedData.termsAccepted,
       privacyAccepted: validatedData.privacyAccepted,
       recaptchaToken: validatedData.recaptchaToken,
-      ipAddress: request.headers.get('x-forwarded-for') || request.ip || 'unknown',
+      ipAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown',
       userAgent: request.headers.get('user-agent') || 'unknown'
     };
 

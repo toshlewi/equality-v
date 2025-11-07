@@ -472,7 +472,7 @@ export function MembershipForm({ onClose }: MembershipFormProps) {
                     value={formData.fullName}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F9D960] focus:border-transparent transition-colors font-league-spartan"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFD935] focus:border-transparent transition-colors font-league-spartan"
                     placeholder="Enter your full name"
                   />
                 </div>
@@ -488,7 +488,7 @@ export function MembershipForm({ onClose }: MembershipFormProps) {
                     value={formData.email}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F9D960] focus:border-transparent transition-colors font-league-spartan"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFD935] focus:border-transparent transition-colors font-league-spartan"
                     placeholder="Enter your email"
                   />
                 </div>
@@ -506,7 +506,7 @@ export function MembershipForm({ onClose }: MembershipFormProps) {
                     value={formData.phone}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F9D960] focus:border-transparent transition-colors font-league-spartan"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFD935] focus:border-transparent transition-colors font-league-spartan"
                     placeholder="Enter your phone number"
                   />
                 </div>
@@ -520,7 +520,7 @@ export function MembershipForm({ onClose }: MembershipFormProps) {
                     name="membershipYears"
                     value={formData.membershipYears}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F9D960] focus:border-transparent transition-colors font-league-spartan"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFD935] focus:border-transparent transition-colors font-league-spartan"
                   >
                     <option value="1">1 Year</option>
                     <option value="2">2 Years</option>
@@ -531,7 +531,7 @@ export function MembershipForm({ onClose }: MembershipFormProps) {
               </div>
 
               {/* Membership Fee Highlight */}
-              <div className="bg-gradient-to-r from-[#F9D960] to-[#F9D960]/80 rounded-xl p-6 border-2 border-[#042C45]/20">
+              <div className="bg-gradient-to-r from-[#FFD935] to-[#FFD935]/80 rounded-xl p-6 border-2 border-[#042C45]/20">
                 <div className="text-center">
                   <h3 className="text-2xl font-bold text-[#042C45] mb-2 font-fredoka">
                     Membership Fee
@@ -562,7 +562,7 @@ export function MembershipForm({ onClose }: MembershipFormProps) {
                   name="paymentMethod"
                   value={formData.paymentMethod}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F9D960] focus:border-transparent transition-colors font-league-spartan"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFD935] focus:border-transparent transition-colors font-league-spartan"
                 >
                   <option value="stripe">Credit/Debit Card (Stripe)</option>
                   <option value="mpesa">M-Pesa</option>
@@ -579,7 +579,7 @@ export function MembershipForm({ onClose }: MembershipFormProps) {
                   name="couponCode"
                   value={formData.couponCode}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F9D960] focus:border-transparent transition-colors font-league-spartan"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFD935] focus:border-transparent transition-colors font-league-spartan"
                   placeholder="Enter coupon code if you have one"
                 />
               </div>
@@ -592,7 +592,7 @@ export function MembershipForm({ onClose }: MembershipFormProps) {
                   checked={formData.acceptTerms}
                   onChange={handleInputChange}
                   required
-                  className="mt-1 h-4 w-4 text-[#F9D960] focus:ring-[#F9D960] border-gray-300 rounded"
+                  className="mt-1 h-4 w-4 text-[#FFD935] focus:ring-[#FFD935] border-gray-300 rounded"
                 />
                 <label htmlFor="acceptTerms" className="text-sm text-gray-600 font-league-spartan">
                   I accept the Terms and Conditions and Privacy Policy *
@@ -647,7 +647,7 @@ export function MembershipForm({ onClose }: MembershipFormProps) {
                 </div>
               </div>
 
-              <div className="bg-gradient-to-r from-[#F9D960] to-[#F9D960]/80 rounded-xl p-6 border-2 border-[#042C45]/20">
+              <div className="bg-gradient-to-r from-[#FFD935] to-[#FFD935]/80 rounded-xl p-6 border-2 border-[#042C45]/20">
                 <div className="text-center">
                   <h3 className="text-xl font-bold text-[#042C45] mb-2 font-fredoka">
                     Payment Amount
@@ -690,7 +690,7 @@ export function MembershipForm({ onClose }: MembershipFormProps) {
                       onChange={(e) => setMpesaPhone(e.target.value)}
                       required
                       placeholder="254712345678"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F9D960] focus:border-transparent transition-colors font-league-spartan"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFD935] focus:border-transparent transition-colors font-league-spartan"
                     />
                     <p className="text-xs text-gray-500 mt-1 font-league-spartan">
                       Format: 254712345678 (include country code)

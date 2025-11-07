@@ -1,10 +1,14 @@
 import Stripe from 'stripe';
 
-// Initialize Stripe with secret key
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-09-30.clover',
-  typescript: true,
-});
+// Initialize Stripe only if configured, and use a stable API version
+const stripeSecret = process.env.STRIPE_SECRET_KEY || '';
+export const isStripeConfigured = !!stripeSecret;
+const stripe = isStripeConfigured
+  ? new Stripe(stripeSecret, {
+      apiVersion: '2023-10-16',
+      typescript: true,
+    })
+  : null;
 
 export interface PaymentIntentData {
   amount: number;
@@ -39,6 +43,7 @@ export interface CheckoutSessionData {
  */
 export async function createPaymentIntent(data: PaymentIntentData): Promise<Stripe.PaymentIntent> {
   try {
+    if (!stripe) throw new Error('Stripe is not configured');
     const paymentIntent = await stripe.paymentIntents.create({
       amount: Math.round(data.amount * 100), // Convert to cents
       currency: data.currency.toLowerCase(),
@@ -62,6 +67,7 @@ export async function createPaymentIntent(data: PaymentIntentData): Promise<Stri
  */
 export async function createCheckoutSession(data: CheckoutSessionData): Promise<Stripe.Checkout.Session> {
   try {
+    if (!stripe) throw new Error('Stripe is not configured');
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: data.lineItems,
@@ -89,6 +95,7 @@ export async function createCheckoutSession(data: CheckoutSessionData): Promise<
  */
 export async function retrievePaymentIntent(paymentIntentId: string): Promise<Stripe.PaymentIntent> {
   try {
+    if (!stripe) throw new Error('Stripe is not configured');
     const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
     return paymentIntent;
   } catch (error) {
@@ -106,6 +113,7 @@ export async function processRefund(
   reason?: Stripe.RefundCreateParams.Reason
 ): Promise<Stripe.Refund> {
   try {
+    if (!stripe) throw new Error('Stripe is not configured');
     const refundData: Stripe.RefundCreateParams = {
       payment_intent: paymentIntentId,
     };
@@ -136,6 +144,7 @@ export async function createCustomer(data: {
   metadata?: Record<string, string>;
 }): Promise<Stripe.Customer> {
   try {
+    if (!stripe) throw new Error('Stripe is not configured');
     const customer = await stripe.customers.create({
       email: data.email,
       name: data.name,
@@ -155,6 +164,7 @@ export async function createCustomer(data: {
  */
 export async function retrieveCustomer(customerId: string): Promise<Stripe.Customer> {
   try {
+    if (!stripe) throw new Error('Stripe is not configured');
     const customer = await stripe.customers.retrieve(customerId) as Stripe.Customer;
     return customer;
   } catch (error) {
@@ -168,6 +178,7 @@ export async function retrieveCustomer(customerId: string): Promise<Stripe.Custo
  */
 export async function listPaymentMethods(customerId: string): Promise<Stripe.PaymentMethod[]> {
   try {
+    if (!stripe) throw new Error('Stripe is not configured');
     const paymentMethods = await stripe.paymentMethods.list({
       customer: customerId,
       type: 'card',
@@ -189,6 +200,7 @@ export async function createSubscription(data: {
   metadata?: Record<string, string>;
 }): Promise<Stripe.Subscription> {
   try {
+    if (!stripe) throw new Error('Stripe is not configured');
     const subscription = await stripe.subscriptions.create({
       customer: data.customerId,
       items: [{ price: data.priceId }],
@@ -210,6 +222,7 @@ export async function createSubscription(data: {
  */
 export async function cancelSubscription(subscriptionId: string): Promise<Stripe.Subscription> {
   try {
+    if (!stripe) throw new Error('Stripe is not configured');
     const subscription = await stripe.subscriptions.cancel(subscriptionId);
     return subscription;
   } catch (error) {
@@ -227,6 +240,7 @@ export function verifyWebhookSignature(
   secret: string
 ): Stripe.Event {
   try {
+    if (!stripe) throw new Error('Stripe is not configured');
     const event = stripe.webhooks.constructEvent(payload, signature, secret);
     return event;
   } catch (error) {

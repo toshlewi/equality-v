@@ -2,16 +2,19 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-config';
 import { getPaginationParams, ApiResponse } from '@/lib/api-utils';
+import { getSubscribers } from '@/lib/mailchimp';
+import type { ListMember } from '@/lib/mailchimp';
 
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
-    if (!session?.user?.id) {
+    const user = session?.user;
+
+    if (!user?.id) {
       return ApiResponse.unauthorized('Authentication required');
     }
 
-    if (!['admin', 'editor'].includes(session.user.role)) {
+    if (!user.role || !['admin', 'editor'].includes(user.role)) {
       return ApiResponse.forbidden('Insufficient permissions');
     }
 
@@ -21,37 +24,29 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get('search') || '';
     const status = searchParams.get('status') || 'subscribed';
 
-    // Import Mailchimp functions
-    const { getListMembers, getSubscriberHash } = await import('@/lib/mailchimp');
-
     if (!process.env.MAILCHIMP_LIST_ID) {
       return ApiResponse.error('Mailchimp not configured', 500);
     }
 
     try {
       // Get subscribers from Mailchimp
-      const result = await getListMembers(process.env.MAILCHIMP_LIST_ID, {
+      const result = await getSubscribers(process.env.MAILCHIMP_LIST_ID, {
         status: status as 'subscribed' | 'unsubscribed' | 'cleaned' | 'pending' | undefined,
         count: limit,
-        offset: (page - 1) * limit
+        offset: (page - 1) * limit,
+        search: search || undefined
       });
 
-      if (!result.success || !result.members) {
+      if (!result.success || !result.subscribers) {
         return ApiResponse.error('Failed to fetch subscribers', 500);
       }
 
-      // Filter by search if provided
-      let filteredSubscribers = result.members || [];
-      if (search) {
-        filteredSubscribers = filteredSubscribers.filter((sub: any) => {
-          const email = sub.email_address?.toLowerCase() || '';
-          const name = `${sub.merge_fields?.FNAME || ''} ${sub.merge_fields?.LNAME || ''}`.toLowerCase();
-          return email.includes(search.toLowerCase()) || name.includes(search.toLowerCase());
-        });
-      }
+      const subscribers = result.subscribers as ListMember[];
+      const totalItems = result.total ?? subscribers.length;
+      const totalPages = Math.ceil(totalItems / limit) || 1;
 
       return ApiResponse.success({
-        subscribers: filteredSubscribers.map((sub: any) => ({
+        subscribers: subscribers.map(sub => ({
           id: sub.id,
           email: sub.email_address,
           firstName: sub.merge_fields?.FNAME || '',
@@ -65,9 +60,9 @@ export async function GET(request: NextRequest) {
         pagination: {
           page,
           limit,
-          total: result.totalItems || filteredSubscribers.length,
-          totalPages: Math.ceil((result.totalItems || filteredSubscribers.length) / limit),
-          hasNextPage: page < Math.ceil((result.totalItems || filteredSubscribers.length) / limit),
+          total: totalItems,
+          totalPages,
+          hasNextPage: page < totalPages,
           hasPrevPage: page > 1
         }
       });

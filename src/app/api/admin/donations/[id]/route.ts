@@ -28,17 +28,17 @@ export async function GET(
     const { id } = await params;
     const session = await getServerSession(authOptions);
     
-    if (!session?.user?.id) {
+    if (!session?.user || !(session.user as any)?.id) {
       return ApiResponse.unauthorized('Authentication required');
     }
 
-    if (!['admin', 'editor', 'reviewer', 'finance'].includes(session.user.role)) {
+    if (!['admin', 'editor', 'reviewer', 'finance'].includes((session.user as any).role)) {
       return ApiResponse.forbidden('Insufficient permissions');
     }
 
     await connectDB();
 
-    const donation = await Donation.findById(id).lean();
+    const donation = await Donation.findById(id).lean() as any;
 
     if (!donation) {
       return ApiResponse.notFound('Donation not found');
@@ -87,11 +87,11 @@ export async function PATCH(
     const { id } = await params;
     const session = await getServerSession(authOptions);
     
-    if (!session?.user?.id) {
+    if (!session?.user || !(session.user as any)?.id) {
       return ApiResponse.unauthorized('Authentication required');
     }
 
-    if (!['admin', 'editor', 'finance'].includes(session.user.role)) {
+    if (!['admin', 'editor', 'finance'].includes((session.user as any).role)) {
       return ApiResponse.forbidden('Insufficient permissions');
     }
 
@@ -124,10 +124,10 @@ export async function PATCH(
       await createAuditLog({
         eventType: 'admin_action',
         description: `Donation ${donation._id.toString()} updated`,
-        userId: session.user.id,
+        userId: (session.user as any).id,
         userEmail: session.user.email || '',
-        userRole: session.user.role,
-        ipAddress: request.headers.get('x-forwarded-for') || request.ip || 'unknown',
+        userRole: (session.user as any).role,
+        ipAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown',
         userAgent: request.headers.get('user-agent') || 'unknown',
         requestMethod: 'PATCH',
         requestUrl: request.url,
@@ -171,11 +171,11 @@ export async function POST(
     const { id } = await params;
     const session = await getServerSession(authOptions);
     
-    if (!session?.user?.id) {
+    if (!session?.user || !(session.user as any)?.id) {
       return ApiResponse.unauthorized('Authentication required');
     }
 
-    if (!['admin', 'finance'].includes(session.user.role)) {
+    if (!['admin', 'finance'].includes((session.user as any).role)) {
       return ApiResponse.forbidden('Only admins and finance can process refunds');
     }
 
@@ -274,10 +274,10 @@ export async function POST(
           await createAuditLog({
             eventType: 'admin_action',
             description: `Donation ${donation._id.toString()} refunded`,
-            userId: session.user.id,
+            userId: (session.user as any).id,
             userEmail: session.user.email || '',
-            userRole: session.user.role,
-            ipAddress: request.headers.get('x-forwarded-for') || request.ip || 'unknown',
+            userRole: (session.user as any).role,
+            ipAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown',
             userAgent: request.headers.get('user-agent') || 'unknown',
             requestMethod: 'POST',
             requestUrl: request.url,

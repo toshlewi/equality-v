@@ -16,7 +16,7 @@ The Events & News page is a comprehensive frontend implementation that showcases
 - **Responsive Design**: Mobile-first approach with breakpoints
 
 ### 🎨 Design & Animations
-- **Brand Colors**: Navy (#042C45), Yellow (#F9D960), Orange (#FF7D05), Olive (#66623C)
+- **Brand Colors**: Navy (#042C45), Yellow (#FFD935), Orange (#FF7D05), Olive (#66623C)
 - **Typography**: Fredoka for headings, League Spartan for body text
 - **Animations**: Framer Motion for component animations, GSAP for scroll effects
 - **Hover Effects**: Card lift, image zoom, button interactions
@@ -176,7 +176,7 @@ src/
 ## Styling & Theming
 
 ### Brand Colors
-- Primary Yellow: `#F9D960`
+- Primary Yellow: `#FFD935`
 - Deep Teal: `#042C45`
 - Bright Orange: `#FF7D05`
 - Earthy Brown: `#66623C`

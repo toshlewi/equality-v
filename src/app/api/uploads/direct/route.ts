@@ -142,7 +142,7 @@ export async function POST(request: NextRequest) {
       userId: session.user.id,
       userEmail: session.user.email || '',
       userRole: session.user.role,
-      ipAddress: request.headers.get('x-forwarded-for') || request.ip || 'unknown',
+      ipAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown',
       userAgent: request.headers.get('user-agent') || 'unknown',
       requestMethod: 'POST',
       requestUrl: request.url,

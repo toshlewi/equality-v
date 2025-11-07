@@ -300,7 +300,7 @@ o	Clean, readable for long text.
 o	Use sparingly for highlighting or technical info.
 ________________________________________
 Colors
-•	Primary Brand Anchor: #F9D960 (Yellow)
+•	Primary Brand Anchor: #FFD935 (Yellow)
 o	Buttons, highlights, active states.
 •	Secondary: #042C45 (Deep Teal)
 o	Headers, footers, background blocks.

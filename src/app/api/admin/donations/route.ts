@@ -4,16 +4,37 @@ import { authOptions } from '@/lib/auth-config';
 import { connectDB } from '@/lib/mongodb';
 import Donation from '@/models/Donation';
 import { getPaginationParams, ApiResponse } from '@/lib/api-utils';
+import { Types } from 'mongoose';
+
+type DonationLean = {
+  _id: Types.ObjectId;
+  donorName: string;
+  donorEmail: string;
+  amount: number;
+  currency?: string;
+  donationType: string;
+  status: string;
+  paymentStatus?: string;
+  paymentMethod?: string;
+  paymentId?: string;
+  transactionId?: string;
+  isAnonymous?: boolean;
+  receiptSent?: boolean;
+  receiptNumber?: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
 
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
-    if (!session?.user?.id) {
+    const user = session?.user;
+
+    if (!user?.id) {
       return ApiResponse.unauthorized('Authentication required');
     }
 
-    if (!['admin', 'editor', 'reviewer', 'finance'].includes(session.user.role)) {
+    if (!user.role || !['admin', 'editor', 'reviewer', 'finance'].includes(user.role)) {
       return ApiResponse.forbidden('Insufficient permissions');
     }
 
@@ -101,12 +122,12 @@ export async function GET(request: NextRequest) {
     ]);
 
     // Fetch donations with pagination
-    const donations = await Donation.find(query)
+    const donations = ((await Donation.find(query)
       .sort(sort)
       .skip(skip)
       .limit(limit)
       .select('-__v')
-      .lean();
+      .lean()) as unknown) as DonationLean[];
 
     // Calculate pagination metadata
     const totalPages = Math.ceil(total / limit);

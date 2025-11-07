@@ -11,7 +11,7 @@ const cards = [
     description: "Become a member of our community and help drive gender justice forward. Your voice matters.",
     action: "membership",
     color: "from-[#042C45] to-[#042C45]/90",
-    accentColor: "#F9D960"
+    accentColor: "#FFD935"
   },
   {
     id: 2,
@@ -27,14 +27,14 @@ const cards = [
     description: "Help fund our initiatives and campaigns. Every contribution makes a difference.",
     action: "donate",
     color: "from-[#66623C] to-[#66623C]/90",
-    accentColor: "#F9D960"
+    accentColor: "#FFD935"
   },
   {
     id: 4,
     title: "Buy Merch",
     description: "Show your support with our feminist merchandise. Wear your values proudly.",
     action: "merch",
-    color: "from-[#F9D960] to-[#F9D960]/90",
+    color: "from-[#FFD935] to-[#FFD935]/90",
     accentColor: "#042C45"
   },
   {
@@ -51,7 +51,7 @@ const cards = [
     description: "Have questions or ideas? We'd love to hear from you. Let's start a conversation.",
     action: "contact",
     color: "from-[#66623C] to-[#042C45]",
-    accentColor: "#F9D960"
+    accentColor: "#FFD935"
   }
 ];
 

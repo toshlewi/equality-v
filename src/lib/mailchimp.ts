@@ -39,6 +39,7 @@ export interface ListMember {
   tags: string[];
   timestamp_signup: string;
   last_changed: string;
+  member_rating?: number;
 }
 
 /**

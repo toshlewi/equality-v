@@ -1020,7 +1020,7 @@ export default function BuyMerchPage() {
                               value={checkoutForm.name}
                               onChange={(e) => setCheckoutForm({ ...checkoutForm, name: e.target.value })}
                               required
-                              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F9D960] focus:border-transparent transition-colors font-league-spartan"
+                              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFD935] focus:border-transparent transition-colors font-league-spartan"
                             />
                           </div>
                           <div>
@@ -1032,7 +1032,7 @@ export default function BuyMerchPage() {
                               value={checkoutForm.email}
                               onChange={(e) => setCheckoutForm({ ...checkoutForm, email: e.target.value })}
                               required
-                              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F9D960] focus:border-transparent transition-colors font-league-spartan"
+                              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFD935] focus:border-transparent transition-colors font-league-spartan"
                             />
                           </div>
                         </div>
@@ -1046,7 +1046,7 @@ export default function BuyMerchPage() {
                             value={checkoutForm.phone}
                             onChange={(e) => setCheckoutForm({ ...checkoutForm, phone: e.target.value })}
                             required
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F9D960] focus:border-transparent transition-colors font-league-spartan"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFD935] focus:border-transparent transition-colors font-league-spartan"
                           />
                         </div>
 
@@ -1060,7 +1060,7 @@ export default function BuyMerchPage() {
                             onChange={(e) => setCheckoutForm({ ...checkoutForm, address: e.target.value })}
                             required
                             minLength={5}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F9D960] focus:border-transparent transition-colors font-league-spartan"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFD935] focus:border-transparent transition-colors font-league-spartan"
                             placeholder="Enter your street address"
                           />
                         </div>
@@ -1076,7 +1076,7 @@ export default function BuyMerchPage() {
                               onChange={(e) => setCheckoutForm({ ...checkoutForm, city: e.target.value })}
                               required
                               minLength={2}
-                              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F9D960] focus:border-transparent transition-colors font-league-spartan"
+                              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFD935] focus:border-transparent transition-colors font-league-spartan"
                               placeholder="Enter your city"
                             />
                           </div>
@@ -1090,7 +1090,7 @@ export default function BuyMerchPage() {
                               onChange={(e) => setCheckoutForm({ ...checkoutForm, postalCode: e.target.value })}
                               required
                               minLength={3}
-                              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F9D960] focus:border-transparent transition-colors font-league-spartan"
+                              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFD935] focus:border-transparent transition-colors font-league-spartan"
                               placeholder="Enter postal code"
                             />
                           </div>
@@ -1104,14 +1104,14 @@ export default function BuyMerchPage() {
                             value={checkoutForm.paymentMethod}
                             onChange={(e) => setCheckoutForm({ ...checkoutForm, paymentMethod: e.target.value as 'stripe' | 'mpesa' })}
                             required
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F9D960] focus:border-transparent transition-colors font-league-spartan"
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFD935] focus:border-transparent transition-colors font-league-spartan"
                           >
                             <option value="stripe">Credit/Debit Card (Stripe)</option>
                             <option value="mpesa">M-Pesa</option>
                           </select>
                         </div>
 
-                        <div className="bg-gradient-to-r from-[#F9D960] to-[#F9D960]/80 rounded-xl p-4 border-2 border-[#042C45]/20">
+                        <div className="bg-gradient-to-r from-[#FFD935] to-[#FFD935]/80 rounded-xl p-4 border-2 border-[#042C45]/20">
                           <div className="flex justify-between items-center">
                             <span className="text-lg font-semibold text-[#042C45] font-fredoka">Total:</span>
                             <span className="text-2xl font-bold text-[#042C45] font-fredoka">
@@ -1127,7 +1127,7 @@ export default function BuyMerchPage() {
                             checked={checkoutForm.acceptTerms}
                             onChange={(e) => setCheckoutForm({ ...checkoutForm, acceptTerms: e.target.checked })}
                             required
-                            className="mt-1 h-4 w-4 text-[#F9D960] focus:ring-[#F9D960] border-gray-300 rounded"
+                            className="mt-1 h-4 w-4 text-[#FFD935] focus:ring-[#FFD935] border-gray-300 rounded"
                           />
                           <label htmlFor="acceptTerms" className="text-sm text-gray-600 font-league-spartan">
                             I accept the Terms and Conditions and Privacy Policy *
@@ -1181,7 +1181,7 @@ export default function BuyMerchPage() {
                           </div>
                         </div>
 
-                        <div className="bg-gradient-to-r from-[#F9D960] to-[#F9D960]/80 rounded-xl p-6 border-2 border-[#042C45]/20">
+                        <div className="bg-gradient-to-r from-[#FFD935] to-[#FFD935]/80 rounded-xl p-6 border-2 border-[#042C45]/20">
                           <div className="text-center">
                             <h3 className="text-xl font-bold text-[#042C45] mb-2 font-fredoka">
                               Payment Amount
@@ -1226,7 +1226,7 @@ export default function BuyMerchPage() {
                                 onChange={(e) => setMpesaPhone(e.target.value)}
                                 required
                                 placeholder="254712345678"
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#F9D960] focus:border-transparent transition-colors font-league-spartan"
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFD935] focus:border-transparent transition-colors font-league-spartan"
                               />
                               <p className="text-xs text-gray-500 mt-1 font-league-spartan">
                                 Format: 254712345678 (include country code)

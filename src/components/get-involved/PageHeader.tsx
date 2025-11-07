@@ -32,7 +32,7 @@ export function PageHeader() {
       
       {/* Decorative elements */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-        <div className="absolute top-10 left-10 w-20 h-20 bg-[#F9D960]/10 rounded-full"></div>
+        <div className="absolute top-10 left-10 w-20 h-20 bg-[#FFD935]/10 rounded-full"></div>
         <div className="absolute top-20 right-20 w-16 h-16 bg-[#FF7D05]/10 rounded-full"></div>
         <div className="absolute bottom-10 left-1/4 w-12 h-12 bg-[#66623C]/10 rounded-full"></div>
       </div>

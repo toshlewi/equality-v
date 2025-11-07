@@ -59,7 +59,7 @@ export default function JobsVolunteerPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.8 }}
             >
-            <div className="bg-gradient-to-br from-[#F9D960] to-[#F9D960]/90 rounded-2xl p-12 mb-8">
+            <div className="bg-gradient-to-br from-[#FFD935] to-[#FFD935]/90 rounded-2xl p-12 mb-8">
               <div className="flex justify-center mb-6">
                 <div className="w-20 h-20 bg-[#042C45] rounded-full flex items-center justify-center">
                   <Briefcase className="w-10 h-10 text-white" />
@@ -84,7 +84,7 @@ export default function JobsVolunteerPage() {
           >
             <div className="text-center">
               <div className="flex justify-center mb-6">
-                <div className="w-20 h-20 bg-[#F9D960] rounded-full flex items-center justify-center">
+                <div className="w-20 h-20 bg-[#FFD935] rounded-full flex items-center justify-center">
                   <Users className="w-10 h-10 text-[#042C45]" />
           </div>
               </div>
@@ -98,7 +98,7 @@ export default function JobsVolunteerPage() {
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
                   href="/get-involved"
-                  className="px-8 py-4 bg-[#F9D960] text-[#042C45] rounded-lg hover:bg-[#F9D960]/90 transition-colors font-league-spartan font-semibold inline-flex items-center"
+                  className="px-8 py-4 bg-[#FFD935] text-[#042C45] rounded-lg hover:bg-[#FFD935]/90 transition-colors font-league-spartan font-semibold inline-flex items-center"
                 >
                   <UserPlus className="w-5 h-5 mr-2" />
                   Join Our Community

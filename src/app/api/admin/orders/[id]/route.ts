@@ -9,7 +9,7 @@ import Stripe from 'stripe';
 import { createAuditLog } from '@/lib/audit';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-12-18.acacia',
+  apiVersion: '2025-09-30.clover',
 });
 
 const updateOrderSchema = z.object({
@@ -34,12 +34,13 @@ export async function GET(
   try {
     const { id } = await params;
     const session = await getServerSession(authOptions);
-    
-    if (!session?.user?.id) {
+    const user = session?.user;
+
+    if (!user?.id) {
       return ApiResponse.unauthorized('Authentication required');
     }
 
-    if (!['admin', 'editor', 'finance'].includes(session.user.role)) {
+    if (!user.role || !['admin', 'editor', 'finance'].includes(user.role)) {
       return ApiResponse.forbidden('Insufficient permissions');
     }
 
@@ -114,12 +115,13 @@ export async function PATCH(
   try {
     const { id } = await params;
     const session = await getServerSession(authOptions);
-    
-    if (!session?.user?.id) {
+    const user = session?.user;
+
+    if (!user?.id) {
       return ApiResponse.unauthorized('Authentication required');
     }
 
-    if (!['admin', 'editor', 'finance'].includes(session.user.role)) {
+    if (!user.role || !['admin', 'editor', 'finance'].includes(user.role)) {
       return ApiResponse.forbidden('Insufficient permissions');
     }
 
@@ -149,10 +151,10 @@ export async function PATCH(
       // Update timestamps based on status
       if (validation.data.status === 'confirmed' && !order.processedAt) {
         order.processedAt = new Date();
-        order.processedBy = session.user.id;
+        order.processedBy = user.id;
       } else if (validation.data.status === 'shipped' && !order.shippedAt) {
         order.shippedAt = new Date();
-        order.shippedBy = session.user.id;
+        order.shippedBy = user.id;
       } else if (validation.data.status === 'delivered' && !order.deliveredAt) {
         order.deliveredAt = new Date();
       }
@@ -189,10 +191,10 @@ export async function PATCH(
       await createAuditLog({
         eventType: 'admin_action',
         description: `Order ${order.orderNumber} updated`,
-        userId: session.user.id,
-        userEmail: session.user.email || '',
-        userRole: session.user.role,
-        ipAddress: request.headers.get('x-forwarded-for') || request.ip || 'unknown',
+        userId: user.id,
+        userEmail: user.email || '',
+        userRole: user.role,
+        ipAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown',
         userAgent: request.headers.get('user-agent') || 'unknown',
         requestMethod: 'PATCH',
         requestUrl: request.url,
@@ -239,12 +241,13 @@ export async function POST(
   try {
     const { id } = await params;
     const session = await getServerSession(authOptions);
-    
-    if (!session?.user?.id) {
+    const user = session?.user;
+
+    if (!user?.id) {
       return ApiResponse.unauthorized('Authentication required');
     }
 
-    if (!['admin', 'finance'].includes(session.user.role)) {
+    if (!user.role || !['admin', 'finance'].includes(user.role)) {
       return ApiResponse.forbidden('Only admins and finance can process refunds');
     }
 
@@ -309,10 +312,10 @@ export async function POST(
         amount: refundAmount,
         reason: refundReason,
         status: refundId ? 'processed' : 'pending',
-        processedBy: session.user.id,
+        processedBy: user.id,
         processedAt: new Date(),
         refundId: refundId || undefined,
-        notes: `Refund processed by ${session.user.email}`
+        notes: `Refund processed by ${user.email ?? 'unknown'}`
       });
 
       // Update payment status

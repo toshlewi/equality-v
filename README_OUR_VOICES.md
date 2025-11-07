@@ -168,7 +168,7 @@ Navigate to `/our-voices` to view the main page.
 Update the color scheme in `tailwind.config.js`:
 ```javascript
 colors: {
-  'brand-yellow': '#F9D960',
+  'brand-yellow': '#FFD935',
   'brand-teal': '#042C45',
   'brand-orange': '#FF7D05',
   'brand-brown': '#66623C',
