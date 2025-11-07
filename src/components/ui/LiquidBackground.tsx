@@ -5,15 +5,15 @@ export default function LiquidBackground() {
   return (
     <div className="fixed inset-0 -z-10 overflow-hidden">
       {/* Base gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-white via-[#042c45]/15 to-[#042c45]/25"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-white via-[#FFD935]/15 to-[#FF7D05]/25"></div>
       
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-20">
-        <div className="absolute top-20 left-20 w-32 h-32 bg-[#042c45] rounded-full blur-xl"></div>
-        <div className="absolute bottom-20 right-20 w-48 h-48 bg-[#042c45] rounded-full blur-xl"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-[#042c45] rounded-full blur-2xl"></div>
-        <div className="absolute top-1/4 right-1/4 w-40 h-40 bg-[#042c45] rounded-full blur-lg"></div>
-        <div className="absolute bottom-1/3 left-1/3 w-36 h-36 bg-[#042c45] rounded-full blur-lg"></div>
+        <div className="absolute top-20 left-20 w-32 h-32 bg-[#FFD935] rounded-full blur-xl"></div>
+        <div className="absolute bottom-20 right-20 w-48 h-48 bg-[#FFD935] rounded-full blur-xl"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-[#FFD935] rounded-full blur-2xl"></div>
+        <div className="absolute top-1/4 right-1/4 w-40 h-40 bg-[#FFD935] rounded-full blur-lg"></div>
+        <div className="absolute bottom-1/3 left-1/3 w-36 h-36 bg-[#FFD935] rounded-full blur-lg"></div>
       </div>
       
       {/* SVG Filter for liquid effect */}
@@ -31,7 +31,7 @@ export default function LiquidBackground() {
       <motion.div
         className="absolute w-96 h-96 rounded-full opacity-80"
         style={{
-          background: 'linear-gradient(135deg, #FFFFFF 0%, #042c45 50%, #FFFFFF 100%)',
+          background: 'linear-gradient(135deg, #FFFFFF 0%, #FFD935 50%, #FF7D05 100%)',
           clipPath: 'polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)',
         }}
         animate={{
@@ -51,7 +51,7 @@ export default function LiquidBackground() {
       <motion.div
         className="absolute w-80 h-80 rounded-full opacity-70"
         style={{
-          background: 'linear-gradient(45deg, #042c45 0%, #FFFFFF 50%, #042c45 100%)',
+          background: 'linear-gradient(45deg, #FFD935 0%, #FFFFFF 50%, #FF7D05 100%)',
           clipPath: 'polygon(25% 0%, 75% 0%, 100% 25%, 100% 75%, 75% 100%, 25% 100%, 0% 75%, 0% 25%)',
         }}
         animate={{
@@ -71,7 +71,7 @@ export default function LiquidBackground() {
       <motion.div
         className="absolute w-72 h-72 rounded-full opacity-60"
         style={{
-          background: 'linear-gradient(225deg, #FFFFFF 0%, #042c45 50%, #042c45 100%)',
+          background: 'linear-gradient(225deg, #FFFFFF 0%, #FFD935 50%, #FF7D05 100%)',
           clipPath: 'polygon(40% 0%, 60% 0%, 100% 40%, 100% 60%, 60% 100%, 40% 100%, 0% 60%, 0% 40%)',
         }}
         animate={{
@@ -91,7 +91,7 @@ export default function LiquidBackground() {
       <motion.div
         className="absolute w-64 h-64 rounded-full opacity-50"
         style={{
-          background: 'linear-gradient(315deg, #042c45 0%, #FFFFFF 30%, #042c45 70%, #042c45 100%)',
+          background: 'linear-gradient(315deg, #FFD935 0%, #FFFFFF 30%, #FF7D05 70%, #FFD935 100%)',
           clipPath: 'polygon(20% 0%, 80% 0%, 100% 20%, 100% 80%, 80% 100%, 20% 100%, 0% 80%, 0% 20%)',
         }}
         animate={{
@@ -111,7 +111,7 @@ export default function LiquidBackground() {
       <motion.div
         className="absolute w-56 h-56 rounded-full opacity-45"
         style={{
-          background: 'linear-gradient(180deg, #042c45 0%, #042c45 50%, #FFFFFF 100%)',
+          background: 'linear-gradient(180deg, #FFD935 0%, #FF7D05 50%, #FFFFFF 100%)',
           clipPath: 'polygon(35% 0%, 65% 0%, 100% 35%, 100% 65%, 65% 100%, 35% 100%, 0% 65%, 0% 35%)',
         }}
         animate={{
@@ -131,7 +131,7 @@ export default function LiquidBackground() {
       <motion.div
         className="absolute w-48 h-48 rounded-full opacity-40"
         style={{
-          background: 'linear-gradient(270deg, #FFFFFF 0%, #042c45 50%, #042c45 100%)',
+          background: 'linear-gradient(270deg, #FFFFFF 0%, #FFD935 50%, #FF7D05 100%)',
           clipPath: 'polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)',
         }}
         animate={{
@@ -151,7 +151,7 @@ export default function LiquidBackground() {
       <motion.div
         className="absolute w-32 h-32 rounded-full opacity-35"
         style={{
-          background: 'linear-gradient(135deg, #042c45 0%, #042c45 100%)',
+          background: 'linear-gradient(135deg, #FFD935 0%, #FF7D05 100%)',
           clipPath: 'polygon(25% 0%, 75% 0%, 100% 25%, 100% 75%, 75% 100%, 25% 100%, 0% 75%, 0% 25%)',
         }}
         animate={{
@@ -170,7 +170,7 @@ export default function LiquidBackground() {
       <motion.div
         className="absolute w-24 h-24 rounded-full opacity-25"
         style={{
-          background: 'linear-gradient(45deg, #042c45 0%, #042c45 100%)',
+          background: 'linear-gradient(45deg, #FFD935 0%, #FF7D05 100%)',
           clipPath: 'polygon(40% 0%, 60% 0%, 100% 40%, 100% 60%, 60% 100%, 40% 100%, 0% 60%, 0% 40%)',
         }}
         animate={{

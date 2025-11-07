@@ -14,14 +14,14 @@ export default function JourneySection() {
   };
 
   return (
-    <section id="journey" className="relative min-h-screen flex items-center bg-gradient-to-br from-white via-[#042c45]/15 to-[#042c45]/25 overflow-hidden">
+    <section id="journey" className="relative min-h-screen flex items-center bg-gradient-to-br from-white via-[#FFD935]/15 to-[#FF7D05]/25 overflow-hidden">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-20">
-        <div className="absolute top-20 left-20 w-32 h-32 bg-[#042c45] rounded-full blur-xl"></div>
-        <div className="absolute bottom-20 right-20 w-48 h-48 bg-[#042c45] rounded-full blur-xl"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-[#042c45] rounded-full blur-2xl"></div>
-        <div className="absolute top-1/4 right-1/4 w-40 h-40 bg-[#042c45] rounded-full blur-lg"></div>
-        <div className="absolute bottom-1/3 left-1/3 w-36 h-36 bg-[#042c45] rounded-full blur-lg"></div>
+        <div className="absolute top-20 left-20 w-32 h-32 bg-[#FFD935] rounded-full blur-xl"></div>
+        <div className="absolute bottom-20 right-20 w-48 h-48 bg-[#FFD935] rounded-full blur-xl"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-[#FFD935] rounded-full blur-2xl"></div>
+        <div className="absolute top-1/4 right-1/4 w-40 h-40 bg-[#FFD935] rounded-full blur-lg"></div>
+        <div className="absolute bottom-1/3 left-1/3 w-36 h-36 bg-[#FFD935] rounded-full blur-lg"></div>
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
