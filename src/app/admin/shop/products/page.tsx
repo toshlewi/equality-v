@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Search, Download, Eye, Plus, ChevronLeft, ChevronRight, Edit } from "lucide-react";
+import { Search, Download, Eye, Plus, ChevronLeft, ChevronRight, Edit, ShoppingCart } from "lucide-react";
 
 interface Product {
   id: string;
@@ -282,15 +282,22 @@ export default function ProductsPage() {
                     <TableCell>
                       <div className="flex gap-2">
                         <Link href={`/admin/shop/products/${product.id}`}>
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" title="View Details">
                             <Eye className="w-4 h-4" />
                           </Button>
                         </Link>
                         <Link href={`/admin/shop/products/${product.id}/edit`}>
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" title="Edit Product">
                             <Edit className="w-4 h-4" />
                           </Button>
                         </Link>
+                        {product.status === 'active' && (
+                          <Link href="/buy-merch" target="_blank">
+                            <Button variant="ghost" size="sm" title="View on Shop">
+                              <ShoppingCart className="w-4 h-4" />
+                            </Button>
+                          </Link>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>

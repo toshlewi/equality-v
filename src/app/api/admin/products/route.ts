@@ -63,8 +63,8 @@ export async function GET(request: NextRequest) {
     const hasPrevPage = page > 1;
 
     return ApiResponse.success({
-      products: products.map(product => ({
-        id: product._id.toString(),
+      products: products.map((product: any) => ({
+        id: product._id?.toString() || '',
         name: product.name,
         slug: product.slug,
         description: product.description,
@@ -163,7 +163,11 @@ export async function POST(request: NextRequest) {
     const validation = createProductSchema.safeParse(body);
     
     if (!validation.success) {
-      return ApiResponse.validationError(validation.error.errors);
+      const errors = validation.error.issues.map(err => ({
+        field: err.path.join('.'),
+        message: err.message
+      }));
+      return ApiResponse.validationError(errors);
     }
 
     const validatedData = validation.data;
@@ -180,7 +184,7 @@ export async function POST(request: NextRequest) {
 
     let slug = generateSlug(validatedData.name);
     let slugCounter = 1;
-    let originalSlug = slug;
+    const originalSlug = slug;
 
     while (await Product.findOne({ slug })) {
       slug = `${originalSlug}-${slugCounter}`;
@@ -202,7 +206,7 @@ export async function POST(request: NextRequest) {
       slug: product.slug,
       status: product.status,
       createdAt: product.createdAt
-    }, 201);
+    }, 'Product created successfully', 201);
 
   } catch (error) {
     console.error('Error creating product:', error);

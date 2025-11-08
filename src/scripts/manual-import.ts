@@ -2,8 +2,8 @@ import { connectDB } from '@/lib/mongodb';
 import Publication from '@/models/Publication';
 import Book from '@/models/Book';
 import Toolkit from '@/models/Toolkit';
-import fs from 'fs/promises';
-import path from 'path';
+// import fs from 'fs/promises'; // Unused for now
+// import path from 'path'; // Unused for now
 
 // Sample data for manual import - you can modify this based on your actual files
 const publicationsData = [

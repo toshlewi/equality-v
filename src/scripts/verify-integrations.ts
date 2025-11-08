@@ -108,7 +108,7 @@ async function verifyStripe() {
     });
 
     // Test API call
-    const account = await stripe.account.retrieve();
+    const account = await stripe.accounts.retrieve();
     addResult('Stripe', 'API Connection', 'pass', `Connected (Account: ${account.id})`);
 
     if (process.env.STRIPE_PUBLISHABLE_KEY) {
@@ -142,7 +142,7 @@ async function verifyMpesa() {
       
       // Test access token generation
       try {
-        const token = await mpesaClient.generateAccessToken();
+        await mpesaClient.generateAccessToken();
         addResult('M-Pesa', 'API Connection', 'pass', 'Access token generated successfully');
       } catch (error) {
         addResult('M-Pesa', 'API Connection', 'fail', `Failed to generate token: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -251,7 +251,7 @@ async function verifyApiRoutes() {
       } else {
         addResult('API Routes', route.name, 'fail', `Route error (${response.status})`);
       }
-    } catch (error) {
+    } catch {
       // If server is not running, this will fail
       addResult('API Routes', route.name, 'warning', `Cannot verify (server may not be running)`);
     }

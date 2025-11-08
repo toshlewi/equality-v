@@ -1,4 +1,4 @@
-import mongoose, { Schema, model, models } from 'mongoose';
+import { Schema, model, models } from 'mongoose';
 
 const OrderSchema = new Schema({
   orderNumber: { type: String, required: true, unique: true },
@@ -149,7 +149,8 @@ const OrderSchema = new Schema({
 
 // Virtual for customer full name
 OrderSchema.virtual('customerFullName').get(function() {
-  return `${this.customerInfo.firstName} ${this.customerInfo.lastName}`;
+  if (!this.customerInfo) return '';
+  return `${this.customerInfo.firstName || ''} ${this.customerInfo.lastName || ''}`.trim();
 });
 
 // Virtual for formatted total
@@ -183,14 +184,15 @@ OrderSchema.virtual('ageInDays').get(function() {
 // Pre-save middleware to generate order number
 OrderSchema.pre('save', async function(next) {
   if (!this.orderNumber) {
-    const count = await this.constructor.countDocuments();
+    const OrderModel = this.constructor as typeof import('./Order').default;
+    const count = await OrderModel.countDocuments();
     this.orderNumber = `EV-${String(count + 1).padStart(6, '0')}`;
   }
   next();
 });
 
 // Method to add refund
-OrderSchema.methods.addRefund = function(amount, reason, processedBy, refundId) {
+OrderSchema.methods.addRefund = function(amount: number, reason: string, processedBy: string, refundId: string) {
   this.refunds.push({
     amount,
     reason,
@@ -212,7 +214,7 @@ OrderSchema.methods.addRefund = function(amount, reason, processedBy, refundId) 
 };
 
 // Method to update status
-OrderSchema.methods.updateStatus = function(newStatus, updatedBy) {
+OrderSchema.methods.updateStatus = function(newStatus: string, updatedBy: string) {
   this.status = newStatus;
   
   if (newStatus === 'confirmed' && !this.processedAt) {
@@ -229,8 +231,8 @@ OrderSchema.methods.updateStatus = function(newStatus, updatedBy) {
 };
 
 // Static method to get order statistics
-OrderSchema.statics.getStats = function(startDate, endDate) {
-  const match = {};
+OrderSchema.statics.getStats = function(startDate?: Date, endDate?: Date) {
+  const match: { createdAt?: { $gte: Date; $lte: Date } } = {};
   if (startDate && endDate) {
     match.createdAt = { $gte: startDate, $lte: endDate };
   }

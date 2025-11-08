@@ -24,6 +24,7 @@ const createBookSchema = z.object({
   isInLibrary: z.boolean().default(true),
   isAvailable: z.boolean().default(true),
   isBookClubSelection: z.boolean().optional(),
+  bookClubDate: z.string().datetime().optional(),
   status: z.enum(['pending', 'review', 'published', 'rejected']).optional()
 });
 
@@ -66,7 +67,7 @@ export async function GET(request: NextRequest) {
     } else {
       // Public access defaults to published only
       const session = await getServerSession(authOptions);
-      if (!session || !['admin', 'editor', 'reviewer'].includes(session.user?.role)) {
+      if (!session || !session.user?.role || !['admin', 'editor', 'reviewer'].includes(session.user.role)) {
         query.status = 'published';
       }
       // If authenticated admin, query all statuses
@@ -106,7 +107,7 @@ export async function GET(request: NextRequest) {
     const total = await Book.countDocuments(query);
 
     // Get featured books if requested
-    let featuredBooks = [];
+    let featuredBooks: any[] = [];
     if (featured === 'true' && page === 1) {
       featuredBooks = await Book.find({ 
         isFeatured: true, 
@@ -119,7 +120,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get book club selections if requested
-    let bookClubSelections = [];
+    let bookClubSelections: any[] = [];
     if (bookClub === 'true' && page === 1) {
       bookClubSelections = await Book.find({ 
         isBookClubSelection: true, 
@@ -185,7 +186,7 @@ export async function POST(request: NextRequest) {
     // Generate unique slug
     let slug = generateSlug(validatedData.title);
     let slugCounter = 1;
-    let originalSlug = slug;
+    const originalSlug = slug;
 
     while (await Book.findOne({ slug })) {
       slug = `${originalSlug}-${slugCounter}`;
@@ -239,12 +240,12 @@ export async function POST(request: NextRequest) {
     console.error('Error creating book:', error);
     
     if (error instanceof z.ZodError) {
-      console.error('Validation errors:', error.errors);
+      console.error('Validation errors:', error.issues);
       return NextResponse.json(
         { 
           success: false, 
           error: 'Validation failed', 
-          details: error.errors.map(e => `${e.path.join('.')}: ${e.message}`) 
+          details: error.issues.map(e => `${e.path.join('.')}: ${e.message}`) 
         },
         { status: 400 }
       );

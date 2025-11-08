@@ -4,6 +4,8 @@ import User from "@/models/User";
 import { verifyPassword } from "@/lib/auth";
 import connectDB from "@/lib/mongodb";
 
+const allowedRoles = ['admin', 'editor', 'reviewer', 'finance'] as const;
+
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
@@ -15,21 +17,40 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials) {
         try {
           await connectDB();
-          const user = await User.findOne({ email: credentials?.email });
+          const email = credentials?.email?.toLowerCase().trim();
+          const password = credentials?.password;
 
-          if (user && credentials?.password && await verifyPassword(credentials.password, user.password)) {
-            // Check if the user has an allowed role for admin access
-            const allowedRoles = ['admin', 'editor', 'reviewer', 'finance'];
-            if (!allowedRoles.includes(user.role)) {
-              throw new Error("Access Denied: Insufficient role.");
-            }
-            return { id: user._id.toString(), name: user.name, email: user.email, role: user.role };
-          } else {
+          if (!email || !password) {
             return null;
           }
+
+          const user = await User.findOne({ email });
+
+          if (!user) {
+            return null;
+          }
+
+          if (!user.isActive) {
+            throw new Error('AccountDisabled');
+          }
+
+          if (!allowedRoles.includes(user.role)) {
+            throw new Error('AccessDenied');
+          }
+
+          const isValidPassword = await verifyPassword(password, user.password);
+
+          if (!isValidPassword) {
+            return null;
+          }
+
+          return { id: user._id.toString(), name: user.name, email: user.email, role: user.role };
         } catch (error) {
           console.error('NextAuth authorize error:', error);
-          return null;
+          if (error instanceof Error) {
+            throw error;
+          }
+          throw new Error('CredentialsSignin');
         }
       },
     }),
@@ -55,6 +76,18 @@ export const authOptions: NextAuthOptions = {
         session.user.role = token.role as string;
       }
       return session;
+    },
+  },
+  events: {
+    async signIn({ user }) {
+      try {
+        await connectDB();
+        if (user?.id) {
+          await User.findByIdAndUpdate(user.id, { lastLogin: new Date() }).exec();
+        }
+      } catch (error) {
+        console.error('Failed to record last login', error);
+      }
     },
   },
   pages: {

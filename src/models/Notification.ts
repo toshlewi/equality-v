@@ -120,7 +120,7 @@ NotificationSchema.statics.createNotification = function(data) {
 };
 
 // Static method to mark as read
-NotificationSchema.statics.markAsRead = function(notificationId, userId) {
+NotificationSchema.statics.markAsRead = function(notificationId, _userId) {
   return this.findByIdAndUpdate(notificationId, {
     read: true,
     readAt: new Date()
@@ -130,15 +130,21 @@ NotificationSchema.statics.markAsRead = function(notificationId, userId) {
 // Static method to get unread count
 NotificationSchema.statics.getUnreadCount = function(userId) {
   return this.countDocuments({
-    $or: [
-      { userId: userId, read: false },
-      { isGlobal: true, read: false }
+    $and: [
+      {
+        $or: [
+          { userId: userId, read: false },
+          { isGlobal: true, read: false }
+        ]
+      },
+      {
+        $or: [
+          { expiresAt: { $exists: false } },
+          { expiresAt: { $gt: new Date() } }
+        ]
+      }
     ],
-    dismissed: false,
-    $or: [
-      { expiresAt: { $exists: false } },
-      { expiresAt: { $gt: new Date() } }
-    ]
+    dismissed: false
   });
 };
 

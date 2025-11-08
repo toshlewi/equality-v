@@ -17,8 +17,8 @@ export async function GET(request: NextRequest) {
 
     await connectDB();
 
-    // Build query
-    const query: any = { isActive: true };
+    // Build query - only show active products
+    const query: any = { status: 'active' };
     
     if (category) {
       query.category = category;
@@ -28,6 +28,7 @@ export async function GET(request: NextRequest) {
       query.$or = [
         { name: { $regex: search, $options: 'i' } },
         { description: { $regex: search, $options: 'i' } },
+        { shortDescription: { $regex: search, $options: 'i' } },
         { tags: { $in: [new RegExp(search, 'i')] } }
       ];
     }
@@ -39,7 +40,7 @@ export async function GET(request: NextRequest) {
     }
     
     if (inStock) {
-      query.stockQuantity = { $gt: 0 };
+      query['inventory.quantity'] = { $gt: 0 };
     }
 
     // Build sort object
@@ -50,24 +51,34 @@ export async function GET(request: NextRequest) {
       .sort(sort)
       .limit(limit)
       .skip((page - 1) * limit)
-      .select('-variants -description -tags'); // Exclude heavy fields for list view
+      .select('-variants -seoTitle -seoDescription -seoKeywords -createdBy -updatedBy'); // Exclude heavy/admin fields
 
     const total = await Product.countDocuments(query);
 
     return NextResponse.json({
       success: true,
       data: {
-        products: products.map(product => ({
+        products: products.map((product: any) => ({
           id: product._id.toString(),
           name: product.name,
           slug: product.slug,
           price: product.price,
           currency: product.currency,
+          compareAtPrice: product.compareAtPrice,
           category: product.category,
-          images: product.images,
-          stockQuantity: product.stockQuantity,
-          isActive: product.isActive,
-          createdAt: product.createdAt
+          subcategory: product.subcategory,
+          images: product.images || [],
+          inventory: product.inventory || { trackQuantity: false, quantity: 0 },
+          description: product.description,
+          shortDescription: product.shortDescription,
+          status: product.status,
+          rating: product.rating || 0,
+          reviewCount: product.reviewCount || 0,
+          isFeatured: product.isFeatured || false,
+          isNew: product.isNew || false,
+          isOnSale: product.isOnSale || false,
+          createdAt: product.createdAt,
+          updatedAt: product.updatedAt
         })),
         pagination: {
           page,

@@ -104,7 +104,7 @@ export default function ToolkitPage() {
               Toolkit Not Found
             </h1>
             <p className="text-gray-600 mb-8">
-              The toolkit you're looking for doesn't exist or has been removed.
+              The toolkit you&apos;re looking for doesn&apos;t exist or has been removed.
             </p>
             <Link
               href="/matriarchive/toolkits-guides"
@@ -187,7 +187,7 @@ export default function ToolkitPage() {
                   Target Audience
                 </h3>
                 <div className="flex flex-wrap gap-2">
-                  {toolkit.targetAudience.map((audience, index) => (
+                  {toolkit.targetAudience?.map((audience, index) => (
                     <span
                       key={index}
                       className="px-3 py-1 bg-blue-100 text-blue-700 text-sm rounded-full"

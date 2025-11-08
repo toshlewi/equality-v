@@ -116,7 +116,7 @@ function ScrollCard({ card, index, totalCards, scrollProgress }: ScrollCardProps
   const router = useRouter();
 
   // Calculate the progress for this specific card
-  const cardProgress = useTransform(scrollProgress, (value) => {
+  const cardProgress = useTransform(scrollProgress, (value: number) => {
     const progress = value * (totalCards - 1) - index;
     return Math.max(0, Math.min(1, progress));
   });

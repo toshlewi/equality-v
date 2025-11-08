@@ -1,4 +1,4 @@
-import mongoose, { Schema, model, models } from 'mongoose';
+import { Schema, model, models } from 'mongoose';
 
 const SettingSchema = new Schema({
   key: { type: String, required: true, unique: true, maxlength: 100 },
@@ -78,7 +78,7 @@ SettingSchema.statics.setSetting = async function(key: string, value: any, type 
 SettingSchema.statics.getSettingsByCategory = async function(category: string) {
   const settings = await this.find({ category });
   const result: any = {};
-  settings.forEach(setting => {
+  settings.forEach((setting: any) => {
     result[setting.key] = setting.getTypedValue();
   });
   return result;

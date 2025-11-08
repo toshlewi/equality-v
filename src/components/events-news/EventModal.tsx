@@ -11,9 +11,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { loadStripe, StripeElementsOptions } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 
-// Initialize Stripe
-const stripeKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || process.env.STRIPE_PUBLISHABLE_KEY || '';
+// Initialize Stripe - NEXT_PUBLIC_ prefix is required for client-side access
+const stripeKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '';
 const stripePromise = stripeKey ? loadStripe(stripeKey) : null;
+
+if (!stripeKey) {
+  console.error('NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY is not set. Stripe payments will not work.');
+}
 
 // Card payment form component
 function CardPaymentForm({ 
@@ -399,7 +403,7 @@ export default function EventModal({ event, isOpen, onClose }: EventModalProps) 
       email: '',
       phone: '',
       tickets: 1,
-      paymentMethod: '',
+      paymentMethod: 'stripe' as 'stripe' | 'mpesa',
       memberCode: ''
     });
   };
@@ -750,7 +754,7 @@ export default function EventModal({ event, isOpen, onClose }: EventModalProps) 
                   {paymentConfirmed && (
                     <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                       <p className="text-green-700 text-sm">
-                        ✅ Payment confirmed! Your registration is being processed. You'll receive a confirmation email shortly.
+                        ✅ Payment confirmed! Your registration is being processed. You&apos;ll receive a confirmation email shortly.
                       </p>
                     </div>
                   )}

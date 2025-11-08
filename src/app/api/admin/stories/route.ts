@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth-config';
 import { connectDB } from '@/lib/mongodb';
 import Story from '@/models/Story';
 import Media from '@/models/Media';
+import { ApiResponse } from '@/lib/api-utils';
 import { z } from 'zod';
 
 // Validation schema for story updates
@@ -17,16 +20,17 @@ const updateStorySchema = z.object({
 // GET /api/admin/stories - Get all stories for admin review
 export async function GET(request: NextRequest) {
   try {
-    await connectDB();
+    const session = await getServerSession(authOptions);
+    
+    if (!session?.user?.id) {
+      return ApiResponse.unauthorized('Authentication required');
+    }
 
-    // TODO: Add admin authentication check
-    // const user = await getCurrentUser(request);
-    // if (!user || !user.isAdmin) {
-    //   return NextResponse.json(
-    //     { success: false, error: 'Unauthorized' },
-    //     { status: 401 }
-    //   );
-    // }
+    if (!['admin', 'editor', 'reviewer'].includes((session.user as any).role)) {
+      return ApiResponse.forbidden('Insufficient permissions');
+    }
+
+    await connectDB();
 
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');
@@ -134,16 +138,17 @@ export async function GET(request: NextRequest) {
 // PATCH /api/admin/stories - Bulk update stories
 export async function PATCH(request: NextRequest) {
   try {
-    await connectDB();
+    const session = await getServerSession(authOptions);
+    
+    if (!session?.user?.id) {
+      return ApiResponse.unauthorized('Authentication required');
+    }
 
-    // TODO: Add admin authentication check
-    // const user = await getCurrentUser(request);
-    // if (!user || !user.isAdmin) {
-    //   return NextResponse.json(
-    //     { success: false, error: 'Unauthorized' },
-    //     { status: 401 }
-    //   );
-    // }
+    if (!['admin', 'editor', 'reviewer'].includes((session.user as any).role)) {
+      return ApiResponse.forbidden('Insufficient permissions');
+    }
+
+    await connectDB();
 
     const body = await request.json();
     const { storyIds, updates } = body;
@@ -161,7 +166,7 @@ export async function PATCH(request: NextRequest) {
     // Add reviewer information
     const updateData = {
       ...validatedUpdates,
-      reviewerId: null, // TODO: Get from authenticated user
+      reviewerId: session.user.id,
       reviewedAt: new Date()
     };
 
@@ -184,7 +189,7 @@ export async function PATCH(request: NextRequest) {
     
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { success: false, error: 'Validation failed', details: error.errors },
+        { success: false, error: 'Validation failed', details: error.issues },
         { status: 400 }
       );
     }

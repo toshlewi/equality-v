@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { connectDB } from '@/lib/mongodb';
 import Donation from '@/models/Donation';
-import { createPaymentIntent } from '@/lib/stripe';
-import { initiateSTKPush } from '@/lib/mpesa';
+import { createPaymentIntent, isStripeConfigured } from '@/lib/stripe';
+// import { initiateSTKPush, mpesaClient } from '@/lib/mpesa'; // Unused for now
 import { verifyRecaptcha } from '@/lib/security';
 import { sanitizeInput } from '@/lib/auth';
 import { createAdminNotification } from '@/lib/notifications';
@@ -14,6 +14,7 @@ const donationSchema = z.object({
   donorEmail: z.string().email('Invalid email address'),
   donorPhone: z.string().min(10, 'Phone number must be at least 10 characters'),
   amount: z.number().min(1, 'Amount must be at least $1').max(10000, 'Amount cannot exceed $10,000'),
+  currency: z.string().default('USD').optional(),
   donationType: z.enum(['cash', 'product', 'service']),
   category: z.enum(['general', 'education', 'healthcare', 'emergency', 'events', 'other']),
   paymentMethod: z.enum(['stripe', 'mpesa']),
@@ -108,6 +109,14 @@ export async function POST(request: NextRequest) {
 
     // Create payment based on method
     if (validatedData.paymentMethod === 'stripe') {
+      // Validate Stripe configuration
+      if (!isStripeConfigured) {
+        return NextResponse.json(
+          { success: false, error: 'Stripe payment is not configured' },
+          { status: 503 }
+        );
+      }
+
       // Create Stripe payment intent
       const paymentIntent = await createPaymentIntent({
         amount: validatedData.amount,
@@ -155,7 +164,7 @@ export async function POST(request: NextRequest) {
     
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { success: false, error: 'Validation failed', details: error.errors },
+        { success: false, error: 'Validation failed', details: error.issues },
         { status: 400 }
       );
     }

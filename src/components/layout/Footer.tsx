@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { Facebook, Twitter, Instagram, Linkedin, Mail, Send } from 'lucide-react';
-import { TikTok } from 'lucide-react';
 import { useState } from 'react';
 
 export default function Footer() {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { headers } from 'next/headers';
+// import { headers } from 'next/headers'; // Unused for now
 import AuditLog from '@/models/AuditLog';
 import connectDB from '@/lib/mongodb';
 
@@ -150,7 +150,7 @@ export function withSecurity(
   handler: (request: NextRequest) => Promise<NextResponse>
 ) {
   return async (request: NextRequest): Promise<NextResponse> => {
-    const ip = request.ip || request.headers.get('x-forwarded-for') || 'unknown';
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || request.headers.get('x-real-ip') || 'unknown';
     const userAgent = request.headers.get('user-agent') || '';
     
     // Check if IP is blocked
@@ -207,7 +207,7 @@ export function withSecurity(
 export const helmet = addSecurityHeaders;
 
 // CORS middleware (placeholder)
-export const cors = (options: any) => (request: NextRequest) => request;
+export const cors = (_options: any) => (request: NextRequest) => request;
 
 export default {
   addSecurityHeaders,

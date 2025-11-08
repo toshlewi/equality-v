@@ -1,7 +1,7 @@
 import { connectDB } from '@/lib/mongodb';
 import Publication from '@/models/Publication';
 import Book from '@/models/Book';
-import Category from '@/models/Category';
+// import Category from '@/models/Category'; // Unused for now
 
 // Publication data mapping PDFs to titles
 const publicationsData = [

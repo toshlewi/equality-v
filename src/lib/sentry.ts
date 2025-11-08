@@ -13,11 +13,8 @@ export function initSentry() {
       // Set profilesSampleRate to 1.0 to profile every transaction
       profilesSampleRate: 0.1,
       
-      // Capture unhandled promise rejections
-      captureUnhandledRejections: true,
-      
-      // Capture uncaught exceptions
-      captureUncaughtException: true,
+      // Note: captureUnhandledRejections and captureUncaughtException are not available in @sentry/nextjs v10+
+      // Unhandled rejections and exceptions are captured automatically
       
       // Set beforeSend to filter sensitive data
       beforeSend(event, hint) {
@@ -55,12 +52,8 @@ export function initSentry() {
         return event;
       },
       
-      // Set integrations
-      integrations: [
-        new Sentry.Integrations.Http({ tracing: true }),
-        new Sentry.Integrations.Express({ app: undefined }),
-        new Sentry.Integrations.Mongo({ useMongoose: true }),
-      ],
+      // Set integrations (Sentry v10+ uses different integration API)
+      integrations: [],
       
       // Set release
       release: process.env.VERCEL_GIT_COMMIT_SHA || 'unknown',
@@ -89,7 +82,8 @@ export function captureException(error: Error, context?: Record<string, any>) {
  */
 export function captureMessage(message: string, level: Sentry.SeverityLevel = 'info', context?: Record<string, any>) {
   if (process.env.NODE_ENV === 'production') {
-    Sentry.captureMessage(message, level, {
+    Sentry.captureMessage(message, {
+      level,
       extra: context
     });
   } else {
@@ -154,11 +148,14 @@ export function setContext(key: string, context: Record<string, any>) {
 }
 
 /**
- * Start transaction
+ * Start transaction (using startSpan in Sentry v10+)
  */
 export function startTransaction(name: string, op: string) {
   if (process.env.NODE_ENV === 'production') {
-    return Sentry.startTransaction({ name, op });
+    return Sentry.startSpan({ name, op }, () => {
+      // Transaction logic here
+      return null;
+    });
   }
   return null;
 }

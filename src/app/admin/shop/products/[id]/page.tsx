@@ -101,9 +101,9 @@ export default function ProductDetailPage() {
               <Edit className="w-4 h-4 mr-2" /> Edit
             </Button>
           </Link>
-          <Link href={`/shop/${product.slug}`} target="_blank">
+          <Link href="/buy-merch" target="_blank">
             <Button variant="outline">
-              <Eye className="w-4 h-4 mr-2" /> View Public
+              <Eye className="w-4 h-4 mr-2" /> View on Shop
             </Button>
           </Link>
         </div>

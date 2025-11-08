@@ -20,11 +20,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate Stripe webhook secret
+    if (!process.env.STRIPE_WEBHOOK_SECRET) {
+      console.error('STRIPE_WEBHOOK_SECRET is not configured');
+      return NextResponse.json(
+        { error: 'Stripe webhook secret is not configured' },
+        { status: 503 }
+      );
+    }
+
     // Verify webhook signature
     const event = verifyWebhookSignature(
       body,
       signature,
-      process.env.STRIPE_WEBHOOK_SECRET!
+      process.env.STRIPE_WEBHOOK_SECRET
     );
 
     console.log('Received Stripe webhook:', event.type);
@@ -67,10 +76,13 @@ export async function POST(request: NextRequest) {
     console.error('Stripe webhook error:', error);
     
     // Log security event
-    await logSecurityEvent('stripe_webhook_error', {
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-      ip: request.headers.get('x-forwarded-for') || 'unknown'
+    await logSecurityEvent({
+      type: 'stripe_webhook_error',
+      userId: undefined,
+      ip: request.headers.get('x-forwarded-for') || 'unknown',
+      userAgent: request.headers.get('user-agent') || 'unknown',
+      details: { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
+      severity: 'high'
     });
 
     return NextResponse.json(
@@ -96,11 +108,18 @@ async function handlePaymentIntentSucceeded(paymentIntent: any) {
     }
 
     // Log successful payment
-    await logSecurityEvent('payment_succeeded', {
-      success: true,
-      resource: type,
-      action: 'payment_completed',
-      metadata: { paymentIntentId: paymentIntent.id, amount: paymentIntent.amount }
+    await logSecurityEvent({
+      type: 'payment_succeeded',
+      userId: undefined,
+      ip: 'unknown',
+      userAgent: 'unknown',
+      details: {
+        success: true,
+        resource: type,
+        action: 'payment_completed',
+        metadata: { paymentIntentId: paymentIntent.id, amount: paymentIntent.amount }
+      },
+      severity: 'low'
     });
 
   } catch (error) {
@@ -552,12 +571,19 @@ async function handlePaymentIntentFailed(paymentIntent: any) {
     }
 
     // Log failed payment
-    await logSecurityEvent('payment_failed', {
-      success: false,
-      resource: type,
-      action: 'payment_failed',
-      error: paymentIntent.last_payment_error?.message || 'Payment failed',
-      metadata: { paymentIntentId: paymentIntent.id }
+    await logSecurityEvent({
+      type: 'payment_failed',
+      userId: undefined,
+      ip: 'unknown',
+      userAgent: 'unknown',
+      details: {
+        success: false,
+        resource: type,
+        action: 'payment_failed',
+        error: paymentIntent.last_payment_error?.message || 'Payment failed',
+        metadata: { paymentIntentId: paymentIntent.id }
+      },
+      severity: 'medium'
     });
 
   } catch (error) {
@@ -595,11 +621,18 @@ async function handleChargeRefunded(charge: any) {
     }
 
     // Log refund
-    await logSecurityEvent('payment_refunded', {
-      success: true,
-      resource: type,
-      action: 'refund_processed',
-      metadata: { chargeId: charge.id, amount: charge.amount_refunded }
+    await logSecurityEvent({
+      type: 'payment_refunded',
+      userId: undefined,
+      ip: 'unknown',
+      userAgent: 'unknown',
+      details: {
+        success: true,
+        resource: type,
+        action: 'refund_processed',
+        metadata: { chargeId: charge.id, amount: charge.amount_refunded }
+      },
+      severity: 'low'
     });
 
   } catch (error) {

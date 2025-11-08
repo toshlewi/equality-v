@@ -48,10 +48,10 @@ export default function EconomicJusticePage() {
             Feminist scholars delineate this system as a manifestation of gender-based violence, given its structural and enduring detrimental impact, often imperceptible to its beneficiaries. This framework erodes public services, attenuates labor protections, and commodifies essential life elements, compelling women to bear the brunt through unremunerated care work, precarious employment, and personal sacrifice.
           </p>
           <p className="text-lg text-gray-700 leading-relaxed mb-6">
-            Empirical data substantiates this grim reality. During structural adjustment programs in sub-Saharan Africa, average real wages declined in 26 of 28 observed nations. In Ghana, the privatization of forty-two significant state enterprises between 1984 and 1991 resulted in the termination of over 150,000 jobs, disproportionately affecting women in educational, nursing, and clerical professions. In South Africa, more than 60% of households in Soweto experienced electricity disconnections within a single year, with some enduring outages for over a month. Across rural Kenya, climate shocks, exacerbated by resource privatization, compel households to confront untenable choices: 42% of out-of-school girls cite domestic responsibilities, such as childcare or water collection, as the reason for their withdrawal after their families' incomes collapsed.
+            Empirical data substantiates this grim reality. During structural adjustment programs in sub-Saharan Africa, average real wages declined in 26 of 28 observed nations. In Ghana, the privatization of forty-two significant state enterprises between 1984 and 1991 resulted in the termination of over 150,000 jobs, disproportionately affecting women in educational, nursing, and clerical professions. In South Africa, more than 60% of households in Soweto experienced electricity disconnections within a single year, with some enduring outages for over a month. Across rural Kenya, climate shocks, exacerbated by resource privatization, compel households to confront untenable choices: 42% of out-of-school girls cite domestic responsibilities, such as childcare or water collection, as the reason for their withdrawal after their families&apos; incomes collapsed.
           </p>
           <p className="text-lg text-gray-700 leading-relaxed mb-6">
-            Privatization and structural adjustment programs transfer risk from governmental entities to individuals. Hospitals, educational institutions, and utilities, formerly regarded as public trusts, are re-envisioned as cost centers or profit-generating opportunities. User fees for healthcare services render care inaccessible to the impoverished. Water and electricity tariffs escalate under private operators, forcing families to prioritize between essential services and sustenance. As public safety nets disintegrate, women compensate for these deficiencies, engaging in extended unremunerated labor, incurring debt, or entering insecure informal employment. This unseen labor sustains households and communities but degrades women's health, economic autonomy, and prospects for education or leadership.
+            Privatization and structural adjustment programs transfer risk from governmental entities to individuals. Hospitals, educational institutions, and utilities, formerly regarded as public trusts, are re-envisioned as cost centers or profit-generating opportunities. User fees for healthcare services render care inaccessible to the impoverished. Water and electricity tariffs escalate under private operators, forcing families to prioritize between essential services and sustenance. As public safety nets disintegrate, women compensate for these deficiencies, engaging in extended unremunerated labor, incurring debt, or entering insecure informal employment. This unseen labor sustains households and communities but degrades women&apos;s health, economic autonomy, and prospects for education or leadership.
           </p>
           <p className="text-lg text-gray-700 leading-relaxed mb-8">
             The environmental ramifications are equally profound. Resource privatization and cost-recovery policies frequently diminish oversight and accountability, leading to environmental degradation that disproportionately harms smallholder farmers, predominantly women. When forests are cleared for extractive industries or land is commodified for large-scale agribusiness, women lose access to firewood, water, and arable land. Climate shocks, droughts, floods, unpredictable seasons, intensify under these conditions, exacerbating poverty and instigating practices such as early marriage or school withdrawal for girls. Privatized utilities respond to climate-induced disruptions by raising prices or curtailing supply, further marginalizing those already at the periphery.
@@ -136,7 +136,7 @@ export default function EconomicJusticePage() {
 
         {/* Key Statistics */}
         <motion.section variants={fadeInUp} className="bg-white rounded-2xl p-12 shadow-lg">
-          <h3 className="text-3xl font-bold text-brand-teal mb-8 text-center">The Numbers Don't Lie</h3>
+          <h3 className="text-3xl font-bold text-brand-teal mb-8 text-center">The Numbers Don&apos;t Lie</h3>
           <div className="grid md:grid-cols-3 gap-8">
             <div className="text-center">
               <div className="text-4xl font-bold text-brand-orange mb-2">26/28</div>
@@ -144,7 +144,7 @@ export default function EconomicJusticePage() {
             </div>
             <div className="text-center">
               <div className="text-4xl font-bold text-brand-orange mb-2">150K+</div>
-              <div className="text-gray-700">Jobs lost in Ghana's privatization, disproportionately affecting women</div>
+              <div className="text-gray-700">Jobs lost in Ghana&apos;s privatization, disproportionately affecting women</div>
             </div>
             <div className="text-center">
               <div className="text-4xl font-bold text-brand-orange mb-2">60%</div>

@@ -101,7 +101,7 @@ export async function GET(request: NextRequest) {
     const total = await Toolkit.countDocuments(query);
 
     // Get featured toolkits if requested
-    let featuredToolkits = [];
+    let featuredToolkits: any[] = [];
     if (featured === 'true' && page === 1) {
       featuredToolkits = await Toolkit.find({ 
         isFeatured: true, 
@@ -166,7 +166,7 @@ export async function POST(request: NextRequest) {
     // Generate unique slug
     let slug = generateSlug(validatedData.title);
     let slugCounter = 1;
-    let originalSlug = slug;
+    const originalSlug = slug;
 
     while (await Toolkit.findOne({ slug })) {
       slug = `${originalSlug}-${slugCounter}`;
@@ -200,7 +200,7 @@ export async function POST(request: NextRequest) {
         { 
           success: false, 
           error: 'Validation failed', 
-          details: error.errors 
+          details: error.issues 
         },
         { status: 400 }
       );

@@ -110,7 +110,7 @@ export async function GET(request: NextRequest) {
     } else {
       // default public to published
       const session = await getServerSession(authOptions);
-      if (!session || !['admin', 'editor', 'reviewer'].includes(session.user?.role)) {
+      if (!session || !session.user?.role || !['admin', 'editor', 'reviewer'].includes(session.user.role)) {
         query.status = 'published';
       }
     }

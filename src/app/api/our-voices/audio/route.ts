@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, data: item });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ success: false, error: 'Validation failed', details: error.errors }, { status: 400 });
+      return NextResponse.json({ success: false, error: 'Validation failed', details: error.issues }, { status: 400 });
     }
     return NextResponse.json({ success: false, error: 'Failed to create audio' }, { status: 500 });
   }

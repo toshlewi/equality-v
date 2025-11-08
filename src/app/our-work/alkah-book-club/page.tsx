@@ -168,14 +168,14 @@ export default function ALKAHBookClubPage() {
           <div className="grid md:grid-cols-2 gap-8">
             <div className="bg-white/10 rounded-xl p-6">
               <h4 className="text-xl font-semibold mb-3">The Looting Machine by Tom Burgis</h4>
-              <p className="text-white/90 mb-4">Exploring the hidden networks that plunder Africa's wealth and the role of extractive industries in perpetuating inequality.</p>
+              <p className="text-white/90 mb-4">Exploring the hidden networks that plunder Africa&apos;s wealth and the role of extractive industries in perpetuating inequality.</p>
               <div className="text-sm text-white/80">
                 <p>Date: [To be announced]</p>
                 <p>Location: [Online/In-person]</p>
               </div>
             </div>
             <div className="bg-white/10 rounded-xl p-6">
-              <h4 className="text-xl font-semibold mb-3">Unbowed: One Woman's Story by Wangari Maathai</h4>
+              <h4 className="text-xl font-semibold mb-3">Unbowed: One Woman&apos;s Story by Wangari Maathai</h4>
               <p className="text-white/90 mb-4">The inspiring memoir of the Nobel Peace Prize winner and environmental activist who founded the Green Belt Movement.</p>
               <div className="text-sm text-white/80">
                 <p>Date: [To be announced]</p>
@@ -240,7 +240,7 @@ export default function ALKAHBookClubPage() {
         <motion.section variants={fadeInUp} className="text-center bg-white rounded-2xl p-12 shadow-lg">
           <h3 className="text-3xl font-bold text-brand-teal mb-6">Ready to Join ALKAH?</h3>
           <p className="text-lg text-gray-700 mb-8 max-w-2xl mx-auto">
-            Whether you're a seasoned reader or new to feminist literature, ALKAH welcomes all who are ready to engage in the transformative power of collective reading and discussion.
+            Whether you&apos;re a seasoned reader or new to feminist literature, ALKAH welcomes all who are ready to engage in the transformative power of collective reading and discussion.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/get-involved">

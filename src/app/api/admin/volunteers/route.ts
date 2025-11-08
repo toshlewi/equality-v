@@ -64,8 +64,8 @@ export async function GET(request: NextRequest) {
     const hasPrevPage = page > 1;
 
     return ApiResponse.success({
-      applications: applications.map(app => ({
-        id: app._id.toString(),
+      applications: applications.map((app: any) => ({
+        id: (app._id as any).toString(),
         jobId: app.jobId ? (typeof app.jobId === 'object' ? app.jobId._id.toString() : app.jobId.toString()) : null,
         jobTitle: app.jobId && typeof app.jobId === 'object' ? app.jobId.title : null,
         applicantName: app.applicantName,

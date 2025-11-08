@@ -133,7 +133,7 @@ export async function PUT(
       
       // Ensure slug is unique
       let slugCounter = 1;
-      let originalSlug = slug;
+      const originalSlug = slug;
       
       while (await Publication.findOne({ slug, _id: { $ne: id } })) {
         slug = `${originalSlug}-${slugCounter}`;
@@ -174,12 +174,12 @@ export async function PUT(
     console.error('Error updating publication:', error);
     
     if (error instanceof z.ZodError) {
-      console.error('Validation errors:', error.errors);
+      console.error('Validation errors:', error.issues);
       return NextResponse.json(
         { 
           success: false, 
           error: 'Validation failed', 
-          details: error.errors.map(e => `${e.path.join('.')}: ${e.message}`) 
+          details: error.issues.map(e => `${e.path.join('.')}: ${e.message}`) 
         },
         { status: 400 }
       );

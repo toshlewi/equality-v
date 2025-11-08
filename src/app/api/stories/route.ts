@@ -212,12 +212,12 @@ export async function POST(request: NextRequest) {
     console.error('Error creating story:', error);
     
     if (error instanceof z.ZodError) {
-      console.error('Validation errors:', error.errors);
+      console.error('Validation errors:', error.issues);
       return NextResponse.json(
         { 
           success: false, 
           error: 'Validation failed', 
-          details: error.errors.map(e => ({
+          details: error.issues.map(e => ({
             path: e.path,
             message: e.message
           }))

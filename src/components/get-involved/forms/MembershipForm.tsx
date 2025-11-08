@@ -10,9 +10,13 @@ interface MembershipFormProps {
   onClose: () => void;
 }
 
-// Initialize Stripe - check for NEXT_PUBLIC_ prefix first, then fallback to STRIPE_PUBLISHABLE_KEY
-const stripeKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || process.env.STRIPE_PUBLISHABLE_KEY || '';
+// Initialize Stripe - NEXT_PUBLIC_ prefix is required for client-side access
+const stripeKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '';
 const stripePromise = stripeKey ? loadStripe(stripeKey) : null;
+
+if (!stripeKey) {
+  console.error('NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY is not set. Stripe payments will not work.');
+}
 
 // Card payment form component
 function CardPaymentForm({ 
@@ -151,6 +155,10 @@ export function MembershipForm({ onClose }: MembershipFormProps) {
       script.src = `https://www.google.com/recaptcha/api.js?render=${siteKey}`;
       script.async = true;
       script.defer = true;
+      script.onerror = () => {
+        console.error('Failed to load reCAPTCHA script');
+        setError('Security verification failed to load. Please refresh the page.');
+      };
       document.head.appendChild(script);
     }
   }, []);
@@ -742,7 +750,7 @@ export function MembershipForm({ onClose }: MembershipFormProps) {
               {paymentConfirmed && (
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                   <p className="text-green-700 text-sm font-league-spartan">
-                    ✅ Payment confirmed! Your membership is being activated. You'll receive a confirmation email shortly.
+                    ✅ Payment confirmed! Your membership is being activated. You&apos;ll receive a confirmation email shortly.
                   </p>
                 </div>
               )}

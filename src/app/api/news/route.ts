@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
       query.status = status;
     } else {
       const session = await getServerSession(authOptions);
-      if (!session || !['admin', 'editor', 'reviewer'].includes(session.user?.role)) query.status = 'published';
+      if (!session || !session.user?.role || !['admin', 'editor', 'reviewer'].includes(session.user.role)) query.status = 'published';
     }
 
     const skip = (page - 1) * limit;

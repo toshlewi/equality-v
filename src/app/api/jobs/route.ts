@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
     
     // Only show public jobs for non-admin requests
     const session = await getServerSession(authOptions);
-    if (!session || !['admin', 'editor'].includes(session.user.role)) {
+    if (!session || !session.user?.role || !['admin', 'editor'].includes(session.user.role)) {
       query.isPublic = true;
       query.status = 'open';
     }
@@ -144,7 +144,7 @@ export async function POST(request: NextRequest) {
     // Generate unique slug
     let slug = generateSlug(validatedData.title);
     let slugCounter = 1;
-    let originalSlug = slug;
+    const originalSlug = slug;
 
     while (await Job.findOne({ slug })) {
       slug = `${originalSlug}-${slugCounter}`;
@@ -176,7 +176,7 @@ export async function POST(request: NextRequest) {
         { 
           success: false, 
           error: 'Validation failed', 
-          details: error.errors 
+          details: error.issues 
         },
         { status: 400 }
       );

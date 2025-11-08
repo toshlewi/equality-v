@@ -15,6 +15,7 @@ interface Socket {
   emit: (event: string, data: any) => void;
   on: (event: string, callback: Function) => void;
   disconnect: () => void;
+  join: (room: string) => void;
 }
 
 class WebSocketManager {
@@ -30,7 +31,7 @@ class WebSocketManager {
       path: '/api/socket'
     });
 
-    this.io.on('connection', (socket: AuthenticatedSocket) => {
+    this.io.on('connection', (socket: any) => {
       console.log('Client connected:', socket.id);
 
       // Handle authentication

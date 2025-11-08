@@ -1,4 +1,4 @@
-import { connectDB } from '@/lib/mongodb';
+// import { connectDB } from '@/lib/mongodb'; // Unused for now
 import Category from '@/models/Category';
 import Tag from '@/models/Tag';
 import Setting from '@/models/Setting';

@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { connectDB } from '@/lib/mongodb';
 import Member from '@/models/Member';
-import { createPaymentIntent, createCheckoutSession } from '@/lib/stripe';
-import { initiateSTKPush } from '@/lib/mpesa';
+import { createPaymentIntent, isStripeConfigured } from '@/lib/stripe';
+import { initiateSTKPush, mpesaClient } from '@/lib/mpesa';
 import { verifyRecaptcha } from '@/lib/security';
 import { sanitizeInput } from '@/lib/auth';
 import { formRateLimit } from '@/middleware/rate-limit';
@@ -21,12 +21,12 @@ const membershipSchema = z.object({
   recaptchaToken: z.string().min(1, 'reCAPTCHA token is required')
 });
 
-const MEMBERSHIP_PRICES = {
-  annual: 50, // $50 USD
-  lifetime: 200, // $200 USD
-  student: 25, // $25 USD
-  supporter: 100 // $100 USD
-} as const;
+// const MEMBERSHIP_PRICES = {
+//   annual: 50, // $50 USD
+//   lifetime: 200, // $200 USD
+//   student: 25, // $25 USD
+//   supporter: 100 // $100 USD
+// } as const; // Unused for now
 
 export async function POST(request: NextRequest) {
   // Apply rate limiting
@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
     // Calculate amount based on membership years
     // Membership is KSh 5,000 per year
     const membershipYears = validatedData.membershipYears || 1;
-    let amount = membershipYears * 5000; // KSh 5,000 per year
+    const amount = membershipYears * 5000; // KSh 5,000 per year
     
     // TODO: Apply coupon discount if valid
     if (validatedData.couponCode) {
@@ -125,6 +125,14 @@ export async function POST(request: NextRequest) {
 
     // Create payment based on method
     if (validatedData.paymentMethod === 'stripe') {
+      // Validate Stripe configuration
+      if (!isStripeConfigured) {
+        return NextResponse.json(
+          { success: false, error: 'Stripe payment is not configured' },
+          { status: 503 }
+        );
+      }
+
       // Create Stripe payment intent
       // Convert KES to USD for Stripe (approximate conversion, adjust as needed)
       // 1 USD ≈ 150 KES (update this rate as needed)
@@ -160,6 +168,14 @@ export async function POST(request: NextRequest) {
         }
       });
     } else if (validatedData.paymentMethod === 'mpesa') {
+      // Validate M-Pesa configuration
+      if (!mpesaClient.isConfigured()) {
+        return NextResponse.json(
+          { success: false, error: 'M-Pesa payment is not configured' },
+          { status: 503 }
+        );
+      }
+
       // Initiate M-Pesa STK Push
       try {
         // Format phone number (ensure it starts with country code)
@@ -192,7 +208,7 @@ export async function POST(request: NextRequest) {
 
         // Update member with checkout request ID for tracking
         member.paymentId = stkPushResponse.CheckoutRequestID;
-        member.paymentProvider = 'mpesa';
+        (member as any).paymentProvider = 'mpesa';
         await member.save();
 
         return NextResponse.json({
@@ -212,7 +228,7 @@ export async function POST(request: NextRequest) {
         
         // Update member status to indicate payment initiation failed
         member.paymentStatus = 'failed';
-        member.status = 'failed';
+        (member as any).status = 'failed';
         await member.save();
 
         const errorMessage = stkError instanceof Error 
@@ -235,7 +251,7 @@ export async function POST(request: NextRequest) {
     
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { success: false, error: 'Validation failed', details: error.errors },
+        { success: false, error: 'Validation failed', details: error.issues },
         { status: 400 }
       );
     }
@@ -280,15 +296,16 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    const memberDoc = member as any;
     return NextResponse.json({
       success: true,
       data: {
         id: member._id.toString(),
-        name: member.name,
+        name: memberDoc.name || `${memberDoc.firstName || ''} ${memberDoc.lastName || ''}`.trim() || member.email,
         email: member.email,
         membershipType: member.membershipType,
-        subscriptionStart: member.subscriptionStart,
-        subscriptionEnd: member.subscriptionEnd,
+        subscriptionStart: memberDoc.subscriptionStart || member.joinDate,
+        subscriptionEnd: memberDoc.subscriptionEnd || member.expiryDate,
         isActive: member.isActive,
         paymentStatus: member.paymentStatus,
         createdAt: member.createdAt

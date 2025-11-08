@@ -19,7 +19,7 @@ const applicationSchema = z.object({
   portfolioUrl: z.string().url().optional(),
   linkedInUrl: z.string().url().optional(),
   additionalInfo: z.string().max(1000).optional(),
-  applicationData: z.record(z.any()).optional(),
+  applicationData: z.record(z.string(), z.any()).optional(),
   termsAccepted: z.boolean().refine(val => val === true, 'Terms must be accepted'),
   privacyAccepted: z.boolean().refine(val => val === true, 'Privacy policy must be accepted'),
   recaptchaToken: z.string().min(1, 'reCAPTCHA token is required')
@@ -172,7 +172,7 @@ export async function POST(request: NextRequest) {
     
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { success: false, error: 'Validation failed', details: error.errors },
+        { success: false, error: 'Validation failed', details: error.issues },
         { status: 400 }
       );
     }

@@ -77,8 +77,8 @@ async function testEmailSending() {
       title: 'Test Event - Equality Vanguard',
       description: 'This is a test event',
       location: 'Online',
-      start: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
-      end: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000 + 2 * 60 * 60 * 1000), // 2 hours later
+      startDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+      endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000 + 2 * 60 * 60 * 1000), // 2 hours later
       organizer: { name: 'Equality Vanguard', email: process.env.MAILGUN_FROM_EMAIL || 'noreply@equalityvanguard.org' }
     });
 
@@ -157,6 +157,9 @@ async function testEmailSending() {
 
 // Run test
 testEmailSending();
+
+
+
 
 
 

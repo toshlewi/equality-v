@@ -90,8 +90,8 @@ export async function GET(request: NextRequest) {
     };
 
     return ApiResponse.success({
-      orders: orders.map(order => ({
-        id: order._id.toString(),
+      orders: orders.map((order: any) => ({
+        id: order._id?.toString() || '',
         orderNumber: order.orderNumber,
         customerInfo: order.customerInfo,
         items: order.items || [],

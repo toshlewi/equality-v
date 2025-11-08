@@ -100,7 +100,7 @@ export default function PublicationPage() {
               Publication Not Found
             </h1>
             <p className="text-gray-600 mb-8">
-              The publication you're looking for doesn't exist or has been removed.
+              The publication you&apos;re looking for doesn&apos;t exist or has been removed.
             </p>
             <Link
               href="/matriarchive/publications"

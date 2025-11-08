@@ -1,6 +1,8 @@
 import fs from 'fs/promises';
 import path from 'path';
-import pdf from 'pdf-parse';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-expect-error - pdf-parse has inconsistent type exports
+import pdfParse from 'pdf-parse';
 
 interface PDFConversionResult {
   html: string;
@@ -18,15 +20,15 @@ export async function convertPDFToHTML(pdfPath: string): Promise<PDFConversionRe
     const dataBuffer = await fs.readFile(pdfPath);
     
     // Parse the PDF
-    const pdfData = await pdf(dataBuffer);
+    const pdfData = await pdfParse(dataBuffer);
     
     // Extract text and structure
     let html = '<div class="publication-content">';
     
     // Split text into paragraphs
-    const paragraphs = pdfData.text.split(/\n\s*\n/).filter(p => p.trim().length > 0);
+    const paragraphs = pdfData.text.split(/\n\s*\n/).filter((p: string) => p.trim().length > 0);
     
-    paragraphs.forEach((paragraph, index) => {
+    paragraphs.forEach((paragraph: string, index: number) => {
       // Check if it's a heading (typically shorter and ends with specific patterns)
       if (paragraph.length < 100 && !paragraph.endsWith('.')) {
         html += `<h2 class="section-heading">${escapeHtml(paragraph.trim())}</h2>`;

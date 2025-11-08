@@ -12,7 +12,7 @@ export function withApiSecurity(
   } = {}
 ) {
   return async (request: NextRequest): Promise<NextResponse> => {
-    const ip = request.ip || request.headers.get('x-forwarded-for') || 'unknown';
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || request.headers.get('x-real-ip') || 'unknown';
     const userAgent = request.headers.get('user-agent') || '';
     const url = request.url;
 

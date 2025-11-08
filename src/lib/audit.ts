@@ -99,8 +99,8 @@ export async function getAuditLogs(filters: {
 
     return {
       success: true,
-      logs: logs.map(log => ({
-        id: log._id.toString(),
+      logs: logs.map((log: any) => ({
+        id: (log._id as any).toString(),
         eventType: log.eventType,
         description: log.description,
         userId: log.userId ? (typeof log.userId === 'object' ? log.userId._id.toString() : log.userId.toString()) : null,

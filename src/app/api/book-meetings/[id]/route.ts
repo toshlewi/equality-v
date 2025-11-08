@@ -166,7 +166,7 @@ export async function PUT(
       
       // Ensure slug is unique
       let slugCounter = 1;
-      let originalSlug = slug;
+      const originalSlug = slug;
       
       while (await BookMeeting.findOne({ slug, _id: { $ne: id } })) {
         slug = `${originalSlug}-${slugCounter}`;
@@ -212,7 +212,7 @@ export async function PUT(
         { 
           success: false, 
           error: 'Validation failed', 
-          details: error.errors 
+          details: error.issues 
         },
         { status: 400 }
       );

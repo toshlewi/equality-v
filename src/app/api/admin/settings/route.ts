@@ -42,7 +42,7 @@ export const GET = async (request: NextRequest) => {
         grouped[cat] = [];
       }
       grouped[cat].push({
-        id: setting._id.toString(),
+        id: (setting as any)._id?.toString() || '',
         key: setting.key,
         value: setting.value,
         type: setting.type,
@@ -107,7 +107,11 @@ export async function POST(request: NextRequest) {
     const validation = createSettingSchema.safeParse(body);
     
     if (!validation.success) {
-      return ApiResponse.validationError(validation.error.errors);
+      const errors = validation.error.issues.map(err => ({
+        field: err.path.join('.'),
+        message: err.message
+      }));
+      return ApiResponse.validationError(errors);
     }
 
     const validatedData = validation.data;
@@ -160,7 +164,7 @@ export async function POST(request: NextRequest) {
       type: setting.type,
       category: setting.category,
       createdAt: setting.createdAt
-    }, 201);
+    }, 'Setting created successfully', 201);
 
   } catch (error) {
     console.error('Error creating setting:', error);
@@ -202,7 +206,11 @@ export async function PATCH(request: NextRequest) {
     const validation = updateSettingSchema.safeParse(body);
     
     if (!validation.success) {
-      return ApiResponse.validationError(validation.error.errors);
+      const errors = validation.error.issues.map(err => ({
+        field: err.path.join('.'),
+        message: err.message
+      }));
+      return ApiResponse.validationError(errors);
     }
 
     const validatedData = validation.data;

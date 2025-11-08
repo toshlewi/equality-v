@@ -1,4 +1,4 @@
-import mongoose, { Schema, model, models } from 'mongoose';
+import { Schema, model, models } from 'mongoose';
 
 // Clear model from cache if it exists to ensure schema changes take effect
 if (models.Member) {

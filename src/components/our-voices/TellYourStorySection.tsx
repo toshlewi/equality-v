@@ -57,7 +57,7 @@ export default function TellYourStorySection() {
     setValue,
     reset
   } = useForm<StoryFormData>({
-    resolver: zodResolver(storySchema),
+    resolver: zodResolver(storySchema) as any,
     defaultValues: {
       anonymous: false,
       consentToPublish: false,
@@ -175,7 +175,15 @@ export default function TellYourStorySection() {
         });
 
         const results = await Promise.all(uploadPromises);
-        uploaded = results.filter((f): f is { name: string; url: string; type: string; size: number; thumbnailUrl?: string } => f !== null);
+        uploaded = results
+          .filter((f): f is NonNullable<typeof f> => f !== null)
+          .map((f) => ({
+            name: String(f.name || ''),
+            url: String(f.url || ''),
+            type: String(f.type || ''),
+            size: typeof f.size === 'number' ? f.size : 0,
+            thumbnailUrl: f.thumbnailUrl ? String(f.thumbnailUrl) : undefined,
+          }));
       }
 
       // Step 2: Submit story to API
@@ -325,7 +333,7 @@ export default function TellYourStorySection() {
           viewport={{ once: true }}
           className="bg-white rounded-2xl shadow-lg p-8"
         >
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+          <form onSubmit={handleSubmit(onSubmit as any)} className="space-y-8">
             {/* Story Title */}
             <div>
               <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">

@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
     // Generate unique slug
     let slug = generateSlug(validatedData.title);
     let slugCounter = 1;
-    let originalSlug = slug;
+    const originalSlug = slug;
 
     while (await Book.findOne({ slug })) {
       slug = `${originalSlug}-${slugCounter}`;
@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
         { 
           success: false, 
           error: 'Validation failed', 
-          details: error.errors 
+          details: error.issues 
         },
         { status: 400 }
       );

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { ReactNode, useState, useEffect } from "react";
+import { ReactNode, useState, useEffect, useMemo } from "react";
 import { useSession, signOut } from "next-auth/react";
 import {
   Home,
@@ -174,7 +174,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { data: session, status } = useSession();
-  const isAuthPage = pathname === '/admin/login';
+  const openAccessRoutes = useMemo(
+    () => ['/admin/login', '/admin/forgot-password', '/admin/reset-password'],
+    []
+  );
+  const isAuthPage = pathname ? openAccessRoutes.some((route) => pathname.startsWith(route)) : false;
 
   // Close mobile menu when pathname changes (navigation occurs)
   useEffect(() => {
@@ -183,7 +187,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   // Redirect to login if not authenticated
   useEffect(() => {
-    if (isAuthPage) return; // Allow login page without session
+    if (isAuthPage) return; // Allow unauthenticated access to auth routes
     if (status === 'loading') return; // Still loading
     if (!session) { router.push('/admin/login'); return; }
     // Check if user has admin access
@@ -192,7 +196,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       router.push('/admin/login?error=AccessDenied');
       return;
     }
-  }, [session, status, router]);
+  }, [session, status, router, isAuthPage]);
 
   // Allow login page to render without sidebar/auth chrome
   if (isAuthPage) {

@@ -117,8 +117,8 @@ export default function OurWorkPage() {
             Ready to Join Our Movement?
           </h2>
           <p className="text-lg text-gray-700 mb-8 max-w-2xl mx-auto">
-            Whether you're interested in legal advocacy, creative expression, or community building, 
-            there's a place for you in our collective.
+            Whether you&apos;re interested in legal advocacy, creative expression, or community building, 
+            there&apos;s a place for you in our collective.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/get-involved#membership">

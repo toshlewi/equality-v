@@ -1,67 +1,168 @@
 'use client';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
+import Image, { type ImageLoader } from 'next/image';
+
+type HighlightPost = {
+  id: string | number;
+  caption: string;
+  imageUrl: string;
+  badge: 'post' | 'reel' | 'story';
+  permalink?: string;
+  mediaType?: string;
+  username?: string;
+  timestamp?: string;
+  isLocal?: boolean;
+};
+
+const instagramFallbackPosts: HighlightPost[] = [
+  { id: 1, imageUrl: '/images/place1 (9).jpg', caption: 'ALKAH Book Club session on "Purple Hibiscus"', badge: 'post', isLocal: true },
+  { id: 2, imageUrl: '/images/place1 (10).jpg', caption: 'Behind the scenes: Legal Vanguard workshop', badge: 'reel', isLocal: true },
+  { id: 3, imageUrl: '/images/place1 (11).jpg', caption: 'New addition to our feminist library', badge: 'post', isLocal: true },
+  { id: 4, imageUrl: '/images/place1 (12).jpg', caption: 'Marching for women\'s rights in Nairobi', badge: 'reel', isLocal: true },
+  { id: 5, imageUrl: '/images/place1 (13).jpg', caption: 'Podcast recording: Voices of Resistance', badge: 'post', isLocal: true },
+  { id: 6, imageUrl: '/images/place1 (14).jpg', caption: 'Pan-African feminist solidarity', badge: 'story', isLocal: true },
+  { id: 7, imageUrl: '/images/place1 (15).jpg', caption: 'Writing workshop: Telling our stories', badge: 'post', isLocal: true },
+  { id: 8, imageUrl: '/images/place1 (16).jpg', caption: 'Art as resistance: Community mural project', badge: 'reel', isLocal: true },
+  { id: 9, imageUrl: '/images/place1 (17).jpg', caption: 'Economic justice advocacy in action', badge: 'post', isLocal: true },
+  { id: 10, imageUrl: '/images/place1 (18).jpg', caption: 'Digital rights awareness campaign', badge: 'reel', isLocal: true },
+  { id: 11, imageUrl: '/images/place1 (19).jpg', caption: 'Sylvia Tamale book discussion highlights', badge: 'post', isLocal: true },
+  { id: 12, imageUrl: '/images/place1 (20).jpg', caption: 'Celebrating our community achievements', badge: 'story', isLocal: true },
+];
+
+const directImageLoader: ImageLoader = ({ src }) => src;
+
+const INSTAGRAM_ACCOUNT_URL = 'https://www.instagram.com/equalityvanguard/';
 
 export default function SocialHighlights() {
+  const [posts, setPosts] = useState<HighlightPost[]>(instagramFallbackPosts);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-  
-  const instagramPosts = [
-    { id: 1, image: '/images/place1 (9).jpg', caption: 'ALKAH Book Club session on "Purple Hibiscus"', likes: 42, type: 'post' },
-    { id: 2, image: '/images/place1 (10).jpg', caption: 'Behind the scenes: Legal Vanguard workshop', likes: 38, type: 'reel' },
-    { id: 3, image: '/images/place1 (11).jpg', caption: 'New addition to our feminist library', likes: 29, type: 'post' },
-    { id: 4, image: '/images/place1 (12).jpg', caption: 'Marching for women\'s rights in Nairobi', likes: 156, type: 'reel' },
-    { id: 5, image: '/images/place1 (13).jpg', caption: 'Podcast recording: Voices of Resistance', likes: 67, type: 'post' },
-    { id: 6, image: '/images/place1 (14).jpg', caption: 'Pan-African feminist solidarity', likes: 89, type: 'story' },
-    { id: 7, image: '/images/place1 (15).jpg', caption: 'Writing workshop: Telling our stories', likes: 34, type: 'post' },
-    { id: 8, image: '/images/place1 (16).jpg', caption: 'Art as resistance: Community mural project', likes: 78, type: 'reel' },
-    { id: 9, image: '/images/place1 (17).jpg', caption: 'Economic justice advocacy in action', likes: 45, type: 'post' },
-    { id: 10, image: '/images/place1 (18).jpg', caption: 'Digital rights awareness campaign', likes: 92, type: 'reel' },
-    { id: 11, image: '/images/place1 (19).jpg', caption: 'Sylvia Tamale book discussion highlights', likes: 51, type: 'post' },
-    { id: 12, image: '/images/place1 (20).jpg', caption: 'Celebrating our community achievements', likes: 103, type: 'story' },
-    { id: 13, image: '/images/place1 (21).jpg', caption: 'Theater performance: "Breaking the Silence"', likes: 87, type: 'reel' },
-    { id: 14, image: '/images/place1 (22).jpg', caption: 'Research findings: Gender pay gap in tech', likes: 73, type: 'post' },
-    { id: 15, image: '/images/place1 (1).jpg', caption: 'Community festival: Celebrating diversity', likes: 124, type: 'reel' },
-    { id: 16, image: '/images/place1 (2).jpg', caption: 'Digital literacy workshop for women', likes: 56, type: 'story' },
-    { id: 17, image: '/images/place1 (3).jpg', caption: 'Policy advocacy at Parliament', likes: 91, type: 'post' },
-    { id: 18, image: '/images/place1 (4).jpg', caption: 'Feminist poetry night highlights', likes: 68, type: 'reel' },
-    { id: 19, image: '/images/place1 (5).jpg', caption: 'TV interview: Discussing SRHR rights', likes: 145, type: 'post' },
-    { id: 20, image: '/images/place1 (6).jpg', caption: 'Graduation ceremony: Legal Vanguard cohort', likes: 112, type: 'story' },
-    { id: 21, image: '/images/place1 (7).jpg', caption: 'Environmental justice: Women and climate', likes: 79, type: 'reel' },
-    { id: 22, image: '/images/place1 (8).jpg', caption: 'Media training: Amplifying our voices', likes: 63, type: 'post' },
-    { id: 23, image: '/images/place1 (9).jpg', caption: 'Art therapy session: Healing through creativity', likes: 84, type: 'story' },
-    { id: 24, image: '/images/place1 (10).jpg', caption: '5K run for women\'s health awareness', likes: 97, type: 'reel' },
-    { id: 25, image: '/images/place1 (11).jpg', caption: 'New research: Intersectionality in African feminism', likes: 71, type: 'post' },
-    { id: 26, image: '/images/place1 (12).jpg', caption: 'Youth summit: Next generation leaders', likes: 108, type: 'story' },
-    { id: 27, image: '/images/place1 (13).jpg', caption: 'Drama workshop: Role-playing for change', likes: 52, type: 'reel' },
-    { id: 28, image: '/images/place1 (14).jpg', caption: 'App launch: Digital safety for women', likes: 89, type: 'post' },
-    { id: 29, image: '/images/place1 (15).jpg', caption: 'Music video: "Rise Up Sisters"', likes: 156, type: 'reel' },
-    { id: 30, image: '/images/place1 (16).jpg', caption: 'Data visualization: Women in leadership', likes: 67, type: 'post' }
-  ];
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    const deriveBadge = (mediaType?: string): HighlightPost['badge'] => {
+      if (mediaType === 'VIDEO') return 'reel';
+      if (mediaType === 'STORY') return 'story';
+      return 'post';
+    };
+
+    const fetchInstagramPosts = async () => {
+      try {
+        const response = await fetch('/api/instagram?limit=12', {
+          next: { revalidate: 300 },
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to load Instagram posts');
+        }
+
+        const payload = (await response.json()) as {
+          data?: Array<{
+            id: string;
+            caption: string;
+            mediaUrl: string;
+            permalink: string;
+            mediaType?: string;
+            timestamp?: string;
+            username?: string;
+          }>;
+        };
+
+        if (isCancelled) {
+          return;
+        }
+
+        if (payload.data && payload.data.length > 0) {
+          const remotePosts: HighlightPost[] = payload.data
+            .map((item) => {
+              const badge = deriveBadge(item.mediaType);
+              const imageUrl = item.mediaUrl;
+
+              if (!imageUrl) {
+                return null;
+              }
+
+              return {
+                id: String(item.id),
+                caption: item.caption ?? '',
+                imageUrl,
+                badge,
+                permalink: item.permalink,
+                mediaType: item.mediaType,
+                timestamp: item.timestamp,
+                username: item.username,
+                isLocal: false,
+              } as HighlightPost;
+            })
+            .filter((post): post is HighlightPost => post !== null);
+
+          if (remotePosts.length > 0) {
+            setPosts(remotePosts);
+            setCurrentIndex(0);
+            setError(null);
+            return;
+          }
+        }
+
+        setError('No Instagram posts available right now.');
+      } catch (err) {
+        if (!isCancelled) {
+          setError('Unable to load Instagram posts right now.');
+        }
+      } finally {
+        if (!isCancelled) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchInstagramPosts();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (posts.length === 0) {
+      setCurrentIndex(0);
+      return;
+    }
+
+    setCurrentIndex((prev) => {
+      if (prev >= posts.length) {
+        return 0;
+      }
+      return prev;
+    });
+  }, [posts.length]);
+
+  useEffect(() => {
+    if (isPaused || posts.length <= 1) return;
+
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % posts.length);
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [posts.length, isPaused]);
 
   const nextSlide = () => {
-    setCurrentIndex((prev) => (prev + 1) % instagramPosts.length);
+    if (posts.length === 0) return;
+    setCurrentIndex((prev) => (prev + 1) % posts.length);
   };
 
   const prevSlide = () => {
-    setCurrentIndex((prev) => (prev - 1 + instagramPosts.length) % instagramPosts.length);
+    if (posts.length === 0) return;
+    setCurrentIndex((prev) => (prev - 1 + posts.length) % posts.length);
   };
 
-  // Auto-scroll effect
-  useEffect(() => {
-    if (isPaused) return;
-    
-    const interval = setInterval(() => {
-      setCurrentIndex((prev) => {
-        const next = (prev + 1) % instagramPosts.length;
-        console.log('Auto-scroll: currentIndex =', next);
-        return next;
-      });
-    }, 3000); // Change slide every 3 seconds
-
-    return () => clearInterval(interval);
-  }, [instagramPosts.length, isPaused]);
+  const activePostCount = posts.length;
+  const trackWidth = activePostCount * 336;
 
   return (
     <section className="py-20 bg-gradient-to-br from-brand-teal to-brand-brown text-white">
@@ -82,7 +183,7 @@ export default function SocialHighlights() {
         </motion.div>
 
         {/* Instagram Carousel */}
-        <div 
+        <div
           className="relative overflow-hidden"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
@@ -92,9 +193,9 @@ export default function SocialHighlights() {
             className="flex space-x-4"
             animate={{ x: -currentIndex * 336 }}
             transition={{ duration: 0.5, ease: "easeInOut" }}
-            style={{ width: `${instagramPosts.length * 336}px` }}
+            style={{ width: `${trackWidth}px` }}
           >
-            {instagramPosts.map((post, index) => (
+            {posts.map((post, index) => (
               <motion.div
                 key={post.id}
                 initial={{ opacity: 0, scale: 0.8 }}
@@ -106,26 +207,24 @@ export default function SocialHighlights() {
                 {/* Media placeholder */}
                 <div className="aspect-square rounded-2xl overflow-hidden group-hover:scale-105 transition-transform duration-300 relative bg-gradient-to-br from-white to-[#042c45]/20">
                   <Image
-                    src={post.image}
-                    alt={`${post.type} - ${post.caption}`}
+                    src={post.imageUrl}
+                    alt={`${post.badge} - ${post.caption}`}
                     fill
                     className="object-cover"
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-                    onLoad={() => console.log('Image loaded:', post.image)}
-                    onError={(e) => {
-                      console.error('Image failed to load:', post.image);
-                      e.currentTarget.src = '/images/place1 (1).jpg'; // fallback
-                    }}
+                    loader={post.isLocal ? undefined : directImageLoader}
+                    unoptimized={!post.isLocal}
+                    priority={index < 3}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent flex items-end">
                     <div className="p-4 text-white">
                       <div className="text-sm font-semibold">
-                        {post.type === 'reel' ? 'VIDEO' : post.type === 'story' ? 'STORY' : 'PHOTO'}
+                        {post.badge === 'reel' ? 'VIDEO' : post.badge === 'story' ? 'STORY' : 'PHOTO'}
                       </div>
-                      {post.type === 'reel' && (
+                      {post.badge === 'reel' && (
                         <div className="absolute bottom-3 right-3 text-xs text-white font-bold bg-black/30 px-2 py-1 rounded">0:45</div>
                       )}
-                      {post.type === 'story' && (
+                      {post.badge === 'story' && (
                         <div className="absolute top-3 left-3 w-10 h-10 bg-brand-yellow rounded-full flex items-center justify-center">
                           <span className="text-sm font-bold text-brand-teal">EV</span>
                         </div>
@@ -137,7 +236,7 @@ export default function SocialHighlights() {
                   <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                     <div className="flex space-x-6">
                       <a
-                        href="https://www.instagram.com/equalityvanguard/"
+                        href={post.permalink ?? INSTAGRAM_ACCOUNT_URL}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-colors duration-200"
@@ -145,7 +244,7 @@ export default function SocialHighlights() {
                         <span className="text-2xl">❤️</span>
                       </a>
                       <a
-                        href="https://www.instagram.com/equalityvanguard/"
+                        href={post.permalink ?? INSTAGRAM_ACCOUNT_URL}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-colors duration-200"
@@ -153,7 +252,7 @@ export default function SocialHighlights() {
                         <span className="text-2xl">💬</span>
                       </a>
                       <a
-                        href="https://www.instagram.com/equalityvanguard/"
+                        href={post.permalink ?? INSTAGRAM_ACCOUNT_URL}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-colors duration-200"
@@ -166,11 +265,11 @@ export default function SocialHighlights() {
                   {/* Post type indicator */}
                   <div className="absolute top-3 right-3">
                     <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                      post.type === 'reel' ? 'bg-brand-orange text-white' :
-                      post.type === 'story' ? 'bg-brand-yellow text-brand-teal' :
+                      post.badge === 'reel' ? 'bg-brand-orange text-white' :
+                      post.badge === 'story' ? 'bg-brand-yellow text-brand-teal' :
                       'bg-white/40 text-white'
                     }`}>
-                      {post.type === 'reel' ? '🎥' : post.type === 'story' ? '📱' : '📸'}
+                      {post.badge === 'reel' ? '🎥' : post.badge === 'story' ? '📱' : '📸'}
                     </span>
                   </div>
                 </div>
@@ -200,7 +299,7 @@ export default function SocialHighlights() {
 
         {/* Progress indicator */}
         <div className="flex justify-center mt-8 space-x-2">
-          {Array.from({ length: Math.min(10, instagramPosts.length) }, (_, i) => (
+          {Array.from({ length: Math.min(10, Math.max(activePostCount, 1)) }, (_, i) => (
             <button
               key={i}
               onClick={() => setCurrentIndex(i)}
@@ -216,9 +315,21 @@ export default function SocialHighlights() {
         {/* Post counter */}
         <div className="text-center mt-4">
           <span className="text-sm text-white/70">
-            {currentIndex + 1} of {instagramPosts.length} posts
+            {activePostCount === 0 ? 'No posts available' : `${Math.min(currentIndex + 1, activePostCount)} of ${activePostCount} posts`}
           </span>
         </div>
+
+        {isLoading && (
+          <div className="text-center mt-4">
+            <span className="text-sm text-white/70">Loading latest posts…</span>
+          </div>
+        )}
+
+        {!isLoading && error && (
+          <div className="text-center mt-4">
+            <span className="text-sm text-brand-yellow/90">{error}</span>
+          </div>
+        )}
 
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
@@ -228,7 +339,7 @@ export default function SocialHighlights() {
           className="text-center mt-8"
         >
           <a
-            href="https://instagram.com/equalityvanguard"
+            href={INSTAGRAM_ACCOUNT_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="btn-secondary text-lg px-8 py-4 hover:bg-brand-yellow hover:text-brand-teal transition-all duration-300 transform hover:scale-105"

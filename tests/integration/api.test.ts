@@ -3,11 +3,14 @@
  * Run with: npm run test:integration
  */
 
-import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
+// Note: Jest types may not be available in all environments
+// These tests require a test framework setup
+// import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 
 // Note: These tests require a test database and API server running
 // For production, these would use a proper test framework setup
 
+// @ts-expect-error - Jest types may not be available
 describe('API Integration Tests', () => {
   const baseUrl = process.env.TEST_API_URL || 'http://localhost:3000';
 

@@ -1,4 +1,4 @@
-import mongoose, { Schema, model, models } from 'mongoose';
+import { Schema, model, models } from 'mongoose';
 
 const CartSchema = new Schema({
   sessionId: { type: String, required: true },
@@ -118,8 +118,8 @@ CartSchema.pre('save', function(next) {
 });
 
 // Method to add item to cart
-CartSchema.methods.addItem = function(productId, quantity, variantId, price, name, image) {
-  const existingItem = this.items.find(item => 
+CartSchema.methods.addItem = function(productId: string, quantity: number, variantId?: string, price?: number, name?: string, image?: string) {
+  const existingItem = this.items.find((item: any) => 
     item.productId.toString() === productId.toString() && item.variantId === variantId
   );
   
@@ -141,21 +141,21 @@ CartSchema.methods.addItem = function(productId, quantity, variantId, price, nam
 };
 
 // Method to remove item from cart
-CartSchema.methods.removeItem = function(productId, variantId) {
-  this.items = this.items.filter(item => 
+CartSchema.methods.removeItem = function(productId: string, variantId?: string) {
+  this.items = this.items.filter((item: any) => 
     !(item.productId.toString() === productId.toString() && item.variantId === variantId)
   );
   return this.save();
 };
 
 // Method to update item quantity
-CartSchema.methods.updateItemQuantity = function(productId, variantId, quantity) {
-  const item = this.items.find(item => 
+CartSchema.methods.updateItemQuantity = function(productId: string, variantId?: string, quantity?: number) {
+  const item = this.items.find((item: any) => 
     item.productId.toString() === productId.toString() && item.variantId === variantId
   );
   
   if (item) {
-    if (quantity <= 0) {
+    if (quantity === undefined || quantity <= 0) {
       return this.removeItem(productId, variantId);
     } else {
       item.quantity = quantity;

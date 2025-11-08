@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-config';
 import { connectDB } from '@/lib/mongodb';
 import Product from '@/models/Product';
 import { ApiResponse, validateRequest } from '@/lib/api-utils';
+import { createAuditLog } from '@/lib/audit';
 import { z } from 'zod';
 
 const updateProductSchema = z.object({
@@ -65,42 +66,44 @@ export async function GET(
       return ApiResponse.notFound('Product not found');
     }
 
+    const productDoc = product as any;
+
     return ApiResponse.success({
-      id: product._id.toString(),
-      name: product.name,
-      slug: product.slug,
-      description: product.description,
-      shortDescription: product.shortDescription,
-      price: product.price,
-      currency: product.currency,
-      compareAtPrice: product.compareAtPrice,
-      costPrice: product.costPrice,
-      sku: product.sku,
-      barcode: product.barcode,
-      category: product.category,
-      subcategory: product.subcategory,
-      tags: product.tags || [],
-      status: product.status,
-      isDigital: product.isDigital,
-      isPhysical: product.isPhysical,
-      inventory: product.inventory,
-      images: product.images || [],
-      files: product.files || [],
-      variants: product.variants || [],
-      isFeatured: product.isFeatured,
-      isNew: product.isNew,
-      isOnSale: product.isOnSale,
-      saleStartDate: product.saleStartDate,
-      saleEndDate: product.saleEndDate,
-      seoTitle: product.seoTitle,
-      seoDescription: product.seoDescription,
-      seoKeywords: product.seoKeywords || [],
-      viewCount: product.viewCount || 0,
-      purchaseCount: product.purchaseCount || 0,
-      rating: product.rating || 0,
-      reviewCount: product.reviewCount || 0,
-      createdAt: product.createdAt,
-      updatedAt: product.updatedAt
+      id: productDoc._id?.toString() || '',
+      name: productDoc.name,
+      slug: productDoc.slug,
+      description: productDoc.description,
+      shortDescription: productDoc.shortDescription,
+      price: productDoc.price,
+      currency: productDoc.currency,
+      compareAtPrice: productDoc.compareAtPrice,
+      costPrice: productDoc.costPrice,
+      sku: productDoc.sku,
+      barcode: productDoc.barcode,
+      category: productDoc.category,
+      subcategory: productDoc.subcategory,
+      tags: productDoc.tags || [],
+      status: productDoc.status,
+      isDigital: productDoc.isDigital,
+      isPhysical: productDoc.isPhysical,
+      inventory: productDoc.inventory,
+      images: productDoc.images || [],
+      files: productDoc.files || [],
+      variants: productDoc.variants || [],
+      isFeatured: productDoc.isFeatured,
+      isNew: productDoc.isNew,
+      isOnSale: productDoc.isOnSale,
+      saleStartDate: productDoc.saleStartDate,
+      saleEndDate: productDoc.saleEndDate,
+      seoTitle: productDoc.seoTitle,
+      seoDescription: productDoc.seoDescription,
+      seoKeywords: productDoc.seoKeywords || [],
+      viewCount: productDoc.viewCount || 0,
+      purchaseCount: productDoc.purchaseCount || 0,
+      rating: productDoc.rating || 0,
+      reviewCount: productDoc.reviewCount || 0,
+      createdAt: productDoc.createdAt,
+      updatedAt: productDoc.updatedAt
     });
 
   } catch (error) {

@@ -8,9 +8,16 @@ import { z } from 'zod';
 import Stripe from 'stripe';
 import { createAuditLog } from '@/lib/audit';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-09-30.clover',
-});
+// Validate Stripe configuration
+if (!process.env.STRIPE_SECRET_KEY) {
+  console.error('STRIPE_SECRET_KEY is not configured');
+}
+
+const stripe = process.env.STRIPE_SECRET_KEY
+  ? new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: '2025-09-30.clover',
+    })
+  : null;
 
 const updateOrderSchema = z.object({
   status: z.enum(['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded']).optional(),
@@ -55,47 +62,51 @@ export async function GET(
       .populate('processedBy', 'name email')
       .populate('shippedBy', 'name email')
       .populate('items.productId', 'name slug images')
-      .lean();
+      .lean()
+      .exec();
 
     if (!order) {
       return ApiResponse.notFound('Order not found');
     }
 
+    // Type assertion for lean document
+    const orderDoc = order as any;
+
     return ApiResponse.success({
-      id: order._id.toString(),
-      orderNumber: order.orderNumber,
-      customerInfo: order.customerInfo,
-      items: order.items || [],
-      subtotal: order.subtotal,
-      tax: order.tax,
-      taxRate: order.taxRate,
-      shipping: order.shipping,
-      discount: order.discount,
-      couponCode: order.couponCode,
-      couponDiscount: order.couponDiscount,
-      total: order.total,
-      currency: order.currency,
-      status: order.status,
-      paymentStatus: order.paymentStatus,
-      paymentMethod: order.paymentMethod,
-      paymentId: order.paymentId,
-      transactionId: order.transactionId,
-      paymentIntentId: order.paymentIntentId,
-      shippingMethod: order.shippingMethod,
-      shippingCost: order.shippingCost,
-      trackingNumber: order.trackingNumber,
-      trackingUrl: order.trackingUrl,
-      carrier: order.carrier,
-      estimatedDelivery: order.estimatedDelivery,
-      notes: order.notes,
-      specialInstructions: order.specialInstructions,
-      refunds: order.refunds || [],
-      emailsSent: order.emailsSent || [],
-      createdAt: order.createdAt,
-      updatedAt: order.updatedAt,
-      processedAt: order.processedAt,
-      shippedAt: order.shippedAt,
-      deliveredAt: order.deliveredAt
+      id: orderDoc._id?.toString() || id,
+      orderNumber: orderDoc.orderNumber,
+      customerInfo: orderDoc.customerInfo,
+      items: orderDoc.items || [],
+      subtotal: orderDoc.subtotal,
+      tax: orderDoc.tax,
+      taxRate: orderDoc.taxRate,
+      shipping: orderDoc.shipping,
+      discount: orderDoc.discount,
+      couponCode: orderDoc.couponCode,
+      couponDiscount: orderDoc.couponDiscount,
+      total: orderDoc.total,
+      currency: orderDoc.currency,
+      status: orderDoc.status,
+      paymentStatus: orderDoc.paymentStatus,
+      paymentMethod: orderDoc.paymentMethod,
+      paymentId: orderDoc.paymentId,
+      transactionId: orderDoc.transactionId,
+      paymentIntentId: orderDoc.paymentIntentId,
+      shippingMethod: orderDoc.shippingMethod,
+      shippingCost: orderDoc.shippingCost,
+      trackingNumber: orderDoc.trackingNumber,
+      trackingUrl: orderDoc.trackingUrl,
+      carrier: orderDoc.carrier,
+      estimatedDelivery: orderDoc.estimatedDelivery,
+      notes: orderDoc.notes,
+      specialInstructions: orderDoc.specialInstructions,
+      refunds: orderDoc.refunds || [],
+      emailsSent: orderDoc.emailsSent || [],
+      createdAt: orderDoc.createdAt,
+      updatedAt: orderDoc.updatedAt,
+      processedAt: orderDoc.processedAt,
+      shippedAt: orderDoc.shippedAt,
+      deliveredAt: orderDoc.deliveredAt
     });
 
   } catch (error) {
@@ -133,6 +144,8 @@ export async function PATCH(
     if (!validation.success) {
       return ApiResponse.validationError(validation.errors);
     }
+
+    // TypeScript now knows validation.data exists after success check
 
     const order = await Order.findById(id);
 
@@ -274,6 +287,15 @@ export async function POST(
           'Order must be paid before refunding',
           400,
           'Order payment status is not paid'
+        );
+      }
+
+      // Validate Stripe configuration
+      if (!stripe) {
+        return ApiResponse.error(
+          'Stripe is not configured',
+          503,
+          'STRIPE_SECRET_KEY is not set'
         );
       }
 

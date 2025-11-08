@@ -10,7 +10,11 @@ async function testDatabaseConnection() {
     console.log('✅ Database connected successfully');
     
     // Test basic operations
-    const collections = await mongoose.connection.db.listCollections().toArray();
+    const db = mongoose.connection.db;
+    if (!db) {
+      throw new Error('Database connection not established');
+    }
+    const collections = await db.listCollections().toArray();
     console.log(`📊 Found ${collections.length} collections:`, collections.map(c => c.name));
     
     // Test User model

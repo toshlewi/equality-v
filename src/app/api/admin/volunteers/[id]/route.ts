@@ -42,32 +42,34 @@ export async function GET(
       return ApiResponse.notFound('Application not found');
     }
 
+    const applicationDoc = application as any;
+
     return ApiResponse.success({
-      id: application._id.toString(),
-      jobId: application.jobId ? (typeof application.jobId === 'object' ? application.jobId._id.toString() : application.jobId.toString()) : null,
-      job: application.jobId && typeof application.jobId === 'object' ? {
-        title: application.jobId.title,
-        slug: application.jobId.slug,
-        department: application.jobId.department,
-        type: application.jobId.type
+      id: applicationDoc._id?.toString() || '',
+      jobId: applicationDoc.jobId ? (typeof applicationDoc.jobId === 'object' ? (applicationDoc.jobId as any)._id?.toString() : applicationDoc.jobId.toString()) : null,
+      job: applicationDoc.jobId && typeof applicationDoc.jobId === 'object' ? {
+        title: (applicationDoc.jobId as any).title,
+        slug: (applicationDoc.jobId as any).slug,
+        department: (applicationDoc.jobId as any).department,
+        type: (applicationDoc.jobId as any).type
       } : null,
-      applicantName: application.applicantName,
-      applicantEmail: application.applicantEmail,
-      applicantPhone: application.applicantPhone,
-      coverLetter: application.coverLetter,
-      resumeUrl: application.resumeUrl,
-      portfolioUrl: application.portfolioUrl,
-      linkedInUrl: application.linkedInUrl,
-      additionalInfo: application.additionalInfo,
-      applicationData: application.applicationData || {},
-      status: application.status,
-      reviewNotes: application.reviewNotes,
-      reviewedBy: application.reviewedBy ? (typeof application.reviewedBy === 'object' ? application.reviewedBy.name : null) : null,
-      reviewedAt: application.reviewedAt,
-      interviewDate: application.interviewDate,
-      interviewNotes: application.interviewNotes,
-      createdAt: application.createdAt,
-      updatedAt: application.updatedAt
+      applicantName: applicationDoc.applicantName,
+      applicantEmail: applicationDoc.applicantEmail,
+      applicantPhone: applicationDoc.applicantPhone,
+      coverLetter: applicationDoc.coverLetter,
+      resumeUrl: applicationDoc.resumeUrl,
+      portfolioUrl: applicationDoc.portfolioUrl,
+      linkedInUrl: applicationDoc.linkedInUrl,
+      additionalInfo: applicationDoc.additionalInfo,
+      applicationData: applicationDoc.applicationData || {},
+      status: applicationDoc.status,
+      reviewNotes: applicationDoc.reviewNotes,
+      reviewedBy: applicationDoc.reviewedBy ? (typeof applicationDoc.reviewedBy === 'object' ? (applicationDoc.reviewedBy as any).name : null) : null,
+      reviewedAt: applicationDoc.reviewedAt,
+      interviewDate: applicationDoc.interviewDate,
+      interviewNotes: applicationDoc.interviewNotes,
+      createdAt: applicationDoc.createdAt,
+      updatedAt: applicationDoc.updatedAt
     });
 
   } catch (error) {
@@ -133,7 +135,7 @@ export async function PATCH(
     try {
       await createAuditLog({
         eventType: 'admin_action',
-        description: `Volunteer application ${application._id.toString()} updated`,
+        description: `Volunteer application ${(application as any)._id?.toString() || ''} updated`,
         userId: session.user.id,
         userEmail: session.user.email || '',
         userRole: session.user.role,
@@ -142,7 +144,7 @@ export async function PATCH(
         requestMethod: 'PATCH',
         requestUrl: request.url,
         metadata: {
-          applicationId: application._id.toString(),
+          applicationId: (application as any)._id?.toString() || '',
           oldStatus,
           newStatus: application.status,
           jobTitle: application.jobId && typeof application.jobId === 'object' ? application.jobId.title : 'General Volunteer'
@@ -181,7 +183,7 @@ export async function PATCH(
     }
 
     return ApiResponse.success({
-      id: application._id.toString(),
+      id: (application as any)._id?.toString() || '',
       status: application.status,
       reviewNotes: application.reviewNotes,
       interviewDate: application.interviewDate,

@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
 
-export default function UnsubscribePage() {
+function UnsubscribeForm() {
   const [status, setStatus] = useState<'loading' | 'success' | 'error' | 'form'>('loading');
   const [message, setMessage] = useState('');
   const [email, setEmail] = useState('');
@@ -204,5 +204,20 @@ export default function UnsubscribePage() {
         </div>
       </motion.div>
     </div>
+  );
+}
+
+export default function UnsubscribePage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 flex items-center justify-center p-4">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin text-white mx-auto mb-4" />
+          <p className="text-white">Loading...</p>
+        </div>
+      </div>
+    }>
+      <UnsubscribeForm />
+    </Suspense>
   );
 }

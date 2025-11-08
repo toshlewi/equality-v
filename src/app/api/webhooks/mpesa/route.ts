@@ -29,7 +29,27 @@ export async function POST(request: NextRequest) {
     const transactionDetails = extractTransactionDetails(body);
 
     if (transactionDetails.success) {
-      await handleSuccessfulPayment(transactionDetails);
+      // Ensure all required fields are present
+      if (transactionDetails.transactionId && transactionDetails.amount && transactionDetails.phone && transactionDetails.accountReference) {
+        await handleSuccessfulPayment({
+          transactionId: transactionDetails.transactionId,
+          amount: transactionDetails.amount,
+          phone: transactionDetails.phone,
+          accountReference: transactionDetails.accountReference,
+          resultCode: transactionDetails.resultCode,
+          resultDesc: transactionDetails.resultDesc
+        });
+      } else {
+        console.error('Missing required transaction details:', transactionDetails);
+        await logSecurityEvent({
+          type: 'mpesa_webhook_error',
+          userId: undefined,
+          ip: request.headers.get('x-forwarded-for') || 'unknown',
+          userAgent: request.headers.get('user-agent') || 'unknown',
+          details: { error: 'Missing required transaction details', transactionDetails },
+          severity: 'high'
+        });
+      }
     } else {
       await handleFailedPayment(transactionDetails);
     }
@@ -43,10 +63,13 @@ export async function POST(request: NextRequest) {
     console.error('M-Pesa webhook error:', error);
     
     // Log security event
-    await logSecurityEvent('mpesa_webhook_error', {
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-      ip: request.headers.get('x-forwarded-for') || 'unknown'
+    await logSecurityEvent({
+      type: 'mpesa_webhook_error',
+      userId: undefined,
+      ip: request.headers.get('x-forwarded-for') || 'unknown',
+      userAgent: request.headers.get('user-agent') || 'unknown',
+      details: { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
+      severity: 'high'
     });
 
     return NextResponse.json(
@@ -85,16 +108,23 @@ async function handleSuccessfulPayment(transactionDetails: {
     }
 
     // Log successful payment
-    await logSecurityEvent('mpesa_payment_succeeded', {
-      success: true,
-      resource: type,
-      action: 'payment_completed',
-      metadata: { 
-        transactionId, 
-        amount, 
-        phone,
-        accountReference 
-      }
+    await logSecurityEvent({
+      type: 'mpesa_payment_succeeded',
+      userId: undefined,
+      ip: 'unknown',
+      userAgent: 'unknown',
+      details: {
+        success: true,
+        resource: type,
+        action: 'payment_completed',
+        metadata: { 
+          transactionId, 
+          amount, 
+          phone,
+          accountReference 
+        }
+      },
+      severity: 'low'
     });
 
   } catch (error) {
@@ -215,11 +245,18 @@ async function handleFailedPayment(transactionDetails: {
     const { resultCode, resultDesc } = transactionDetails;
 
     // Log failed payment
-    await logSecurityEvent('mpesa_payment_failed', {
-      success: false,
-      action: 'payment_failed',
-      error: resultDesc,
-      metadata: { resultCode }
+    await logSecurityEvent({
+      type: 'mpesa_payment_failed',
+      userId: undefined,
+      ip: 'unknown',
+      userAgent: 'unknown',
+      details: {
+        success: false,
+        action: 'payment_failed',
+        error: resultDesc,
+        metadata: { resultCode }
+      },
+      severity: 'medium'
     });
 
     console.log('M-Pesa payment failed:', resultDesc);

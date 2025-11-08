@@ -144,7 +144,7 @@ export default function BookSuggestionPage() {
               Suggestion Submitted!
             </h1>
             <p className="text-lg text-gray-600 mb-8">
-              Thank you for your book suggestion! We'll review it and add it to our library 
+              Thank you for your book suggestion! We&apos;ll review it and add it to our library 
               if it aligns with our collection criteria.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">

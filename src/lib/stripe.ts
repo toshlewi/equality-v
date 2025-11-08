@@ -5,8 +5,8 @@ const stripeSecret = process.env.STRIPE_SECRET_KEY || '';
 export const isStripeConfigured = !!stripeSecret;
 const stripe = isStripeConfigured
   ? new Stripe(stripeSecret, {
-      apiVersion: '2023-10-16',
-  typescript: true,
+      apiVersion: '2025-09-30.clover',
+      typescript: true,
     })
   : null;
 

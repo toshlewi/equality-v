@@ -43,7 +43,7 @@ export default function DigitalRightsPage() {
         <motion.section variants={fadeInUp} className="prose prose-lg max-w-none">
           <h2 className="text-3xl font-bold text-brand-teal mb-6">Our Digital Rights Work</h2>
           <p className="text-lg text-gray-700 leading-relaxed mb-6">
-            One of the guiding tenets at Equality Vanguard is the cardinal belief and endeavor to create safe spaces for women, everywhere, virtual spaces included. We continue to action the same through the creation of spaces and platforms where members of our community are able to freely share and tap into each other's experiences, narratives and resources in a manner compliant with their overriding right to privacy.
+            One of the guiding tenets at Equality Vanguard is the cardinal belief and endeavor to create safe spaces for women, everywhere, virtual spaces included. We continue to action the same through the creation of spaces and platforms where members of our community are able to freely share and tap into each other&apos;s experiences, narratives and resources in a manner compliant with their overriding right to privacy.
           </p>
           <p className="text-lg text-gray-700 leading-relaxed mb-8">
             Additionally, any data so garnered is solely collected and used upon the full consent and approval of members. Over and above the aforementioned, the Legal Vanguard continues to make great strides in championing conversations on Digital Justice and safeguarding online freedoms.
@@ -71,7 +71,7 @@ export default function DigitalRightsPage() {
           <div className="max-w-4xl">
             <h3 className="text-3xl font-bold mb-6">Legal Vanguard Digital Justice</h3>
             <p className="text-xl leading-relaxed mb-8">
-              Our Legal Vanguard team leads conversations on digital justice, working to ensure that online freedoms are protected and that women's rights extend seamlessly into digital spaces.
+              Our Legal Vanguard team leads conversations on digital justice, working to ensure that online freedoms are protected and that women&apos;s rights extend seamlessly into digital spaces.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Link href="/our-work/legal-vanguard">
@@ -99,7 +99,7 @@ export default function DigitalRightsPage() {
         <motion.section variants={fadeInUp} className="text-center bg-white rounded-2xl p-12 shadow-lg">
           <h3 className="text-3xl font-bold text-brand-teal mb-6">Ready to Join Our Digital Rights Movement?</h3>
           <p className="text-lg text-gray-700 mb-8 max-w-2xl mx-auto">
-            Whether you're interested in digital privacy, online safety, or legal advocacy for digital rights, there's a place for you in our collective.
+            Whether you&apos;re interested in digital privacy, online safety, or legal advocacy for digital rights, there&apos;s a place for you in our collective.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/get-involved#membership">

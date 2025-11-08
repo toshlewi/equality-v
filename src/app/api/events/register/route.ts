@@ -3,8 +3,8 @@ import { z } from 'zod';
 import { connectDB } from '@/lib/mongodb';
 import Event from '@/models/Event';
 import EventRegistration from '@/models/EventRegistration';
-import { createPaymentIntent } from '@/lib/stripe';
-import { initiateSTKPush } from '@/lib/mpesa';
+import { createPaymentIntent, isStripeConfigured } from '@/lib/stripe';
+// import { initiateSTKPush, mpesaClient } from '@/lib/mpesa'; // Unused for now
 import { sendEmail } from '@/lib/email';
 import { generateICSFile } from '@/lib/calendar';
 import { createAdminNotification } from '@/lib/notifications';
@@ -28,7 +28,7 @@ const registrationSchema = z.object({
     phone: z.string().optional(),
     relationship: z.string().optional()
   }).optional(),
-  registrationData: z.record(z.any()).optional(),
+  registrationData: z.record(z.string(), z.any()).optional(),
   termsAccepted: z.boolean().refine(val => val === true, 'Terms must be accepted'),
   privacyAccepted: z.boolean().refine(val => val === true, 'Privacy policy must be accepted'),
   recaptchaToken: z.string().min(1, 'reCAPTCHA token is required')
@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Calculate price
-    let basePrice = event.isFree ? 0 : (event.price || 0);
+    const basePrice = event.isFree ? 0 : (event.price || 0);
     let discountAmount = 0;
     let discountCode = validatedData.discountCode;
 
@@ -166,6 +166,14 @@ export async function POST(request: NextRequest) {
     // Handle payment if required
     if (totalPrice > 0 && validatedData.paymentMethod !== 'free') {
       if (validatedData.paymentMethod === 'stripe') {
+        // Validate Stripe configuration
+        if (!isStripeConfigured) {
+          return NextResponse.json(
+            { success: false, error: 'Stripe payment is not configured' },
+            { status: 503 }
+          );
+        }
+
         // Create Stripe PaymentIntent
         const paymentIntent = await createPaymentIntent({
           amount: Math.round(totalPrice * 100), // Convert to cents
@@ -314,7 +322,7 @@ export async function POST(request: NextRequest) {
     
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { success: false, error: 'Validation failed', details: error.errors },
+        { success: false, error: 'Validation failed', details: error.issues },
         { status: 400 }
       );
     }

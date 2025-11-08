@@ -47,11 +47,19 @@ export class ApiResponse {
     }, { status: 404 });
   }
 
-  static validationError(errors: Record<string, unknown>) {
+  static validationError(errors: Record<string, unknown> | Array<{ field: string; message: string }>) {
+    // Convert array format to record format if needed
+    const errorDetails = Array.isArray(errors)
+      ? errors.reduce((acc, err) => {
+          acc[err.field] = err.message;
+          return acc;
+        }, {} as Record<string, unknown>)
+      : errors;
+    
     return NextResponse.json({
       success: false,
       error: 'Validation failed',
-      details: errors,
+      details: errorDetails,
       timestamp: new Date().toISOString()
     }, { status: 422 });
   }
@@ -77,7 +85,7 @@ export async function requireRole(request: NextRequest, allowedRoles: string[]) 
 
   const { user } = authResult;
   
-  if (!allowedRoles.includes(user.role)) {
+  if (!user || !allowedRoles.includes(user.role)) {
     return ApiResponse.forbidden(`Access denied. Required roles: ${allowedRoles.join(', ')}`);
   }
 
@@ -85,14 +93,16 @@ export async function requireRole(request: NextRequest, allowedRoles: string[]) 
 }
 
 // Validation utilities
-export function validateRequest<T>(schema: z.ZodSchema<T>, data: unknown) {
+export function validateRequest<T>(schema: z.ZodSchema<T>, data: unknown): 
+  | { success: true; data: T }
+  | { success: false; errors: Array<{ field: string; message: string }> } {
   try {
     return { success: true, data: schema.parse(data) };
   } catch (error) {
     if (error instanceof z.ZodError) {
       return { 
         success: false, 
-        errors: error.errors.map(err => ({
+        errors: error.issues.map(err => ({
           field: err.path.join('.'),
           message: err.message
         }))

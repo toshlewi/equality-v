@@ -28,7 +28,7 @@ export function CardItem({ card, index, totalCards, scrollProgress }: CardItemPr
   const router = useRouter();
 
   // Calculate card position based on scroll progress - matches Purpose Talent behavior
-  const cardPosition = useTransform(scrollProgress, (value) => {
+  const cardPosition = useTransform(scrollProgress, (value: number) => {
     const progress = value - index;
     return Math.max(0, Math.min(1, progress));
   });

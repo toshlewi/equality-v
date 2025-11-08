@@ -45,7 +45,8 @@ export async function GET(
 
     // Check if job is public (for non-admin)
     const session = await getServerSession(authOptions);
-    if ((!job.isPublic || job.status !== 'open') && (!session || !['admin', 'editor'].includes(session.user.role))) {
+    const jobDoc = job as any;
+    if ((!jobDoc.isPublic || jobDoc.status !== 'open') && (!session || !session.user?.role || !['admin', 'editor'].includes(session.user.role))) {
       return NextResponse.json(
         { success: false, error: 'Job not found' },
         { status: 404 }
@@ -129,7 +130,7 @@ export async function PATCH(
         { 
           success: false, 
           error: 'Validation failed', 
-          details: error.errors 
+          details: error.issues 
         },
         { status: 400 }
       );

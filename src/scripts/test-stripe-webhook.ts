@@ -78,7 +78,8 @@ async function simulateStripeWebhook() {
 
     // Check database status
     if (testMember) {
-      await testMember.reload();
+      await testMember.populate('paymentMethod');
+      // const refreshedMember = await Member.findById(testMember._id); // Unused for now
       console.log('\n📊 Member Status:');
       console.log('  Payment Status:', testMember.paymentStatus);
       console.log('  Member Status:', testMember.status);
@@ -117,6 +118,9 @@ async function simulateStripeWebhook() {
 
 // Run simulation
 simulateStripeWebhook();
+
+
+
 
 
 

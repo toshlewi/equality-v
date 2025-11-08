@@ -100,7 +100,7 @@ export async function GET(request: NextRequest) {
     const total = await Partnership.countDocuments(query);
 
     // Get featured partnerships if requested
-    let featuredPartnerships = [];
+    let featuredPartnerships: any[] = [];
     if (featured === 'true' && page === 1) {
       featuredPartnerships = await Partnership.find({ 
         isFeatured: true, 
@@ -166,7 +166,7 @@ export async function POST(request: NextRequest) {
     // Generate unique slug
     let slug = generateSlug(validatedData.name);
     let slugCounter = 1;
-    let originalSlug = slug;
+    const originalSlug = slug;
 
     while (await Partnership.findOne({ slug })) {
       slug = `${originalSlug}-${slugCounter}`;
@@ -204,7 +204,7 @@ export async function POST(request: NextRequest) {
         { 
           success: false, 
           error: 'Validation failed', 
-          details: error.errors 
+          details: error.issues 
         },
         { status: 400 }
       );

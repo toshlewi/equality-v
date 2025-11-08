@@ -8,9 +8,14 @@ export const metadata: Metadata = {
   title: "Equality Vanguard",
   description: "Pan-African feminist collective dismantling oppression through law, art, and radical community",
   icons: {
-    icon: "/images/EV ROUND LOGO.png",
-    shortcut: "/images/EV ROUND LOGO.png",
-    apple: "/images/EV ROUND LOGO.png",
+    icon: [
+      { url: "/images/EV ROUND LOGO.png", sizes: "16x16", type: "image/png" },
+      { url: "/images/EV ROUND LOGO.png", sizes: "32x32", type: "image/png" },
+      { url: "/images/EV ROUND LOGO.png", sizes: "192x192", type: "image/png" },
+      { url: "/images/EV ROUND LOGO.png", sizes: "512x512", type: "image/png" },
+    ],
+    shortcut: [{ url: "/images/EV ROUND LOGO.png", sizes: "32x32", type: "image/png" }],
+    apple: [{ url: "/images/EV ROUND LOGO.png", sizes: "180x180", type: "image/png" }],
   },
 };
 

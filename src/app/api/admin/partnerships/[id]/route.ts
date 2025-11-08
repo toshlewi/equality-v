@@ -43,22 +43,24 @@ export async function GET(
       return ApiResponse.notFound('Partnership inquiry not found');
     }
 
-      return ApiResponse.success({
-      id: inquiry._id.toString(),
-      name: inquiry.name,
-      email: inquiry.email,
-      phone: inquiry.phone,
-      subject: inquiry.subject,
-      message: inquiry.message,
-      status: inquiry.status,
-      priority: inquiry.priority,
-      category: inquiry.category,
-      metadata: inquiry.metadata || {},
-      notes: inquiry.notes || '',
-      response: inquiry.response || '',
-      respondedAt: inquiry.respondedAt,
-      createdAt: inquiry.createdAt,
-      updatedAt: inquiry.updatedAt
+    const inquiryDoc = inquiry as any;
+
+    return ApiResponse.success({
+      id: inquiryDoc._id?.toString() || '',
+      name: inquiryDoc.name,
+      email: inquiryDoc.email,
+      phone: inquiryDoc.phone,
+      subject: inquiryDoc.subject,
+      message: inquiryDoc.message,
+      status: inquiryDoc.status,
+      priority: inquiryDoc.priority,
+      category: inquiryDoc.category,
+      metadata: inquiryDoc.metadata || {},
+      notes: inquiryDoc.notes || '',
+      response: inquiryDoc.response || '',
+      respondedAt: inquiryDoc.respondedAt,
+      createdAt: inquiryDoc.createdAt,
+      updatedAt: inquiryDoc.updatedAt
     });
 
   } catch (error) {

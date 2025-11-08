@@ -41,7 +41,7 @@ export default function WorkCard({
       scale: 1,
       transition: {
         duration: 0.6,
-        ease: "easeOut",
+        ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number],
         delay: index * 0.1
       }
     }
@@ -53,7 +53,7 @@ export default function WorkCard({
       y: -5,
       transition: {
         duration: 0.3,
-        ease: "easeInOut"
+        ease: [0.42, 0, 0.58, 1] as [number, number, number, number]
       }
     }
   };

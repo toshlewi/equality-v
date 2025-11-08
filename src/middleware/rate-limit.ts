@@ -13,9 +13,9 @@ export function createRateLimit(options: RateLimitOptions) {
   const { windowMs, maxRequests, message = 'Too many requests' } = options;
 
   return (request: NextRequest): NextResponse | null => {
-    const ip = request.ip || request.headers.get('x-forwarded-for') || 'unknown';
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || request.headers.get('x-real-ip') || 'unknown';
     const now = Date.now();
-    const windowStart = now - windowMs;
+    // const windowStart = now - windowMs; // Unused for now
 
     // Clean up old entries
     for (const [key, value] of rateLimitMap.entries()) {

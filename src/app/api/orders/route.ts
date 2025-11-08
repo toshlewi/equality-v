@@ -4,10 +4,11 @@ import { connectDB } from '@/lib/mongodb';
 import mongoose from 'mongoose';
 import Order from '@/models/Order';
 import Product from '@/models/Product';
-import { createPaymentIntent, createCheckoutSession } from '@/lib/stripe';
-import { initiateSTKPush } from '@/lib/mpesa';
-import { sendEmail } from '@/lib/email';
-import { createAdminNotification } from '@/lib/notifications';
+import { createPaymentIntent, isStripeConfigured } from '@/lib/stripe';
+// import { createCheckoutSession } from '@/lib/stripe'; // Unused for now
+// import { initiateSTKPush, mpesaClient } from '@/lib/mpesa'; // Unused for now
+// import { sendEmail } from '@/lib/email'; // Unused for now
+// import { createAdminNotification } from '@/lib/notifications'; // Unused for now
 import { verifyRecaptcha } from '@/lib/security';
 import { sanitizeInput } from '@/lib/auth';
 
@@ -82,7 +83,6 @@ export async function POST(request: NextRequest) {
     // Validate products and calculate totals
     const orderItems = [] as any[];
     let subtotal = 0;
-    let totalItems = 0;
 
     const isDemoMode = process.env.SHOP_DEMO_MODE === 'true' || !!(validatedData as any).skipValidation;
 
@@ -93,7 +93,6 @@ export async function POST(request: NextRequest) {
         const productName = item.name || `Item ${item.productId}`;
         const itemTotal = unitPrice * item.quantity;
         subtotal += itemTotal;
-        totalItems += item.quantity;
 
         orderItems.push({
           productId: item.productId,
@@ -127,7 +126,6 @@ export async function POST(request: NextRequest) {
 
         const itemTotal = product.price * item.quantity;
         subtotal += itemTotal;
-        totalItems += item.quantity;
 
         orderItems.push({
           productId: product._id,
@@ -206,6 +204,14 @@ export async function POST(request: NextRequest) {
 
     // Create payment based on method
     if (validatedData.paymentMethod === 'stripe') {
+      // Validate Stripe configuration
+      if (!isStripeConfigured) {
+        return NextResponse.json(
+          { success: false, error: 'Stripe payment is not configured' },
+          { status: 503 }
+        );
+      }
+
       // Create Stripe payment intent
       const paymentIntent = await createPaymentIntent({
         amount: total,
@@ -255,7 +261,7 @@ export async function POST(request: NextRequest) {
     
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { success: false, error: 'Validation failed', details: error.errors },
+        { success: false, error: 'Validation failed', details: error.issues },
         { status: 400 }
       );
     }

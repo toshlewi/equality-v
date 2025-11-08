@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, ShoppingBag, Heart, Star, Plus, Minus, Filter, Search, ShoppingCart, X } from 'lucide-react';
-import { loadStripe, StripeElementsOptions } from '@stripe/stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 
 declare global {
@@ -13,9 +13,13 @@ declare global {
   }
 }
 
-// Initialize Stripe
-const stripeKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || process.env.STRIPE_PUBLISHABLE_KEY || '';
+// Initialize Stripe - NEXT_PUBLIC_ prefix is required for client-side access
+const stripeKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '';
 const stripePromise = stripeKey ? loadStripe(stripeKey) : null;
+
+if (!stripeKey) {
+  console.error('NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY is not set. Stripe payments will not work.');
+}
 
 // Card payment form component
 function CardPaymentForm({ 
@@ -124,17 +128,23 @@ interface ShopProduct {
   name: string;
   price: number;
   currency?: string;
-  images?: string[];
+  images?: Array<{ url: string; alt?: string; isPrimary?: boolean }> | string[];
   category?: string;
   stockQuantity?: number;
   isActive?: boolean;
   description?: string;
+  originalPrice?: number;
+  rating?: number;
+  reviews?: number;
+  sizes?: string[];
+  colors?: string[];
+  inStock?: boolean;
 }
 
 export default function BuyMerchPage() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const [cart, setCart] = useState([]);
+  const [cart, setCart] = useState<Array<ShopProduct & { quantity: number }>>([]);
   const [showCart, setShowCart] = useState(false);
   const [products, setProducts] = useState<ShopProduct[]>([]);
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
@@ -182,7 +192,23 @@ export default function BuyMerchPage() {
         }
         if (isMounted) {
           const list = Array.isArray(data.data) ? data.data : (data.data?.products || []);
-          setProducts(list);
+          // Transform products to match ShopProduct interface
+          const transformedProducts: ShopProduct[] = list.map((p: any) => ({
+            id: p.id || p._id?.toString() || '',
+            name: p.name || '',
+            price: p.price || 0,
+            currency: p.currency || 'KES',
+            images: p.images || [],
+            category: p.category || '',
+            stockQuantity: p.inventory?.quantity ?? p.stockQuantity ?? 0,
+            isActive: p.status === 'active' || p.isActive !== false,
+            description: p.description || p.shortDescription || '',
+            originalPrice: p.compareAtPrice || undefined,
+            rating: p.rating || 0,
+            reviews: p.reviewCount || 0,
+            inStock: (p.inventory?.quantity ?? p.stockQuantity ?? 0) > 0
+          }));
+          setProducts(transformedProducts);
         }
       } catch (err: any) {
         if (isMounted) setProductsError(err.message || 'Failed to load products');
@@ -212,7 +238,7 @@ export default function BuyMerchPage() {
     };
   }, []);
 
-  const categories = ['all', ...Array.from(new Set(products.map(p => (p as any).category).filter(Boolean) as string[]))];
+  const categories = ['all', ...Array.from(new Set(products.map(p => p.category).filter((cat): cat is string => Boolean(cat))))];
 
   const filteredProducts = products.filter(product => {
     const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
@@ -221,8 +247,8 @@ export default function BuyMerchPage() {
     return matchesCategory && matchesSearch;
   });
 
-  const addToCart = (product) => {
-    if (product && product.inStock === false) {
+  const addToCart = (product: ShopProduct) => {
+    if (product && (product.inStock === false || (product.stockQuantity !== undefined && product.stockQuantity <= 0))) {
       setError('This item is currently out of stock.');
       return;
     }
@@ -236,7 +262,7 @@ export default function BuyMerchPage() {
     });
   };
 
-  const updateQuantity = (productId, newQuantity) => {
+  const updateQuantity = (productId: string, newQuantity: number) => {
     if (newQuantity === 0) {
       setCart(prev => prev.filter(item => item.id !== productId));
     } else {
@@ -246,11 +272,11 @@ export default function BuyMerchPage() {
     }
   };
 
-  const getTotalPrice = () => {
+  const getTotalPrice = (): number => {
     return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
   };
 
-  const formatPrice = (price) => {
+  const formatPrice = (price: number): string => {
     return `KSh ${price.toLocaleString()}`;
   };
 
@@ -357,7 +383,7 @@ export default function BuyMerchPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          items: cart.map(item => ({
+          items: cart.map((item: ShopProduct & { quantity: number }) => ({
             productId: item.id.toString(),
             quantity: item.quantity,
             // Provide name/price for demo mode fallback on the server
@@ -712,7 +738,9 @@ export default function BuyMerchPage() {
                     <div 
                       className="w-full h-64 bg-cover bg-center bg-no-repeat"
                       style={{
-                        backgroundImage: product.images && product.images.length > 0 ? `url(${product.images[0]})` : 'url(/images/shopplace.JPG)'
+                        backgroundImage: product.images && product.images.length > 0 
+                          ? `url(${typeof product.images[0] === 'string' ? product.images[0] : product.images[0].url})` 
+                          : 'url(/images/shopplace.JPG)'
                       }}
                     >
                       <div className="w-full h-full bg-black/20 flex items-center justify-center">
@@ -722,7 +750,7 @@ export default function BuyMerchPage() {
                         </div>
                       </div>
                     </div>
-                    {product.originalPrice && (
+                    {product.originalPrice !== undefined && product.originalPrice > 0 && (
                       <div className="absolute top-2 left-2 bg-[#FF7D05] text-white px-2 py-1 rounded text-sm font-league-spartan font-semibold">
                         Sale
                       </div>
@@ -738,7 +766,7 @@ export default function BuyMerchPage() {
                       <div className="flex items-center">
                         <Star className="w-4 h-4 text-yellow-400 fill-current" />
                         <span className="ml-1 text-sm text-gray-600 font-league-spartan">
-                          {product.rating} ({product.reviews})
+                          {product.rating || 0} ({product.reviews || 0})
                         </span>
                       </div>
                     </div>
@@ -752,27 +780,27 @@ export default function BuyMerchPage() {
                         <span className="text-2xl font-bold text-[#042C45] font-fredoka">
                           {formatPrice(product.price)}
                         </span>
-                        {product.originalPrice && (
+                        {product.originalPrice !== undefined && product.originalPrice > 0 && (
                           <span className="text-lg text-gray-500 line-through font-league-spartan">
                             {formatPrice(product.originalPrice)}
                           </span>
                         )}
                       </div>
                       <span className={`text-sm px-2 py-1 rounded font-league-spartan ${
-                        product.stockQuantity && product.stockQuantity > 0 
+                        (product.stockQuantity !== undefined && product.stockQuantity > 0) || product.inStock === true
                           ? 'bg-green-100 text-green-800' 
                           : 'bg-red-100 text-red-800'
                       }`}>
-                        {product.stockQuantity && product.stockQuantity > 0 ? 'In Stock' : 'Out of Stock'}
+                        {(product.stockQuantity !== undefined && product.stockQuantity > 0) || product.inStock === true ? 'In Stock' : 'Out of Stock'}
                       </span>
                     </div>
 
                     {/* Product Options */}
-                    {product.sizes && (
+                    {product.sizes && product.sizes.length > 0 && (
                       <div className="mb-4">
                         <p className="text-sm text-gray-600 mb-2 font-league-spartan">Size:</p>
                         <div className="flex gap-2 flex-wrap">
-                          {product.sizes.map((size) => (
+                          {product.sizes.map((size: string) => (
                             <button
                               key={size}
                               className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-100 font-league-spartan"
@@ -784,11 +812,11 @@ export default function BuyMerchPage() {
                       </div>
                     )}
 
-                    {product.colors && (
+                    {product.colors && product.colors.length > 0 && (
                       <div className="mb-4">
                         <p className="text-sm text-gray-600 mb-2 font-league-spartan">Color:</p>
                         <div className="flex gap-2">
-                          {product.colors.map((color) => (
+                          {product.colors.map((color: string) => (
                             <button
                               key={color}
                               className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-100 font-league-spartan"
@@ -802,7 +830,7 @@ export default function BuyMerchPage() {
 
                     <button
                       onClick={() => addToCart(product)}
-                      disabled={!product.stockQuantity || product.stockQuantity <= 0}
+                      disabled={(product.stockQuantity !== undefined && product.stockQuantity <= 0) || product.inStock === false}
                       className="w-full py-3 bg-[#042C45] text-white rounded-lg hover:bg-[#042C45]/90 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-league-spartan font-semibold"
                     >
                       Add to Cart
@@ -857,7 +885,9 @@ export default function BuyMerchPage() {
                         <div 
                           className="w-12 h-12 bg-cover bg-center bg-no-repeat rounded flex-shrink-0"
                           style={{
-                            backgroundImage: item.images && item.images.length > 0 ? `url(${item.images[0]})` : 'url(/images/shopplace.JPG)'
+                            backgroundImage: item.images && item.images.length > 0 
+                              ? `url(${typeof item.images[0] === 'string' ? item.images[0] : item.images[0].url})` 
+                              : 'url(/images/shopplace.JPG)'
                           }}
                         >
                           <div className="w-full h-full bg-black/30 rounded flex items-center justify-center">
@@ -1275,7 +1305,7 @@ export default function BuyMerchPage() {
                         {paymentConfirmed && (
                           <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                             <p className="text-green-700 text-sm font-league-spartan">
-                              ✅ Payment confirmed! Your order is being processed. You'll receive a confirmation email shortly.
+                              ✅ Payment confirmed! Your order is being processed. You&apos;ll receive a confirmation email shortly.
                             </p>
                           </div>
                         )}

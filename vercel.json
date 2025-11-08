@@ -38,11 +38,5 @@
         }
       ]
     }
-  ],
-  "rewrites": [
-    {
-      "source": "/api/webhooks/:path*",
-      "destination": "/api/webhooks/:path*"
-    }
   ]
 }

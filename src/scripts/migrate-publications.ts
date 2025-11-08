@@ -1,4 +1,4 @@
-import { connectDB } from '@/lib/mongodb';
+// import { connectDB } from '@/lib/mongodb'; // Unused for now
 import Publication from '@/models/Publication';
 import { slugify } from '@/lib/utils';
 

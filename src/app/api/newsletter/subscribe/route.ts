@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { addSubscriber, syncMemberToMailchimp } from '@/lib/mailchimp';
+import { addSubscriber } from '@/lib/mailchimp';
+// import { syncMemberToMailchimp } from '@/lib/mailchimp'; // Unused for now
 import { sendEmail } from '@/lib/email';
 import { verifyRecaptcha } from '@/lib/security';
 import { sanitizeInput } from '@/lib/auth';
@@ -42,6 +43,14 @@ export async function POST(request: NextRequest) {
       source: validatedData.source ? sanitizeInput(validatedData.source) : 'website'
     };
 
+    // Validate Mailchimp configuration
+    if (!process.env.MAILCHIMP_LIST_ID) {
+      return NextResponse.json(
+        { success: false, error: 'Newsletter service is not configured' },
+        { status: 503 }
+      );
+    }
+
     // Add default tags
     const tags = [
       'newsletter',
@@ -50,7 +59,7 @@ export async function POST(request: NextRequest) {
     ];
 
     // Add subscriber to Mailchimp
-    const result = await addSubscriber(process.env.MAILCHIMP_LIST_ID!, {
+    const result = await addSubscriber(process.env.MAILCHIMP_LIST_ID, {
       email: sanitizedData.email,
       name: sanitizedData.name,
       tags,
@@ -90,7 +99,7 @@ export async function POST(request: NextRequest) {
     
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { success: false, error: 'Validation failed', details: error.errors },
+        { success: false, error: 'Validation failed', details: error.issues },
         { status: 400 }
       );
     }
@@ -114,11 +123,19 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Validate Mailchimp configuration
+    if (!process.env.MAILCHIMP_LIST_ID) {
+      return NextResponse.json(
+        { success: false, error: 'Newsletter service is not configured' },
+        { status: 503 }
+      );
+    }
+
     // Check if email is subscribed
     const { getSubscriber, getSubscriberHash } = await import('@/lib/mailchimp');
     const subscriberHash = getSubscriberHash(email);
     
-    const result = await getSubscriber(process.env.MAILCHIMP_LIST_ID!, subscriberHash);
+    const result = await getSubscriber(process.env.MAILCHIMP_LIST_ID, subscriberHash);
 
     if (!result.success) {
       return NextResponse.json(

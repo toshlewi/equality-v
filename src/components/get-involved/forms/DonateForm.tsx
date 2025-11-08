@@ -9,9 +9,13 @@ interface DonateFormProps {
   onClose: () => void;
 }
 
-// Initialize Stripe
-const stripeKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || process.env.STRIPE_PUBLISHABLE_KEY || '';
+// Initialize Stripe - NEXT_PUBLIC_ prefix is required for client-side access
+const stripeKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '';
 const stripePromise = stripeKey ? loadStripe(stripeKey) : null;
+
+if (!stripeKey) {
+  console.error('NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY is not set. Stripe payments will not work.');
+}
 
 // Card payment form component
 function CardPaymentForm({ 
@@ -151,6 +155,10 @@ export function DonateForm({ onClose }: DonateFormProps) {
       script.src = `https://www.google.com/recaptcha/api.js?render=${siteKey}`;
       script.async = true;
       script.defer = true;
+      script.onerror = () => {
+        console.error('Failed to load reCAPTCHA script');
+        setError('Security verification failed to load. Please refresh the page.');
+      };
       document.head.appendChild(script);
     }
   }, []);
@@ -308,7 +316,7 @@ export function DonateForm({ onClose }: DonateFormProps) {
 
         setStep('payment');
       } else {
-        // Non-cash donations don't require payment
+        // Non-cash donations don&apos;t require payment
         setSuccess(true);
         setTimeout(() => {
           onClose();
@@ -585,7 +593,7 @@ export function DonateForm({ onClose }: DonateFormProps) {
                     required
                     rows={4}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FFD935] focus:border-transparent transition-colors font-league-spartan"
-                    placeholder="Describe what you're donating"
+                    placeholder="Describe what you&apos;re donating"
                   />
                 </div>
               )}
@@ -760,7 +768,7 @@ export function DonateForm({ onClose }: DonateFormProps) {
               {paymentConfirmed && (
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                   <p className="text-green-700 text-sm font-league-spartan">
-                    ✅ Payment confirmed! Thank you for your donation. You'll receive a confirmation email shortly.
+                    ✅ Payment confirmed! Thank you for your donation. You&apos;ll receive a confirmation email shortly.
                   </p>
                 </div>
               )}

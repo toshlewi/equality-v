@@ -60,7 +60,7 @@ export interface FileValidationResult {
  */
 export function validateFileType(mimeType: string, mediaType: MediaType): boolean {
   const allowedTypes = ALLOWED_MIME_TYPES[mediaType.toUpperCase() as keyof typeof ALLOWED_MIME_TYPES];
-  return allowedTypes.includes(mimeType);
+  return (allowedTypes as readonly string[]).includes(mimeType);
 }
 
 /**
@@ -75,11 +75,11 @@ export function validateFileSize(fileSize: number, mediaType: MediaType): boolea
  * Detect media type from MIME type
  */
 export function detectMediaType(mimeType: string): MediaType | null {
-  if (ALLOWED_MIME_TYPES.IMAGE.includes(mimeType)) return 'image';
-  if (ALLOWED_MIME_TYPES.PDF.includes(mimeType)) return 'pdf';
-  if (ALLOWED_MIME_TYPES.AUDIO.includes(mimeType)) return 'audio';
-  if (ALLOWED_MIME_TYPES.VIDEO.includes(mimeType)) return 'video';
-  if (ALLOWED_MIME_TYPES.DOCUMENT.includes(mimeType)) return 'document';
+  if ((ALLOWED_MIME_TYPES.IMAGE as readonly string[]).includes(mimeType)) return 'image';
+  if ((ALLOWED_MIME_TYPES.PDF as readonly string[]).includes(mimeType)) return 'pdf';
+  if ((ALLOWED_MIME_TYPES.AUDIO as readonly string[]).includes(mimeType)) return 'audio';
+  if ((ALLOWED_MIME_TYPES.VIDEO as readonly string[]).includes(mimeType)) return 'video';
+  if ((ALLOWED_MIME_TYPES.DOCUMENT as readonly string[]).includes(mimeType)) return 'document';
   return null;
 }
 
@@ -188,35 +188,35 @@ export function formatFileSize(bytes: number): string {
  * Check if file is an image
  */
 export function isImageFile(mimeType: string): boolean {
-  return ALLOWED_MIME_TYPES.IMAGE.includes(mimeType);
+  return (ALLOWED_MIME_TYPES.IMAGE as readonly string[]).includes(mimeType);
 }
 
 /**
  * Check if file is a PDF
  */
 export function isPdfFile(mimeType: string): boolean {
-  return ALLOWED_MIME_TYPES.PDF.includes(mimeType);
+  return (ALLOWED_MIME_TYPES.PDF as readonly string[]).includes(mimeType);
 }
 
 /**
  * Check if file is an audio file
  */
 export function isAudioFile(mimeType: string): boolean {
-  return ALLOWED_MIME_TYPES.AUDIO.includes(mimeType);
+  return (ALLOWED_MIME_TYPES.AUDIO as readonly string[]).includes(mimeType);
 }
 
 /**
  * Check if file is a video file
  */
 export function isVideoFile(mimeType: string): boolean {
-  return ALLOWED_MIME_TYPES.VIDEO.includes(mimeType);
+  return (ALLOWED_MIME_TYPES.VIDEO as readonly string[]).includes(mimeType);
 }
 
 /**
  * Check if file is a document
  */
 export function isDocumentFile(mimeType: string): boolean {
-  return ALLOWED_MIME_TYPES.DOCUMENT.includes(mimeType);
+  return (ALLOWED_MIME_TYPES.DOCUMENT as readonly string[]).includes(mimeType);
 }
 
 // Zod schemas for API validation

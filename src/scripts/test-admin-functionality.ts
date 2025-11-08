@@ -170,8 +170,9 @@ async function testAPIEndpoints() {
         results.push({ endpoint, status: 'failed', error: data.error });
       }
     } catch (error) {
-      console.log(`❌ ${endpoint} - Error: ${error.message}`);
-      results.push({ endpoint, status: 'error', error: error.message });
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.log(`❌ ${endpoint} - Error: ${errorMessage}`);
+      results.push({ endpoint, status: 'error', error: errorMessage });
     }
   }
 
@@ -204,14 +205,36 @@ async function testFormValidation() {
       console.log('❌ Publication validation failed - should reject empty title');
     }
   } catch (error) {
-    console.log('❌ Error testing form validation:', error.message);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.log('❌ Error testing form validation:', errorMessage);
   }
 }
 
 async function generateTestReport() {
   console.log('\n📋 Generating test report...');
   
-  const report = {
+  const report: {
+    timestamp: string;
+    tests: {
+      databaseConnection: boolean;
+      dataCounts: {
+        publicationCount: number;
+        bookCount: number;
+        toolkitCount: number;
+        storyCount: number;
+        memberCount: number;
+        donationCount: number;
+        orderCount: number;
+        eventCount: number;
+        contactCount: number;
+      } | null;
+      publications: boolean;
+      books: boolean;
+      stories: boolean;
+      apiEndpoints: Array<{ endpoint: string; status: string; error?: string }>;
+      formValidation: boolean;
+    };
+  } = {
     timestamp: new Date().toISOString(),
     tests: {
       databaseConnection: false,
@@ -252,7 +275,7 @@ async function main() {
   console.log('🚀 Starting comprehensive admin functionality test...\n');
   
   try {
-    const report = await generateTestReport();
+    await generateTestReport();
     
     console.log('\n🎉 Test completed!');
     console.log('\n📝 Next steps:');

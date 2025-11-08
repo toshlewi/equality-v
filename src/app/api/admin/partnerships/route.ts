@@ -57,8 +57,8 @@ export async function GET(request: NextRequest) {
     const hasPrevPage = page > 1;
 
     return ApiResponse.success({
-      inquiries: inquiries.map(inquiry => ({
-        id: inquiry._id.toString(),
+      inquiries: inquiries.map((inquiry: any) => ({
+        id: inquiry._id?.toString() || '',
         name: inquiry.name,
         email: inquiry.email,
         phone: inquiry.phone,

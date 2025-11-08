@@ -35,6 +35,10 @@ export function ContactForm({ onClose }: ContactFormProps) {
       script.src = `https://www.google.com/recaptcha/api.js?render=${siteKey}`;
       script.async = true;
       script.defer = true;
+      script.onerror = () => {
+        console.error('Failed to load reCAPTCHA script');
+        setError('Security verification failed to load. Please refresh the page.');
+      };
       document.head.appendChild(script);
     }
   }, []);

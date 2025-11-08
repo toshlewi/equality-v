@@ -1,4 +1,4 @@
-import { connectDB } from '@/lib/mongodb';
+// import { connectDB } from '@/lib/mongodb'; // Unused for now
 import User from '@/models/User';
 
 // Team member data from EV CONTEXT.md

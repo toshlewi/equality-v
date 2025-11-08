@@ -13,11 +13,19 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validatedData = unsubscribeSchema.parse(body);
 
+    // Validate Mailchimp configuration
+    if (!process.env.MAILCHIMP_LIST_ID) {
+      return NextResponse.json(
+        { success: false, error: 'Newsletter service is not configured' },
+        { status: 503 }
+      );
+    }
+
     const email = validatedData.email.toLowerCase();
     const subscriberHash = getSubscriberHash(email);
 
     // Remove subscriber from Mailchimp
-    const result = await removeSubscriber(process.env.MAILCHIMP_LIST_ID!, subscriberHash);
+    const result = await removeSubscriber(process.env.MAILCHIMP_LIST_ID, subscriberHash);
 
     if (!result.success) {
       return NextResponse.json(
@@ -52,7 +60,7 @@ export async function POST(request: NextRequest) {
     
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { success: false, error: 'Validation failed', details: error.errors },
+        { success: false, error: 'Validation failed', details: error.issues },
         { status: 400 }
       );
     }
@@ -68,7 +76,7 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const email = searchParams.get('email');
-    const token = searchParams.get('token');
+    // const token = searchParams.get('token'); // Unused for now
 
     if (!email) {
       return NextResponse.json(
@@ -77,11 +85,19 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Validate Mailchimp configuration
+    if (!process.env.MAILCHIMP_LIST_ID) {
+      return NextResponse.json(
+        { success: false, error: 'Newsletter service is not configured' },
+        { status: 503 }
+      );
+    }
+
     // In a real implementation, you would verify the token
     // For now, we'll just process the unsubscribe
     const subscriberHash = getSubscriberHash(email);
     
-    const result = await removeSubscriber(process.env.MAILCHIMP_LIST_ID!, subscriberHash);
+    const result = await removeSubscriber(process.env.MAILCHIMP_LIST_ID, subscriberHash);
 
     if (!result.success) {
       return NextResponse.json(
