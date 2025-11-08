@@ -170,7 +170,7 @@ export default function HeroSection() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="font-fredoka text-5xl lg:text-6xl font-bold text-brand-teal leading-tight"
+              className="font-fredoka text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-brand-teal leading-tight"
             >
               Equality Vanguard
             </motion.h1>
@@ -179,7 +179,7 @@ export default function HeroSection() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
-              className="font-spartan text-lg lg:text-xl text-gray-700 leading-relaxed"
+              className="font-spartan text-base sm:text-lg md:text-lg lg:text-xl text-gray-700 leading-relaxed"
             >
               Equality Vanguard is a Pan-African feminist collective dismantling oppression through law, art, and radical community. We fuse legal advocacy with creative expression using film, storytelling, music, poetry and more to decolonize knowledge and reimagine justice that is accessible, intersectional, transformative, and rooted in liberation.
             </motion.p>
@@ -190,7 +190,7 @@ export default function HeroSection() {
               transition={{ duration: 0.6, delay: 0.6 }}
             >
               <Link href="/get-involved">
-                <button className="btn-primary text-lg px-8 py-4 hover:bg-brand-orange hover:text-white transition-all duration-300 transform hover:scale-105">
+                <button className="btn-primary text-sm sm:text-base md:text-lg px-6 py-3 sm:px-8 sm:py-4 hover:bg-brand-orange hover:text-white transition-all duration-300 transform hover:scale-105">
                   Join the Movement
                 </button>
               </Link>

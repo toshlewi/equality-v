@@ -28,8 +28,7 @@ export default function Navbar() {
     <nav className="bg-[#042C45] text-white sticky top-0 z-50 shadow-lg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-14 sm:h-16">
-          <Link href="/" className="flex items-center">
-            <span className="sr-only">Equality Vanguard</span>
+          <Link href="/" className="flex items-center space-x-3">
             <Image
               src="/images/EV ROUND LOGO.png"
               alt="Equality Vanguard logo"
@@ -38,6 +37,9 @@ export default function Navbar() {
               priority
               className="w-[5.9rem] h-[5.9rem] sm:w-[6rem] sm:h-[6rem] object-contain"
             />
+            <span className="font-fredoka text-xl sm:text-2xl font-bold text-brand-yellow self-center">
+              Equality Vanguard
+            </span>
           </Link>
           
           {/* Desktop Nav */}

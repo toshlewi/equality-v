@@ -40,8 +40,8 @@ export default function EconomicJusticePage() {
       >
         {/* Introduction */}
         <motion.section variants={fadeInUp} className="prose prose-lg max-w-none">
-          <h2 className="text-3xl font-bold text-brand-teal mb-6">Our Economic Justice Work</h2>
-          <p className="text-lg text-gray-700 leading-relaxed mb-6">
+          <h2 className="text-2xl sm:text-3xl font-bold text-brand-teal mb-4 sm:mb-6">Our Economic Justice Work</h2>
+          <p className="text-base sm:text-lg text-gray-700 leading-relaxed mb-4 sm:mb-6">
             At Equality Vanguard, we assert the intrinsic link between economic justice and gender justice. Throughout Africa and the Global South, the prevailing neoliberal framework, characterized by privatization, austerity measures, and deregulation, has fundamentally restructured not merely markets, but also societal existence.
           </p>
           <p className="text-lg text-gray-700 leading-relaxed mb-6">
@@ -59,8 +59,8 @@ export default function EconomicJusticePage() {
         </motion.section>
 
         {/* The Problem */}
-        <motion.section variants={fadeInUp} className="bg-red-50 rounded-2xl p-12">
-          <h3 className="text-3xl font-bold text-red-800 mb-6">The Hidden Violence of Neoliberalism</h3>
+        <motion.section variants={fadeInUp} className="bg-red-50 rounded-2xl p-6 sm:p-8 md:p-12">
+          <h3 className="text-2xl sm:text-3xl font-bold text-red-800 mb-4 sm:mb-6">The Hidden Violence of Neoliberalism</h3>
           <div className="grid md:grid-cols-2 gap-8">
             <div>
               <h4 className="text-xl font-semibold text-red-700 mb-4">Structural Impact</h4>

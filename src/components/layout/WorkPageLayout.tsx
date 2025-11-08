@@ -45,7 +45,7 @@ export default function WorkPageLayout({
       </Container>
 
       {/* Hero Section */}
-      <div className="relative h-96 lg:h-[500px] overflow-hidden">
+      <div className="relative h-64 sm:h-80 md:h-96 lg:h-[500px] overflow-hidden">
         <Image
           src={heroImage}
           alt={title}
@@ -56,18 +56,18 @@ export default function WorkPageLayout({
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
         <div className="absolute inset-0 flex items-end">
-          <Container className="pb-16">
+          <Container className="pb-8 sm:pb-12 md:pb-16">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
               className="text-white"
             >
-              <h1 className="text-4xl lg:text-6xl font-bold mb-4">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-2 sm:mb-4">
                 {title}
               </h1>
               {subtitle && (
-                <p className="text-xl lg:text-2xl text-white/90 max-w-3xl">
+                <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-white/90 max-w-3xl">
                   {subtitle}
                 </p>
               )}

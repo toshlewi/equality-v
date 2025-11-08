@@ -72,10 +72,10 @@ export default function OurWorkPage() {
           transition={{ duration: 0.8 }}
           className="text-center mb-16"
         >
-          <h1 className="text-5xl md:text-6xl font-bold text-brand-teal mb-6">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-brand-teal mb-6">
             Our Work
           </h1>
-          <p className="text-xl text-gray-700 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-base sm:text-lg md:text-xl text-gray-700 max-w-3xl mx-auto leading-relaxed px-4">
             At Equality Vanguard, we fuse legal advocacy with creative expression to dismantle oppression 
             and reimagine justice. Our work spans multiple interconnected areas, each contributing to our 
             vision of a more just and equitable world.
@@ -111,12 +111,12 @@ export default function OurWorkPage() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.3 }}
-          className="text-center mt-20 bg-white rounded-2xl p-12 shadow-lg"
+          className="text-center mt-12 sm:mt-16 md:mt-20 bg-white rounded-2xl p-6 sm:p-8 md:p-12 shadow-lg"
         >
-          <h2 className="text-3xl font-bold text-brand-teal mb-6">
+          <h2 className="text-2xl sm:text-3xl font-bold text-brand-teal mb-4 sm:mb-6">
             Ready to Join Our Movement?
           </h2>
-          <p className="text-lg text-gray-700 mb-8 max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg text-gray-700 mb-6 sm:mb-8 max-w-2xl mx-auto px-4">
             Whether you're interested in legal advocacy, creative expression, or community building, 
             there's a place for you in our collective.
           </p>

@@ -65,7 +65,7 @@ export default function WorkCard({
     >
       <Link href={href}>
         <Card className="h-full overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-300 bg-white">
-          <div className="relative h-80 overflow-hidden">
+          <div className="relative h-48 sm:h-64 md:h-80 overflow-hidden">
             <Image
               src={image}
               alt={title}
@@ -81,13 +81,13 @@ export default function WorkCard({
           </div>
           
           <CardHeader className="pb-4">
-            <CardTitle className="text-2xl font-bold text-brand-teal group-hover:text-brand-orange transition-colors duration-300">
+            <CardTitle className="text-xl sm:text-2xl font-bold text-brand-teal group-hover:text-brand-orange transition-colors duration-300">
               {title}
             </CardTitle>
           </CardHeader>
           
           <CardContent className="flex-1 flex flex-col">
-            <p className="text-gray-600 mb-6 leading-relaxed">
+            <p className="text-sm sm:text-base text-gray-600 mb-6 leading-relaxed">
               {description}
             </p>
             

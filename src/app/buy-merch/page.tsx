@@ -175,6 +175,43 @@ export default function BuyMerchPage() {
   const [mpesaPhone, setMpesaPhone] = useState('');
   const paymentPollInterval = useRef<NodeJS.Timeout | null>(null);
 
+  // Suppress Stripe analytics errors (blocked by ad blockers - harmless)
+  useEffect(() => {
+    const handleError = (event: ErrorEvent) => {
+      // Suppress Stripe analytics endpoint errors (blocked by ad blockers)
+      if (
+        event.message?.includes('r.stripe.com/b') ||
+        event.message?.includes('Failed to fetch') ||
+        event.filename?.includes('stripe') ||
+        (event.error as any)?.message?.includes('r.stripe.com/b')
+      ) {
+        event.preventDefault();
+        return false;
+      }
+    };
+
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+      // Suppress Stripe analytics promise rejections
+      const reason = event.reason;
+      if (
+        reason?.message?.includes('r.stripe.com/b') ||
+        reason?.message?.includes('Failed to fetch') ||
+        (typeof reason === 'string' && reason.includes('r.stripe.com/b'))
+      ) {
+        event.preventDefault();
+        return false;
+      }
+    };
+
+    window.addEventListener('error', handleError);
+    window.addEventListener('unhandledrejection', handleUnhandledRejection);
+
+    return () => {
+      window.removeEventListener('error', handleError);
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+    };
+  }, []);
+
   // Fetch products from API (initial, on tab focus, and periodic refresh)
   useEffect(() => {
     let isMounted = true;
@@ -607,7 +644,7 @@ export default function BuyMerchPage() {
           
           <div className="text-center">
             <motion.h1 
-              className="text-4xl md:text-6xl font-bold mb-6 font-fredoka drop-shadow-lg"
+              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 font-fredoka drop-shadow-lg"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
@@ -777,7 +814,7 @@ export default function BuyMerchPage() {
 
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-2">
-                        <span className="text-2xl font-bold text-[#042C45] font-fredoka">
+                        <span className="text-xl sm:text-2xl font-bold text-[#042C45] font-fredoka">
                           {formatPrice(product.price)}
                         </span>
                         {product.originalPrice !== undefined && product.originalPrice > 0 && (
@@ -854,7 +891,7 @@ export default function BuyMerchPage() {
         >
             <div className="p-6 h-full flex flex-col">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-[#042C45] font-fredoka">
+                <h2 className="text-xl sm:text-2xl font-bold text-[#042C45] font-fredoka">
                   Shopping Cart ({cart.length})
                 </h2>
                 <button
@@ -954,7 +991,7 @@ export default function BuyMerchPage() {
         transition={{ duration: 0.8, delay: 1.0 }}
       >
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold text-[#042C45] text-center mb-12 font-fredoka">
+          <h2 className="text-2xl sm:text-3xl font-bold text-[#042C45] text-center mb-8 sm:mb-12 font-fredoka">
             Why Shop With Us?
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -1016,7 +1053,7 @@ export default function BuyMerchPage() {
             >
               <div className="p-6">
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-2xl font-bold text-[#042C45] font-fredoka">
+                  <h2 className="text-xl sm:text-2xl font-bold text-[#042C45] font-fredoka">
                     Checkout
                   </h2>
                   <button
@@ -1144,7 +1181,7 @@ export default function BuyMerchPage() {
                         <div className="bg-gradient-to-r from-[#FFD935] to-[#FFD935]/80 rounded-xl p-4 border-2 border-[#042C45]/20">
                           <div className="flex justify-between items-center">
                             <span className="text-lg font-semibold text-[#042C45] font-fredoka">Total:</span>
-                            <span className="text-2xl font-bold text-[#042C45] font-fredoka">
+                            <span className="text-xl sm:text-2xl font-bold text-[#042C45] font-fredoka">
                               {formatPrice(getTotalPrice())}
                             </span>
                           </div>
@@ -1216,7 +1253,7 @@ export default function BuyMerchPage() {
                             <h3 className="text-xl font-bold text-[#042C45] mb-2 font-fredoka">
                               Payment Amount
                             </h3>
-                            <div className="text-3xl font-bold text-[#042C45] font-fredoka">
+                            <div className="text-2xl sm:text-3xl font-bold text-[#042C45] font-fredoka">
                               {formatPrice(paymentData.amount)}
                             </div>
                           </div>
