@@ -16,6 +16,7 @@ const applySecurityHeaders = (response: NextResponse) => {
     response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
   }
 
+  // Content Security Policy - Updated for reCAPTCHA v2 compatibility
   const csp = [
     "default-src 'self'",
     "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.google.com https://www.gstatic.com https://www.recaptcha.net https://js.stripe.com",
