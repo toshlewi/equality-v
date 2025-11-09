@@ -8,8 +8,8 @@ export const verifyRecaptcha = async (token: string): Promise<boolean> => {
     return true;
   }
   
-  if (!secretKey || secretKey === 'your_recaptcha_secret_key') {
-    console.warn('reCAPTCHA secret key not configured');
+  if (!secretKey || secretKey === 'your_recaptcha_secret_key' || secretKey.includes('PLACEHOLDER') || secretKey.includes('GET_FROM')) {
+    console.warn('reCAPTCHA secret key not configured or is placeholder');
     return true; // Allow requests if reCAPTCHA is not configured
   }
 
