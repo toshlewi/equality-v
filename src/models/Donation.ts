@@ -7,7 +7,7 @@ const DonationSchema = new Schema({
   currency: { type: String, default: 'USD' },
   donationType: { 
     type: String, 
-    enum: ['general', 'specific_campaign', 'monthly', 'one_time'],
+    enum: ['cash', 'product', 'service', 'general', 'specific_campaign', 'monthly', 'one_time'],
     required: true 
   },
   campaign: { type: String },
