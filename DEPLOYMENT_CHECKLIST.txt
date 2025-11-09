@@ -1,0 +1,135 @@
+═══════════════════════════════════════════════════════════════
+  VERCEL DEPLOYMENT CHECKLIST - Equality Vanguard
+═══════════════════════════════════════════════════════════════
+
+✅ STEP 1: CODE PUSHED TO GITHUB
+   [✓] Code committed
+   [✓] Code pushed to: github.com:cissybosibori/equality-v
+
+───────────────────────────────────────────────────────────────
+
+□ STEP 2: GO TO VERCEL (5 minutes)
+   [ ] Go to https://vercel.com
+   [ ] Sign in with GitHub
+   [ ] Click "Add New Project"
+   [ ] Import "equality-v" repository
+   [ ] DON'T CLICK DEPLOY YET!
+
+───────────────────────────────────────────────────────────────
+
+□ STEP 3: ADD ENVIRONMENT VARIABLES (10 minutes)
+   Click "Environment Variables" and add:
+   
+   [ ] MONGODB_URI (1 variable)
+   [ ] Authentication (5 variables)
+       - NEXTAUTH_URL (use: https://TEMPORARY.vercel.app)
+       - NEXTAUTH_SECRET
+       - ADMIN_EMAIL
+       - ADMIN_PASSWORD
+       - ADMIN_NAME
+   [ ] Stripe (4 variables)
+       - STRIPE_SECRET_KEY
+       - STRIPE_PUBLISHABLE_KEY
+       - NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+       - STRIPE_WEBHOOK_SECRET (use: WILL_UPDATE_AFTER_DEPLOYMENT)
+   [ ] M-Pesa (6 variables)
+   [ ] Mailchimp (3 variables)
+   [ ] Cloudflare R2 (5 variables)
+       - R2_PUBLIC_URL (use: https://TEMPORARY.vercel.app)
+   [ ] Mailgun (4 variables - use placeholders)
+   [ ] reCAPTCHA (2 variables - use placeholders)
+   [ ] App URLs (3 variables)
+       - NEXT_PUBLIC_URL (use: https://TEMPORARY.vercel.app)
+       - NEXT_PUBLIC_API_URL (use: https://TEMPORARY.vercel.app/api)
+       - NODE_ENV (use: production)
+   
+   Total: 33 variables
+
+───────────────────────────────────────────────────────────────
+
+□ STEP 4: DEPLOY (3-5 minutes)
+   [ ] Click "Deploy" button
+   [ ] Wait for build to complete
+   [ ] Copy your Vercel URL
+
+───────────────────────────────────────────────────────────────
+
+□ STEP 5: UPDATE URLS (5 minutes)
+   Go to Settings → Environment Variables
+   Update these 4 with your actual Vercel URL:
+   [ ] NEXTAUTH_URL
+   [ ] R2_PUBLIC_URL
+   [ ] NEXT_PUBLIC_URL
+   [ ] NEXT_PUBLIC_API_URL
+   [ ] Click "Redeploy"
+
+───────────────────────────────────────────────────────────────
+
+□ STEP 6: STRIPE WEBHOOK (5 minutes)
+   [ ] Go to https://dashboard.stripe.com/test/webhooks
+   [ ] Click "Add endpoint"
+   [ ] Enter: https://YOUR-URL.vercel.app/api/webhooks/stripe
+   [ ] Select payment events
+   [ ] Copy webhook secret (starts with whsec_)
+   [ ] Update STRIPE_WEBHOOK_SECRET in Vercel
+   [ ] Redeploy
+
+───────────────────────────────────────────────────────────────
+
+□ STEP 7: CREATE ADMIN USER (2 minutes)
+   [ ] Visit: https://YOUR-URL.vercel.app/api/seed
+   [ ] See success message
+   [ ] Go to: https://YOUR-URL.vercel.app/admin
+   [ ] Login with:
+       Email: admin@equalityvanguard.org
+       Password: Sylvia2025!
+
+───────────────────────────────────────────────────────────────
+
+□ STEP 8: TEST YOUR SITE (5 minutes)
+   [ ] Homepage loads
+   [ ] Test donation (card: 4242 4242 4242 4242)
+   [ ] Newsletter signup works
+   [ ] Admin panel accessible
+   [ ] Can upload files
+
+───────────────────────────────────────────────────────────────
+
+✅ STEP 9: YOU'RE LIVE!
+   Your site is now live at: https://YOUR-URL.vercel.app
+   
+   Working now (85%):
+   ✓ Full website
+   ✓ Admin panel
+   ✓ Payments (Stripe + M-Pesa)
+   ✓ Newsletter
+   ✓ File uploads
+   
+   Optional (15%):
+   ⚠ Email notifications (need Mailgun key)
+   ⚠ Bot protection (need reCAPTCHA keys)
+
+───────────────────────────────────────────────────────────────
+
+□ OPTIONAL: ENABLE EMAILS (10 minutes)
+   [ ] Sign up at https://www.mailgun.com
+   [ ] Get API key
+   [ ] Update MAILGUN_API_KEY in Vercel
+   [ ] Redeploy
+
+───────────────────────────────────────────────────────────────
+
+□ OPTIONAL: ENABLE reCAPTCHA (10 minutes)
+   [ ] Get keys from https://www.google.com/recaptcha/admin
+   [ ] Update NEXT_PUBLIC_RECAPTCHA_SITE_KEY in Vercel
+   [ ] Update RECAPTCHA_SECRET_KEY in Vercel
+   [ ] Redeploy
+
+═══════════════════════════════════════════════════════════════
+
+TOTAL TIME: 30-45 minutes
+RESULT: Fully functional website on Vercel!
+
+═══════════════════════════════════════════════════════════════
+
+NEED HELP? Open DEPLOY_NOW.md for detailed instructions!
