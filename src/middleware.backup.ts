@@ -34,7 +34,7 @@ const applySecurityHeaders = (response: NextResponse) => {
     "upgrade-insecure-requests"
   ].join('; ');
 
-  response.headers.set('Content-Security-Policy', contentSecurityPolicy);
+  response.headers.set('Content-Security-Policy', csp);
   return response;
 };
 
