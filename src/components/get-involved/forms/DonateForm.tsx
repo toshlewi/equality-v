@@ -236,8 +236,8 @@ export function DonateForm({ onClose }: DonateFormProps) {
 
       if (formData.donationType === 'cash') {
         const amount = calculateAmount();
-        if (amount <= 0) {
-          throw new Error('Please enter a valid donation amount (minimum KSh 1,000).');
+        if (amount < 10) {
+          throw new Error('Please enter a valid donation amount (minimum KSh 10).');
         }
       }
 
