@@ -47,12 +47,17 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Get the base URL for callback
+    const baseUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_URL || 'http://localhost:3000';
+    const callbackUrl = `${baseUrl}/api/webhooks/mpesa`;
+
     // Initiate STK Push
     const stkPushResponse = await initiateSTKPush({
       phone: phoneNumber,
       amount: validatedData.amount,
       accountReference: validatedData.accountReference,
       transactionDesc: validatedData.transactionDesc,
+      callbackUrl: callbackUrl,
     });
 
     return NextResponse.json({

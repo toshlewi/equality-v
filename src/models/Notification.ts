@@ -15,7 +15,7 @@ const NotificationSchema = new Schema({
       'new_member', 'member_expired',
       'new_order', 'order_shipped', 'order_delivered',
       'new_registration', 'event_cancelled',
-      'new_donation', 'donation_acknowledged',
+      'new_donation', 'donation_acknowledged', 'donation_submitted',
       'system_alert', 'maintenance', 'feature_update'
     ],
     required: true 
@@ -37,7 +37,7 @@ const NotificationSchema = new Schema({
   },
   category: { 
     type: String, 
-    enum: ['content', 'payment', 'member', 'order', 'event', 'donation', 'system'],
+    enum: ['content', 'payment', 'member', 'order', 'event', 'donation', 'donations', 'system'],
     required: true 
   },
   // Delivery channels
