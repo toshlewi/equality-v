@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createReadStream, statSync } from 'fs';
-import { join, normalize } from 'path';
 
-export const runtime = 'nodejs';
+export const runtime = 'edge';
 
-// Streams a PDF from the public folder with proper headers for inline viewing
+// Lightweight PDF viewer - redirects to public files
+// This uses Edge Runtime to keep function size minimal
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -23,36 +22,16 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Invalid path' }, { status: 400 });
     }
 
-    // Resolve to public directory
-    const publicDir = join(process.cwd(), 'public');
-    const resolvedPath = normalize(join(publicDir, path));
-
-    if (!resolvedPath.startsWith(publicDir)) {
-      return NextResponse.json({ success: false, error: 'Path traversal detected' }, { status: 400 });
-    }
-
-    // Ensure file exists and is a PDF
-    const stats = statSync(resolvedPath);
-    if (!stats.isFile()) {
-      return NextResponse.json({ success: false, error: 'File not found' }, { status: 404 });
-    }
-
-    // Stream the file with headers that allow iframe viewing
-    const stream = createReadStream(resolvedPath);
-    const filename = resolvedPath.split(/[/\\]/).pop() || 'document.pdf';
-    const response = new NextResponse(stream as any, {
-      status: 200,
+    // Redirect to the public file with proper headers
+    const baseUrl = new URL(request.url).origin;
+    const fileUrl = `${baseUrl}${path}`;
+    
+    return NextResponse.redirect(fileUrl, {
+      status: 302,
       headers: {
-        'Content-Type': 'application/pdf',
-        'Content-Length': stats.size.toString(),
-        'Content-Disposition': `inline; filename="${filename}"`,
-        'X-Frame-Options': 'SAMEORIGIN',
-        'Content-Security-Policy': "frame-ancestors 'self'",
-        'Cross-Origin-Resource-Policy': 'same-origin',
         'Cache-Control': 'public, max-age=3600',
       },
     });
-    return response;
   } catch (error) {
     return NextResponse.json({ success: false, error: 'Failed to load PDF' }, { status: 500 });
   }
