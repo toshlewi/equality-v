@@ -471,7 +471,7 @@ export default function YourStoriesSection() {
                                   Download
                                 </a>
                               </div>
-                              <iframe src={`/api/view-pdf?path=${encodeURIComponent(media.url)}`} className="w-full h-[500px]" />
+                              <iframe src={media.url} className="w-full h-[500px]" />
                             </div>
                           );
                         }

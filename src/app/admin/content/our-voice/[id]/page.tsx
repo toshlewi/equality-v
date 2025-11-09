@@ -100,7 +100,7 @@ export default function StoryDetailPage() {
               <Download className="w-4 h-4" /> Download
             </a>
           </div>
-          <iframe src={`/api/view-pdf?path=${encodeURIComponent(m.url)}`} className="w-full h-[600px]" />
+          <iframe src={m.url} className="w-full h-[600px]" />
         </div>
       );
     }
