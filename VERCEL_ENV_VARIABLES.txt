@@ -1,0 +1,88 @@
+# COPY-PASTE THESE INTO VERCEL ENVIRONMENT VARIABLES
+# Go to: Vercel Dashboard → Your Project → Settings → Environment Variables
+
+# ============================================
+# DATABASE
+# ============================================
+MONGODB_URI=mongodb+srv://equality-vanguard-user:B8Ccem6U6SQkAUvE@equality-vanguard-clust.gsfm6qe.mongodb.net/?retryWrites=true&w=majority&appName=equality-vanguard-cluster
+
+# ============================================
+# AUTHENTICATION
+# ============================================
+NEXTAUTH_URL=https://YOUR_VERCEL_URL_HERE.vercel.app
+NEXTAUTH_SECRET=P2xxsL6RACghyhPJY/E6yGbT1PnesSz2msEv2fybNBM=
+ADMIN_EMAIL=admin@equalityvanguard.org
+ADMIN_PASSWORD=Sylvia2025!
+ADMIN_NAME=System Administrator
+
+# ============================================
+# STRIPE PAYMENTS
+# ============================================
+STRIPE_SECRET_KEY=sk_test_51SQ5cI4CpEJP3wofpDgeaENWkHAyicpubKabBg5JBO4ZhybR3MNo0pAw9oqCvPG0H1d1Z1yMk8glFeFzT1HrDr0K00XQnLQcfe
+STRIPE_PUBLISHABLE_KEY=pk_test_51SQ5cI4CpEJP3wofqpLNo8H7uynwJPM3xIfLpDPA3oAZ9zdIcf4PAVJsJRWxnCOpSPFeHzOcWf3hDJGmghcPzgzY00agS7ALJb
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_51SQ5cI4CpEJP3wofqpLNo8H7uynwJPM3xIfLpDPA3oAZ9zdIcf4PAVJsJRWxnCOpSPFeHzOcWf3hDJGmghcPzgzY00agS7ALJb
+STRIPE_WEBHOOK_SECRET=UPDATE_AFTER_CREATING_WEBHOOK
+
+# ============================================
+# M-PESA PAYMENTS
+# ============================================
+MPESA_CONSUMER_KEY=oMjEATGvBv9FjdFAJLAE7piHlVOA9IeGWCAmlpCu5zAkxIF5
+MPESA_CONSUMER_SECRET=zGAVAJI5ifsn1wIrmh0reGYUQhmACB2vUSnLNY7BIyTmyjJHyDn4NONrxqifKiyp
+MPESA_SHORTCODE=174379
+MPESA_PASSKEY=bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919
+MPESA_BUSINESS_SHORTCODE=174379
+MPESA_ENVIRONMENT=sandbox
+
+# ============================================
+# MAILCHIMP NEWSLETTER
+# ============================================
+MAILCHIMP_API_KEY=d2a5027c23a8780439a9109380ca1202-us1
+MAILCHIMP_LIST_ID=1d50d52306
+MAILCHIMP_SERVER_PREFIX=us1
+
+# ============================================
+# CLOUDFLARE R2 STORAGE
+# ============================================
+R2_ACCESS_KEY_ID=156079ef3687569ce1e59b2668cf056a
+R2_SECRET_ACCESS_KEY=5a5333a765a12826ce6d9cd25759857e2b9eadf793f83f02ffe3f497a7680712
+R2_ACCOUNT_ID=1a960de18723bbc182a9b2d12e9ae9b7
+R2_BUCKET_NAME=equality-vanguard-uploads
+R2_PUBLIC_URL=https://YOUR_VERCEL_URL_HERE.vercel.app
+
+# ============================================
+# EMAIL SERVICE (MAILGUN) - NEEDS CONFIGURATION
+# ============================================
+MAILGUN_API_KEY=GET_FROM_MAILGUN_DASHBOARD
+MAILGUN_DOMAIN=mg.equalityvanguard.org
+MAILGUN_FROM_EMAIL=noreply@equalityvanguard.org
+MAILGUN_FROM_NAME=Equality Vanguard
+
+# ============================================
+# SECURITY (reCAPTCHA) - NEEDS CONFIGURATION
+# ============================================
+NEXT_PUBLIC_RECAPTCHA_SITE_KEY=GET_FROM_GOOGLE_RECAPTCHA
+RECAPTCHA_SECRET_KEY=GET_FROM_GOOGLE_RECAPTCHA
+
+# ============================================
+# APPLICATION URLS
+# ============================================
+NEXT_PUBLIC_URL=https://YOUR_VERCEL_URL_HERE.vercel.app
+NEXT_PUBLIC_API_URL=https://YOUR_VERCEL_URL_HERE.vercel.app/api
+NODE_ENV=production
+
+# ============================================
+# OPTIONAL - CAN ADD LATER
+# ============================================
+# GOOGLE_ANALYTICS_ID=G-XXXXXXXXXX
+# SENTRY_DSN=your_sentry_dsn
+# REDIS_URL=redis://localhost:6379
+# INSTAGRAM_ACCESS_TOKEN=your_instagram_access_token
+# INSTAGRAM_USER_ID=your_instagram_user_id
+
+# ============================================
+# INSTRUCTIONS:
+# ============================================
+# 1. Replace "YOUR_VERCEL_URL_HERE" with your actual Vercel URL after first deployment
+# 2. Update STRIPE_WEBHOOK_SECRET after creating webhook in Stripe dashboard
+# 3. Get MAILGUN_API_KEY from Mailgun dashboard (optional but recommended)
+# 4. Get reCAPTCHA keys from Google reCAPTCHA (optional but recommended)

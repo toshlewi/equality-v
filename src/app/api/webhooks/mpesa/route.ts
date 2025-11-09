@@ -177,9 +177,77 @@ async function handleMembershipPayment(
 
   console.log('Membership activated via M-Pesa:', memberId);
 
-  // TODO: Send confirmation SMS
-  // TODO: Send confirmation email
-  // TODO: Add to Mailchimp
+  // Get member name (handle legacy fields)
+  const memberName = member.firstName && member.lastName
+    ? `${member.firstName} ${member.lastName}`
+    : (member as any).name || member.email;
+
+  const joinDate = member.joinDate || (member as any).subscriptionStart || new Date();
+  const expiryDate = member.expiryDate || (member as any).subscriptionEnd;
+
+  // Send confirmation email
+  try {
+    const { sendEmail } = await import('@/lib/email');
+    await sendEmail({
+      to: member.email,
+      subject: 'Equality Vanguard Membership Confirmed',
+      template: 'membership-confirmation',
+      data: {
+        name: memberName,
+        membershipType: member.membershipType,
+        joinDate: new Date(joinDate).toLocaleDateString(),
+        expiryDate: expiryDate ? new Date(expiryDate).toLocaleDateString() : 'Lifetime',
+        amount: paidAmount,
+        currency: 'KES',
+        startDate: new Date(joinDate).toLocaleDateString(),
+        endDate: expiryDate ? new Date(expiryDate).toLocaleDateString() : 'Lifetime'
+      }
+    });
+  } catch (emailError) {
+    console.error('Error sending membership confirmation email:', emailError);
+    // Don't fail the webhook if email fails
+  }
+
+  // Add to Mailchimp if newsletter is enabled
+  if (member.newsletter !== false && process.env.MAILCHIMP_LIST_ID) {
+    try {
+      const { addSubscriber } = await import('@/lib/mailchimp');
+      await addSubscriber(process.env.MAILCHIMP_LIST_ID, {
+        email: member.email,
+        name: memberName,
+        tags: [`member_${member.membershipType}`, 'member', 'mpesa'],
+        status: 'subscribed'
+      });
+    } catch (mailchimpError) {
+      console.error('Mailchimp error:', mailchimpError);
+      // Don't fail the webhook if Mailchimp fails
+    }
+  }
+
+  // Create admin notification for membership activation
+  try {
+    const { createAdminNotification } = await import('@/lib/notifications');
+    await createAdminNotification({
+      type: 'membership_activated',
+      title: 'New Membership Activated (M-Pesa)',
+      message: `Membership activated for ${memberName} (${member.membershipType}) via M-Pesa`,
+      metadata: {
+        memberId: member._id.toString(),
+        memberName: memberName,
+        membershipType: member.membershipType,
+        amount: paidAmount,
+        currency: 'KES',
+        paymentMethod: 'mpesa',
+        transactionId: transactionId
+      },
+      priority: 'medium',
+      category: 'members',
+      actionUrl: `/admin/members/${member._id}`
+    });
+  } catch (notificationError) {
+    console.error('Error creating admin notification:', notificationError);
+    // Don't fail the webhook if notification fails
+  }
 }
 
 async function handleDonationPayment(
@@ -194,10 +262,16 @@ async function handleDonationPayment(
     return;
   }
 
+  // Generate receipt number if not exists
+  if (!donation.receiptNumber) {
+    donation.receiptNumber = `EV-${donation._id.toString().slice(-8).toUpperCase()}`;
+  }
+
   // Update donation status
   donation.paymentStatus = 'paid';
   donation.status = 'completed';
   donation.paymentId = transactionId;
+  donation.transactionId = transactionId;
   donation.processedAt = new Date();
   donation.processedBy = 'mpesa';
   donation.paymentPhone = phone;
@@ -205,9 +279,72 @@ async function handleDonationPayment(
 
   console.log('Donation processed via M-Pesa:', donationId);
 
-  // TODO: Send receipt SMS
-  // TODO: Send receipt email
-  // TODO: Add to Mailchimp
+  // Send receipt email
+  try {
+    const { sendEmail } = await import('@/lib/email');
+    await sendEmail({
+      to: donation.donorEmail,
+      subject: `Donation Receipt - ${donation.receiptNumber}`,
+      template: 'donation-receipt',
+      data: {
+        donorName: donation.donorName,
+        amount: amount,
+        currency: 'KES',
+        receiptNumber: donation.receiptNumber,
+        donationDate: donation.createdAt.toLocaleDateString(),
+        taxDeductible: donation.taxDeductible,
+        organizationName: 'Equality Vanguard',
+        organizationAddress: 'Nairobi, Kenya',
+        organizationTaxId: process.env.ORG_TAX_ID || 'N/A'
+      }
+    });
+    donation.receiptSent = true;
+    await donation.save();
+  } catch (emailError) {
+    console.error('Error sending donation receipt:', emailError);
+    // Don't fail the webhook if email fails
+  }
+
+  // Add to Mailchimp if enabled
+  if (process.env.MAILCHIMP_LIST_ID && !donation.isAnonymous) {
+    try {
+      const { addSubscriber } = await import('@/lib/mailchimp');
+      await addSubscriber(process.env.MAILCHIMP_LIST_ID, {
+        email: donation.donorEmail,
+        name: donation.donorName,
+        tags: ['donor', 'donation', 'mpesa'],
+        status: 'subscribed'
+      });
+    } catch (mailchimpError) {
+      console.error('Mailchimp error:', mailchimpError);
+      // Don't fail the webhook if Mailchimp fails
+    }
+  }
+
+  // Create admin notification for donation payment success
+  try {
+    const { createAdminNotification } = await import('@/lib/notifications');
+    await createAdminNotification({
+      type: 'donation_paid',
+      title: 'Donation Payment Received (M-Pesa)',
+      message: `Donation payment of KES ${amount} from ${donation.isAnonymous ? 'Anonymous' : donation.donorName} has been received via M-Pesa`,
+      metadata: {
+        donationId: donation._id.toString(),
+        donorName: donation.isAnonymous ? 'Anonymous' : donation.donorName,
+        amount: amount,
+        currency: 'KES',
+        receiptNumber: donation.receiptNumber,
+        paymentMethod: 'mpesa',
+        transactionId: transactionId
+      },
+      priority: 'medium',
+      category: 'donations',
+      actionUrl: `/admin/payments/donations/${donation._id}`
+    });
+  } catch (notificationError) {
+    console.error('Error creating admin notification:', notificationError);
+    // Don't fail the webhook if notification fails
+  }
 }
 
 async function handleOrderPayment(
@@ -232,9 +369,86 @@ async function handleOrderPayment(
 
   console.log('Order confirmed via M-Pesa:', orderId);
 
-  // TODO: Send order confirmation SMS
-  // TODO: Send order confirmation email
-  // TODO: Update inventory
+  // Send order confirmation email
+  try {
+    const { sendEmail } = await import('@/lib/email');
+    
+    // Format shipping address
+    const shippingAddress = order.customerInfo.shippingAddress
+      ? `${order.customerInfo.shippingAddress.street || ''}, ${order.customerInfo.shippingAddress.city || ''}, ${order.customerInfo.shippingAddress.state || ''} ${order.customerInfo.shippingAddress.postalCode || ''}, ${order.customerInfo.shippingAddress.country || ''}`
+      : order.customerInfo.billingAddress
+      ? `${order.customerInfo.billingAddress.street || ''}, ${order.customerInfo.billingAddress.city || ''}, ${order.customerInfo.billingAddress.state || ''} ${order.customerInfo.billingAddress.postalCode || ''}, ${order.customerInfo.billingAddress.country || ''}`
+      : undefined;
+    
+    await sendEmail({
+      to: order.customerInfo.email,
+      subject: `Order Confirmation - ${order.orderNumber}`,
+      template: 'order-confirmation',
+      data: {
+        customerName: `${order.customerInfo.firstName} ${order.customerInfo.lastName}`,
+        orderNumber: order.orderNumber,
+        items: order.items || [],
+        subtotal: order.subtotal,
+        shipping: order.shipping || 0,
+        tax: order.tax || 0,
+        total: order.total,
+        currency: 'KES',
+        shippingAddress
+      }
+    });
+
+    // Track email sent
+    order.emailsSent = order.emailsSent || [];
+    order.emailsSent.push({
+      type: 'confirmation',
+      sentAt: new Date()
+    });
+    await order.save();
+  } catch (emailError) {
+    console.error('Error sending order confirmation email:', emailError);
+    // Don't fail the webhook if email fails
+  }
+
+  // Update inventory
+  try {
+    const Product = await import('@/models/Product').then(m => m.default);
+    for (const item of order.items || []) {
+      if (item.productId) {
+        const product = await Product.findById(item.productId);
+        if (product && product.inventory?.trackQuantity) {
+          product.inventory.quantity = Math.max(0, (product.inventory.quantity || 0) - item.quantity);
+          await product.save();
+        }
+      }
+    }
+  } catch (inventoryError) {
+    console.error('Error updating inventory:', inventoryError);
+    // Don't fail the webhook if inventory update fails
+  }
+
+  // Create admin notification
+  try {
+    const { createAdminNotification } = await import('@/lib/notifications');
+    await createAdminNotification({
+      type: 'order_confirmed',
+      title: 'New Order Confirmed (M-Pesa)',
+      message: `New order ${order.orderNumber} from ${order.customerInfo.firstName} ${order.customerInfo.lastName} via M-Pesa`,
+      metadata: {
+        orderId: order._id.toString(),
+        orderNumber: order.orderNumber,
+        customerEmail: order.customerInfo.email,
+        total: order.total,
+        currency: 'KES',
+        paymentMethod: 'mpesa',
+        transactionId: transactionId
+      },
+      priority: 'medium',
+      category: 'orders',
+      actionUrl: `/admin/shop/orders/${order._id}`
+    });
+  } catch (notificationError) {
+    console.error('Error creating admin notification:', notificationError);
+  }
 }
 
 async function handleFailedPayment(transactionDetails: {
