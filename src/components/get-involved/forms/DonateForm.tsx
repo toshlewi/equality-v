@@ -147,8 +147,11 @@ export function DonateForm({ onClose }: DonateFormProps) {
   const [mpesaPhone, setMpesaPhone] = useState('');
   const paymentPollInterval = useRef<NodeJS.Timeout | null>(null);
 
-  // Load reCAPTCHA script
+  // Load reCAPTCHA script - TEMPORARILY DISABLED FOR TESTING (2025-11-10)
   useEffect(() => {
+    console.warn('⚠️ reCAPTCHA loading DISABLED for testing purposes');
+    // COMMENTED OUT - reCAPTCHA script loading disabled
+    /*
     const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
     if (typeof window !== 'undefined' && !window.grecaptcha && siteKey && siteKey !== 'your_recaptcha_site_key' && siteKey.trim() !== '') {
       const script = document.createElement('script');
@@ -161,6 +164,7 @@ export function DonateForm({ onClose }: DonateFormProps) {
       };
       document.head.appendChild(script);
     }
+    */
   }, []);
 
   // Cleanup polling on unmount
@@ -181,6 +185,11 @@ export function DonateForm({ onClose }: DonateFormProps) {
   };
 
   const getRecaptchaToken = async (): Promise<string> => {
+    // TEMPORARILY DISABLED FOR TESTING (2025-11-10)
+    console.warn('⚠️ reCAPTCHA token generation BYPASSED for testing');
+    return 'testing-bypass-token';
+    
+    /* ORIGINAL CODE - COMMENTED OUT FOR TESTING
     const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
     
     if (!siteKey || siteKey === 'your_recaptcha_site_key' || siteKey.trim() === '') {
@@ -204,6 +213,7 @@ export function DonateForm({ onClose }: DonateFormProps) {
           });
       });
     });
+    */
   };
 
   const calculateAmount = () => {
