@@ -30,16 +30,10 @@ export function PartnerForm({ onClose }: PartnerFormProps) {
   const [success, setSuccess] = useState(false);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
 
-  // Load reCAPTCHA script
+  // Load reCAPTCHA script - TEMPORARILY DISABLED FOR TESTING (2025-11-10)
   useEffect(() => {
-    const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
-    if (typeof window !== 'undefined' && !window.grecaptcha && siteKey && siteKey !== 'your_recaptcha_site_key' && siteKey.trim() !== '') {
-      const script = document.createElement('script');
-      script.src = `https://www.google.com/recaptcha/api.js?render=${siteKey}`;
-      script.async = true;
-      script.defer = true;
-      document.head.appendChild(script);
-    }
+    console.warn('⚠️ reCAPTCHA loading DISABLED for testing purposes');
+    // DISABLED - reCAPTCHA script loading commented out
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -77,36 +71,9 @@ export function PartnerForm({ onClose }: PartnerFormProps) {
   };
 
   const getRecaptchaToken = async (): Promise<string> => {
-    const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
-    
-    // If reCAPTCHA is not configured, return a placeholder token (for development)
-    // The server will handle validation and allow requests if reCAPTCHA is not configured
-    if (!siteKey || siteKey === 'your_recaptcha_site_key' || siteKey.trim() === '') {
-      console.warn('reCAPTCHA not configured. Using placeholder token for development.');
-      return 'dev-placeholder-token';
-    }
-
-    return new Promise((resolve, reject) => {
-      if (typeof window === 'undefined' || !window.grecaptcha) {
-        // If reCAPTCHA script hasn't loaded, return placeholder
-        console.warn('reCAPTCHA script not loaded. Using placeholder token.');
-        resolve('dev-placeholder-token');
-        return;
-      }
-
-      window.grecaptcha.ready(() => {
-        window.grecaptcha
-          .execute(siteKey, { action: 'partnership' })
-          .then((token: string) => {
-            resolve(token);
-          })
-          .catch((err: Error) => {
-            console.error('reCAPTCHA execution error:', err);
-            // For development, allow form submission even if reCAPTCHA fails
-            resolve('dev-placeholder-token');
-          });
-      });
-    });
+    // TEMPORARILY DISABLED FOR TESTING (2025-11-10)
+    console.warn('⚠️ reCAPTCHA token generation BYPASSED for testing');
+    return 'testing-bypass-token';
   };
 
   // Map partnership method to API expected values

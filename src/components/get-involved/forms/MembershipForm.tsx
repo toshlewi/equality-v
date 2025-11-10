@@ -147,20 +147,10 @@ export function MembershipForm({ onClose }: MembershipFormProps) {
   const [mpesaPhone, setMpesaPhone] = useState('');
   const paymentPollInterval = useRef<NodeJS.Timeout | null>(null);
 
-  // Load reCAPTCHA script
+  // Load reCAPTCHA script - TEMPORARILY DISABLED FOR TESTING (2025-11-10)
   useEffect(() => {
-    const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
-    if (typeof window !== 'undefined' && !window.grecaptcha && siteKey && siteKey !== 'your_recaptcha_site_key' && siteKey.trim() !== '') {
-      const script = document.createElement('script');
-      script.src = `https://www.google.com/recaptcha/api.js?render=${siteKey}`;
-      script.async = true;
-      script.defer = true;
-      script.onerror = () => {
-        console.error('Failed to load reCAPTCHA script');
-        setError('Security verification failed to load. Please refresh the page.');
-      };
-      document.head.appendChild(script);
-    }
+    console.warn('⚠️ reCAPTCHA loading DISABLED for testing purposes');
+    // DISABLED - reCAPTCHA script loading commented out
   }, []);
 
   // Cleanup polling on unmount
@@ -181,30 +171,9 @@ export function MembershipForm({ onClose }: MembershipFormProps) {
   };
 
   const getRecaptchaToken = async (): Promise<string> => {
-    const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
-    
-    if (!siteKey || siteKey === 'your_recaptcha_site_key' || siteKey.trim() === '') {
-      console.warn('reCAPTCHA not configured. Using placeholder token for development.');
-      return 'dev-placeholder-token';
-    }
-
-    return new Promise((resolve) => {
-      if (typeof window === 'undefined' || !window.grecaptcha) {
-        resolve('dev-placeholder-token');
-        return;
-      }
-
-      window.grecaptcha.ready(() => {
-        window.grecaptcha
-          .execute(siteKey, { action: 'membership' })
-          .then((token: string) => {
-            resolve(token);
-          })
-          .catch(() => {
-            resolve('dev-placeholder-token');
-          });
-      });
-    });
+    // TEMPORARILY DISABLED FOR TESTING (2025-11-10)
+    console.warn('⚠️ reCAPTCHA token generation BYPASSED for testing');
+    return 'testing-bypass-token';
   };
 
   const calculateAmount = () => {
