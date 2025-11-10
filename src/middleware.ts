@@ -20,12 +20,12 @@ const applySecurityHeaders = (response: NextResponse) => {
   // CRITICAL: reCAPTCHA v3 needs full domain access (not path-restricted)
   const contentSecurityPolicy = [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.google.com https://www.gstatic.com https://www.recaptcha.net https://js.stripe.com",
+    "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.google.com https://www.gstatic.com https://www.recaptcha.net https://recaptcha.google.com https://js.stripe.com",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://www.gstatic.com",
     "font-src 'self' https://fonts.gstatic.com",
     "img-src 'self' data: https: blob:",
     // reCAPTCHA v3 requires full access to www.google.com (including /recaptcha/api2/clr)
-    "connect-src 'self' https://api.stripe.com https://api.mailgun.net https://api.mpesa.vm.co.ke https://www.google.com https://www.gstatic.com https://www.recaptcha.net https://vercel.live",
+    "connect-src 'self' https://api.stripe.com https://api.mailgun.net https://api.mpesa.vm.co.ke https://www.google.com https://www.gstatic.com https://www.recaptcha.net https://recaptcha.google.com https://vercel.live",
     // frame-src must allow www.google.com (not just www.google.com/recaptcha) for reCAPTCHA to work
     "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://www.google.com https://www.gstatic.com https://www.recaptcha.net https://recaptcha.google.com",
     "object-src 'none'",
