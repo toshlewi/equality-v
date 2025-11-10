@@ -16,18 +16,22 @@ const applySecurityHeaders = (response: NextResponse) => {
     response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
   }
 
-  // Content Security Policy - FIXED for reCAPTCHA v3 (2025-11-10)
-  // CRITICAL: reCAPTCHA v3 needs full domain access (not path-restricted)
+  // Content Security Policy - FIXED for reCAPTCHA v3
   const contentSecurityPolicy = [
     "default-src 'self'",
+    // Script sources - allow reCAPTCHA and Stripe
     "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.google.com https://www.gstatic.com https://www.recaptcha.net https://recaptcha.google.com https://js.stripe.com",
+    // Style sources - allow Google Fonts and reCAPTCHA
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://www.gstatic.com",
+    // Font sources - allow Google Fonts
     "font-src 'self' https://fonts.gstatic.com",
+    // Image sources
     "img-src 'self' data: https: blob:",
-    // reCAPTCHA v3 requires full access to www.google.com (including /recaptcha/api2/clr)
+    // Connect sources - allow API calls to reCAPTCHA, Stripe, etc.
     "connect-src 'self' https://api.stripe.com https://api.mailgun.net https://api.mpesa.vm.co.ke https://www.google.com https://www.gstatic.com https://www.recaptcha.net https://recaptcha.google.com https://vercel.live",
-    // frame-src must allow www.google.com (not just www.google.com/recaptcha) for reCAPTCHA to work
+    // Frame sources - FIXED: Allow all required Google domains for reCAPTCHA iframes
     "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://www.google.com https://www.gstatic.com https://www.recaptcha.net https://recaptcha.google.com",
+    // Other security directives
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
@@ -48,12 +52,17 @@ const adminAuthMiddleware = withAuth(
     callbacks: {
       authorized: ({ token, req }) => {
         const pathname = req.nextUrl.pathname;
+        
+        // Allow access to open admin routes (login, password reset)
         if (openAdminRoutes.some((route) => pathname.startsWith(route))) {
           return true;
         }
+        
+        // Require authentication and specific roles for other admin routes
         if (!token?.role) {
           return false;
         }
+        
         return allowedRoles.has(token.role as string);
       },
     },
@@ -64,10 +73,12 @@ const adminAuthMiddleware = withAuth(
 );
 
 export function middleware(request: NextRequest, event: any) {
+  // Apply admin authentication for /admin routes
   if (request.nextUrl.pathname.startsWith('/admin')) {
     return adminAuthMiddleware(request as any, event);
   }
 
+  // Apply security headers to all other routes
   const response = NextResponse.next();
   return applySecurityHeaders(response);
 }
@@ -75,4 +86,3 @@ export function middleware(request: NextRequest, event: any) {
 export const config = {
   matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
 };
-
