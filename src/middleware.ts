@@ -16,17 +16,17 @@ const applySecurityHeaders = (response: NextResponse) => {
     response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
   }
 
-  // Content Security Policy - FIXED for reCAPTCHA v2 (2025-11-09)
-  // CRITICAL: Must include full domains, not just /recaptcha paths
+  // Content Security Policy - FIXED for reCAPTCHA v2 (2025-11-10)
+  // CRITICAL: reCAPTCHA needs full wildcard access to google.com subdomains for /api2/clr endpoint
   const contentSecurityPolicy = [
     "default-src 'self'",
     "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.google.com https://www.gstatic.com https://www.recaptcha.net https://js.stripe.com",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "font-src 'self' https://fonts.gstatic.com",
     "img-src 'self' data: https: blob:",
-    // reCAPTCHA needs: www.google.com (main), www.gstatic.com (assets), www.recaptcha.net (fallback)
-    "connect-src 'self' https://api.stripe.com https://api.mailgun.net https://api.mpesa.vm.co.ke https://www.google.com https://www.gstatic.com https://www.recaptcha.net https://vercel.live",
-    "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://www.google.com https://www.gstatic.com https://www.recaptcha.net",
+    // reCAPTCHA v2 requires: *.google.com (for /api2/clr), *.gstatic.com (assets), *.recaptcha.net (fallback)
+    "connect-src 'self' https://api.stripe.com https://api.mailgun.net https://api.mpesa.vm.co.ke https://*.google.com https://*.gstatic.com https://*.recaptcha.net https://vercel.live",
+    "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://www.google.com https://www.gstatic.com https://www.recaptcha.net https://recaptcha.google.com",
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",

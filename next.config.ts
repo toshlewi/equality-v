@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   images: {
+    unoptimized: true, // Disable Next.js image optimization to avoid Vercel 503 errors
     remotePatterns: [
       {
         protocol: 'https',
