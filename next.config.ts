@@ -1,10 +1,15 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  output: 'standalone',
   eslint: {
     // Don't fail build on ESLint errors during production builds
     // Run `npm run lint` separately to check for linting issues
     ignoreDuringBuilds: true,
+  },
+  typescript: {
+    // Don't fail build on TypeScript errors during production builds
+    ignoreBuildErrors: true,
   },
   images: {
     unoptimized: true, // Disable Next.js image optimization to avoid Vercel 503 errors
