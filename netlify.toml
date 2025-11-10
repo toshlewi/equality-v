@@ -2,7 +2,7 @@
 # Next.js Application
 
 [build]
-  command = "npm run build"
+  command = "npm run build -- --no-lint"
   publish = ".next"
 
 [build.environment]

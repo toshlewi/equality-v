@@ -1,7 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: 'standalone',
   eslint: {
     // Don't fail build on ESLint errors during production builds
     // Run `npm run lint` separately to check for linting issues
