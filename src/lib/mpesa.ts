@@ -179,6 +179,16 @@ class MpesaClient {
         });
       }
 
+      // Get callback URL - must be publicly accessible HTTPS URL
+      const callbackUrl = data.callbackUrl || 
+                         process.env.MPESA_CALLBACK_URL || 
+                         `${process.env.NEXTAUTH_URL}/api/webhooks/mpesa`;
+      
+      // Validate callback URL
+      if (!callbackUrl || !callbackUrl.startsWith('https://')) {
+        throw new Error(`Invalid CallBackURL: ${callbackUrl}. M-Pesa requires a publicly accessible HTTPS URL. Please set MPESA_CALLBACK_URL or NEXTAUTH_URL in your environment variables.`);
+      }
+
       const payload = {
         BusinessShortCode: businessShortCode,
         Password: password,
@@ -188,7 +198,7 @@ class MpesaClient {
         PartyA: data.phone,
         PartyB: businessShortCode,
         PhoneNumber: data.phone,
-        CallBackURL: data.callbackUrl || `${process.env.NEXTAUTH_URL}/api/webhooks/mpesa`,
+        CallBackURL: callbackUrl,
         AccountReference: data.accountReference,
         TransactionDesc: data.transactionDesc,
       };

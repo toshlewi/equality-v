@@ -19,8 +19,8 @@ const applySecurityHeaders = (response: NextResponse) => {
   // Content Security Policy - FIXED for reCAPTCHA v3
   const contentSecurityPolicy = [
     "default-src 'self'",
-    // Script sources - allow reCAPTCHA and Stripe
-    "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.google.com https://www.gstatic.com https://www.recaptcha.net https://recaptcha.google.com https://js.stripe.com",
+    // Script sources - allow reCAPTCHA, Stripe, and Vercel Live
+    "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.google.com https://www.gstatic.com https://www.recaptcha.net https://recaptcha.google.com https://js.stripe.com https://vercel.live",
     // Style sources - allow Google Fonts and reCAPTCHA
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://www.gstatic.com",
     // Font sources - allow Google Fonts
