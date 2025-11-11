@@ -20,7 +20,9 @@ import {
   ChevronRight,
   Menu,
   X,
+  Bell,
 } from "lucide-react";
+import NotificationBell from "@/components/admin/NotificationBell";
 
 type AdminLayoutProps = {
   children: ReactNode;
@@ -103,6 +105,11 @@ const navItems: NavItem[] = [
     label: "Settings",
     href: "/admin/settings",
     icon: <Settings className="w-5 h-5" />,
+  },
+  {
+    label: "Notifications",
+    href: "/admin/notifications",
+    icon: <Bell className="w-5 h-5" />,
   },
   {
     label: "Audit Logs",
@@ -303,9 +310,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               <span className="text-sm text-white/90">Section</span>
             </div>
           </div>
-          <Link href="/" className="text-sm text-white hover:text-brand-yellow transition-colors flex items-center gap-1">
-            <ArrowLeft className="w-4 h-4" /> Back to main site
-          </Link>
+          <div className="flex items-center gap-3">
+            <NotificationBell />
+            <Link href="/" className="text-sm text-white hover:text-brand-yellow transition-colors flex items-center gap-1">
+              <ArrowLeft className="w-4 h-4" /> Back to main site
+            </Link>
+          </div>
         </header>
 
         {/* Scrollable content area */}

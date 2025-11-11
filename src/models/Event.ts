@@ -111,6 +111,7 @@ const EventSchema = new Schema({
   seoTitle: String,
   seoDescription: String,
   seoKeywords: [String],
+  googleCalendarEventId: String, // Google Calendar event ID for sync
   createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
   updatedBy: { type: Schema.Types.ObjectId, ref: 'User' }
 }, { 

@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-config';
 import { connectDB } from '@/lib/mongodb';
 import Event from '@/models/Event';
 import { z } from 'zod';
+import { updateCalendarEvent, deleteCalendarEvent, createCalendarEvent, isGoogleCalendarConfigured } from '@/lib/google-calendar';
 
 const updateSchema = z.object({
   title: z.string().optional(),
@@ -70,12 +71,66 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     if (payload.startDate) (payload as any).startDate = new Date(payload.startDate as any);
     if (payload.endDate) (payload as any).endDate = new Date(payload.endDate as any);
 
+    const existingEvent = await Event.findById(id);
+    if (!existingEvent) return NextResponse.json({ success: false, message: 'Not found' }, { status: 404 });
+
     const updated = await Event.findByIdAndUpdate(
       id,
       { ...payload, updatedAt: new Date(), updatedBy: session.user.id },
       { new: true }
     );
-    if (!updated) return NextResponse.json({ success: false, message: 'Not found' }, { status: 404 });
+
+    // Sync with Google Calendar if configured
+    if (isGoogleCalendarConfigured()) {
+      try {
+        const shouldSync = updated.status === 'published';
+        const hadCalendarEvent = !!existingEvent.googleCalendarEventId;
+
+        if (shouldSync) {
+          const location = updated.location?.isVirtual 
+            ? updated.location.virtualLink || 'Virtual Event'
+            : updated.location?.address || updated.location?.name || '';
+
+          const calendarData: any = {};
+          if (payload.title) calendarData.summary = updated.title;
+          if (payload.description) calendarData.description = updated.description;
+          if (payload.location) calendarData.location = location;
+          if (payload.startDate) calendarData.startDateTime = updated.startDate.toISOString();
+          if (payload.endDate) calendarData.endDateTime = updated.endDate.toISOString();
+          if (payload.timezone) calendarData.timezone = updated.timezone;
+
+          if (hadCalendarEvent) {
+            // Update existing calendar event
+            const result = await updateCalendarEvent(existingEvent.googleCalendarEventId, calendarData);
+            if (!result.success) {
+              console.warn('Failed to update Google Calendar event:', result.error);
+            }
+          } else {
+            // Create new calendar event
+            const result = await createCalendarEvent({
+              summary: updated.title,
+              description: updated.description,
+              location,
+              startDateTime: updated.startDate.toISOString(),
+              endDateTime: updated.endDate.toISOString(),
+              timezone: updated.timezone || 'Africa/Nairobi'
+            });
+            if (result.success && result.eventId) {
+              updated.googleCalendarEventId = result.eventId;
+              await updated.save();
+            }
+          }
+        } else if (hadCalendarEvent && (payload.status === 'cancelled' || payload.status === 'draft')) {
+          // Delete calendar event if status changed to cancelled or draft
+          await deleteCalendarEvent(existingEvent.googleCalendarEventId);
+          updated.googleCalendarEventId = undefined;
+          await updated.save();
+        }
+      } catch (calendarError) {
+        console.error('Error syncing to Google Calendar:', calendarError);
+      }
+    }
+
     return NextResponse.json({ success: true, data: updated, message: 'Event updated' });
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -93,6 +148,18 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
     if (!['admin', 'editor'].includes(session.user.role)) return NextResponse.json({ success: false, message: 'Insufficient permissions' }, { status: 403 });
 
     await connectDB();
+    const event = await Event.findById(id);
+    
+    // Delete from Google Calendar if synced
+    if (event?.googleCalendarEventId && isGoogleCalendarConfigured()) {
+      try {
+        await deleteCalendarEvent(event.googleCalendarEventId);
+        console.log('Event deleted from Google Calendar');
+      } catch (calendarError) {
+        console.error('Error deleting from Google Calendar:', calendarError);
+      }
+    }
+    
     await Event.findByIdAndDelete(id);
     return NextResponse.json({ success: true, message: 'Event deleted' });
   } catch (error) {

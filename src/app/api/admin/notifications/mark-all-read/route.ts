@@ -1,14 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-config';
-import { markAsRead } from '@/lib/notifications';
+import { markAllAsRead } from '@/lib/notifications';
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: NextRequest) {
   try {
-    const { id } = await params;
     const session = await getServerSession(authOptions);
     
     if (!session?.user?.id) {
@@ -18,7 +14,7 @@ export async function POST(
       );
     }
 
-    const result = await markAsRead(id, session.user.id);
+    const result = await markAllAsRead(session.user.id);
 
     if (!result.success) {
       return NextResponse.json(
@@ -29,13 +25,13 @@ export async function POST(
 
     return NextResponse.json({
       success: true,
-      message: 'Notification marked as read'
+      message: 'All notifications marked as read'
     });
 
   } catch (error) {
-    console.error('Error marking notification as read:', error);
+    console.error('Error marking all notifications as read:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to mark notification as read' },
+      { success: false, error: 'Failed to mark all notifications as read' },
       { status: 500 }
     );
   }

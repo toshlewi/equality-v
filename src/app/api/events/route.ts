@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth-config';
 import { connectDB } from '@/lib/mongodb';
 import Event from '@/models/Event';
 import { z } from 'zod';
+import { createCalendarEvent, isGoogleCalendarConfigured } from '@/lib/google-calendar';
 
 const createEventSchema = z.object({
   title: z.string().min(1),
@@ -155,6 +156,36 @@ export async function POST(request: NextRequest) {
       slug,
       createdBy: session.user.id
     });
+
+    // Create Google Calendar event if configured and event is published
+    if (isGoogleCalendarConfigured() && payload.status === 'published') {
+      try {
+        const location = payload.location?.isVirtual 
+          ? payload.location.virtualLink || 'Virtual Event'
+          : payload.location?.address || payload.location?.name || '';
+
+        const calendarResult = await createCalendarEvent({
+          summary: payload.title,
+          description: payload.description,
+          location,
+          startDateTime: new Date(payload.startDate as any).toISOString(),
+          endDateTime: new Date(payload.endDate as any).toISOString(),
+          timezone: payload.timezone || 'Africa/Nairobi'
+        });
+
+        if (calendarResult.success && calendarResult.eventId) {
+          // Update event with Google Calendar ID
+          event.googleCalendarEventId = calendarResult.eventId;
+          await event.save();
+          console.log('Event synced to Google Calendar:', calendarResult.htmlLink);
+        } else {
+          console.warn('Failed to sync event to Google Calendar:', calendarResult.error);
+        }
+      } catch (calendarError) {
+        console.error('Error syncing to Google Calendar:', calendarError);
+        // Don't fail the event creation if calendar sync fails
+      }
+    }
 
     return NextResponse.json({ success: true, data: event, message: 'Event created' }, { status: 201 });
   } catch (error) {

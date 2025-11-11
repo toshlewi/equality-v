@@ -6,6 +6,7 @@ import Donation from '@/models/Donation';
 import Order from '@/models/Order';
 import EventRegistration from '@/models/EventRegistration';
 import Event from '@/models/Event';
+import Product from '@/models/Product';
 import { logSecurityEvent } from '@/lib/security';
 
 export async function POST(request: NextRequest) {
@@ -388,7 +389,6 @@ async function handleOrderPayment(paymentIntent: any, orderId: string) {
 
   // Update inventory
   try {
-    const Product = await import('@/models/Product').then(m => m.default);
     for (const item of order.items || []) {
       if (item.productId) {
         const product = await Product.findById(item.productId);
@@ -427,9 +427,6 @@ async function handleOrderPayment(paymentIntent: any, orderId: string) {
 }
 
 async function handleEventRegistrationPayment(paymentIntent: any, registrationId: string) {
-  const EventRegistration = await import('@/models/EventRegistration').then(m => m.default);
-  const Event = await import('@/models/Event').then(m => m.default);
-  
   const registration = await EventRegistration.findById(registrationId).populate('eventId');
   if (!registration) {
     console.error('Event registration not found:', registrationId);
@@ -458,28 +455,18 @@ async function handleEventRegistrationPayment(paymentIntent: any, registrationId
 
   // Generate ICS file and send confirmation email
   try {
-    const { generateICSFile } = await import('@/lib/calendar');
-    const icsFile = generateICSFile({
-      title: event.title,
+    const { generateICSFile } = await import('@/lib/google-calendar');
+    const location = event.location?.isVirtual 
+      ? event.location.virtualLink || event.location.name || 'Virtual Event'
+      : event.location?.address || event.location?.name || '';
+    
+    const icsContent = generateICSFile({
+      summary: event.title,
       description: event.description || event.shortDescription || '',
-      startDate: new Date(event.startDate),
-      endDate: new Date(event.endDate),
-      location: event.location?.isVirtual 
-        ? event.location.virtualLink || event.location.name || ''
-        : event.location?.address || event.location?.name || '',
-      organizer: event.organizer ? {
-        name: event.organizer.name || 'Equality Vanguard',
-        email: event.organizer.email || 'events@equalityvanguard.org'
-      } : {
-        name: 'Equality Vanguard',
-        email: 'events@equalityvanguard.org'
-      },
-      attendee: {
-        name: registration.attendeeName,
-        email: registration.attendeeEmail
-      },
-      url: `${process.env.NEXTAUTH_URL}/events/${event.slug}`,
-      uid: `event-reg-${registration._id.toString()}`
+      location,
+      startDateTime: new Date(event.startDate).toISOString(),
+      endDateTime: new Date(event.endDate).toISOString(),
+      timezone: event.timezone || 'Africa/Nairobi'
     });
 
     const { sendEmail } = await import('@/lib/email');
@@ -501,8 +488,8 @@ async function handleEventRegistrationPayment(paymentIntent: any, registrationId
         currency: registration.currency
       },
       attachments: [{
-        filename: icsFile.filename,
-        data: icsFile.buffer,
+        filename: 'event.ics',
+        data: Buffer.from(icsContent),
         contentType: 'text/calendar'
       }]
     });
@@ -561,7 +548,6 @@ async function handlePaymentIntentFailed(paymentIntent: any) {
         await order.save();
       }
     } else if (type === 'event_registration' && registrationId) {
-      const EventRegistration = await import('@/models/EventRegistration').then(m => m.default);
       const registration = await EventRegistration.findById(registrationId);
       if (registration) {
         registration.paymentStatus = 'failed';
