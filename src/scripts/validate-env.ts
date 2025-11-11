@@ -37,11 +37,9 @@ const envVars: EnvVar[] = [
   { name: 'MPESA_PASSKEY', value: process.env.MPESA_PASSKEY, required: false, description: 'M-Pesa passkey', category: 'Payments' },
   { name: 'MPESA_ENVIRONMENT', value: process.env.MPESA_ENVIRONMENT, required: false, description: 'M-Pesa environment', category: 'Payments' },
   
-  // Email
-  { name: 'MAILGUN_API_KEY', value: process.env.MAILGUN_API_KEY, required: false, description: 'Mailgun API key', category: 'Email' },
-  { name: 'MAILGUN_DOMAIN', value: process.env.MAILGUN_DOMAIN, required: false, description: 'Mailgun domain', category: 'Email' },
-  { name: 'MAILGUN_FROM_EMAIL', value: process.env.MAILGUN_FROM_EMAIL, required: false, description: 'Mailgun from email', category: 'Email' },
-  { name: 'MAILGUN_FROM_NAME', value: process.env.MAILGUN_FROM_NAME, required: false, description: 'Mailgun from name', category: 'Email' },
+  // Email - Resend
+  { name: 'RESEND_API_KEY', value: process.env.RESEND_API_KEY, required: false, description: 'Resend API key', category: 'Email' },
+  { name: 'EMAIL_FROM', value: process.env.EMAIL_FROM, required: false, description: 'Email from address', category: 'Email' },
   
   // Mailchimp
   { name: 'MAILCHIMP_API_KEY', value: process.env.MAILCHIMP_API_KEY, required: false, description: 'Mailchimp API key', category: 'Email' },

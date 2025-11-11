@@ -7,51 +7,31 @@
 
 ### Step 1: Update Your Local `.env.local`
 
-Update your `.env.local` file with the correct Mailgun settings:
+Update your `.env.local` file with the Resend settings:
 
 ```bash
-# Email Service - Mailgun
-MAILGUN_API_KEY=your_mailgun_api_key_here
-MAILGUN_DOMAIN=sandbox10ca81ae73d1422b97aed0344c4d366c.mailgun.org
-MAILGUN_FROM_EMAIL=noreply@sandbox10ca81ae73d1422b97aed0344c4d366c.mailgun.org
-MAILGUN_FROM_NAME=Equality Vanguard
+# Email Service - Resend
+RESEND_API_KEY=re_7aX3SRd3_82GYRX9gHZxLLTJqSioSESfe
+EMAIL_FROM=noreply@equalityvanguard.org
 ```
 
-### Step 2: Add Environment Variables to Vercel
+### Step 2: Verify Environment Variables in Vercel
 
 Go to: https://vercel.com/toshlewi/equality-v/settings/environment-variables
 
-Add these **4 new variables** (select **All Environments**):
+Verify these **2 variables exist** (should already be configured):
 
-1. **MAILGUN_API_KEY**
+1. **RESEND_API_KEY**
    ```
-   your_mailgun_api_key_here
-   ```
-   (Get this from your Mailgun dashboard)
-
-2. **MAILGUN_DOMAIN**
-   ```
-   sandbox10ca81ae73d1422b97aed0344c4d366c.mailgun.org
+   re_7aX3SRd3_82GYRX9gHZxLLTJqSioSESfe
    ```
 
-3. **MAILGUN_FROM_EMAIL**
+2. **EMAIL_FROM**
    ```
-   noreply@sandbox10ca81ae73d1422b97aed0344c4d366c.mailgun.org
-   ```
-
-4. **MAILGUN_FROM_NAME**
-   ```
-   Equality Vanguard
+   noreply@equalityvanguard.org
    ```
 
-### Step 3: Add Authorized Recipients in Mailgun
-
-1. Go to: https://app.mailgun.com/app/sending/domains/sandbox10ca81ae73d1422b97aed0344c4d366c.mailgun.org
-2. Click **"Authorized Recipients"**
-3. Add your test email addresses (the emails you'll use for testing)
-4. Check your inbox and verify each email
-
-### Step 4: Redeploy on Vercel
+### Step 3: Redeploy on Vercel
 
 After adding environment variables:
 1. Go to: https://vercel.com/toshlewi/equality-v/deployments

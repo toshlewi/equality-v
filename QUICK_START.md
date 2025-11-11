@@ -10,7 +10,7 @@ You have a **fully functional** application with:
 
 - ✅ **M-Pesa payments** - Working in production
 - ✅ **Stripe payments** - Implemented, needs webhook secret update
-- ✅ **15 email templates** - Ready to send
+- ✅ **Resend email service** - Configured with 15+ templates
 - ✅ **Admin notifications** - Fully implemented
 - ✅ **Instagram API** - Ready to use
 - ✅ **Mailchimp** - Configured
@@ -29,31 +29,23 @@ cd /home/toshlewi/equality-v/equality-v
 npm install googleapis
 ```
 
-### 2. Add Mailgun to Vercel (5 minutes)
+### 2. Verify Resend Configuration (2 minutes)
 
-Go to: https://vercel.com/toshlewi/equality-v/settings/environment-variables
+Resend is already configured! Verify in Vercel:
+https://vercel.com/toshlewi/equality-v/settings/environment-variables
 
-Add these 4 variables (select "All Environments"):
+Confirm these variables exist:
 
 | Variable | Value |
 |----------|-------|
-| `MAILGUN_API_KEY` | `your_mailgun_api_key_here` |
-| `MAILGUN_DOMAIN` | `sandbox10ca81ae73d1422b97aed0344c4d366c.mailgun.org` |
-| `MAILGUN_FROM_EMAIL` | `noreply@sandbox10ca81ae73d1422b97aed0344c4d366c.mailgun.org` |
-| `MAILGUN_FROM_NAME` | `Equality Vanguard` |
+| `RESEND_API_KEY` | `re_7aX3SRd3_82GYRX9gHZxLLTJqSioSESfe` |
+| `EMAIL_FROM` | `noreply@equalityvanguard.org` |
 
-### 3. Add Authorized Recipients in Mailgun (3 minutes)
-
-1. Go to: https://app.mailgun.com/app/sending/domains/sandbox10ca81ae73d1422b97aed0344c4d366c.mailgun.org
-2. Click "Authorized Recipients"
-3. Add your email address
-4. Verify the confirmation email
-
-### 4. Deploy (2 minutes)
+### 3. Deploy (2 minutes)
 
 ```bash
 git add .
-git commit -m "Add Google Calendar integration and Mailgun config"
+git commit -m "Add Google Calendar integration and migrate to Resend"
 git push origin integrations
 ```
 
@@ -118,7 +110,7 @@ Your system can send these emails automatically:
 |-------------|--------|-------|
 | M-Pesa | ✅ Working | Tested in production |
 | Stripe | ⚠️ Ready | Need to update webhook secret |
-| Mailgun | ⚠️ Ready | Need to add to Vercel |
+| Resend | ✅ Configured | Ready to test |
 | Mailchimp | ✅ Configured | Ready to test |
 | reCAPTCHA | ✅ Working | On all forms |
 | Instagram | ⚠️ Ready | Need access token |
@@ -132,7 +124,7 @@ Your system can send these emails automatically:
 - **Staging Site**: https://equality-v.vercel.app
 - **Vercel Dashboard**: https://vercel.com/toshlewi/equality-v
 - **Vercel Logs**: https://vercel.com/toshlewi/equality-v/logs
-- **Mailgun Dashboard**: https://app.mailgun.com
+- **Resend Dashboard**: https://resend.com/emails
 - **Stripe Dashboard**: https://dashboard.stripe.com/test
 - **MongoDB Atlas**: https://cloud.mongodb.com
 
@@ -150,9 +142,10 @@ Your system can send these emails automatically:
 ## 🆘 Troubleshooting
 
 ### Emails not sending?
-1. Check Mailgun credentials in Vercel
-2. Verify authorized recipients in Mailgun
+1. Check Resend credentials in Vercel (RESEND_API_KEY, EMAIL_FROM)
+2. Verify domain is verified in Resend dashboard
 3. Check Vercel logs for errors
+4. Check Resend dashboard for delivery status
 
 ### M-Pesa not working?
 1. Use test number: 254708374149
@@ -187,7 +180,7 @@ Your implementation meets ALL client requirements:
 
 ## 🎯 Next Steps
 
-1. **NOW**: Add Mailgun to Vercel
+1. **NOW**: Test Resend email delivery
 2. **TODAY**: Test all email flows
 3. **THIS WEEK**: Complete integration testing
 4. **FINAL**: Create test report with screenshots
@@ -213,7 +206,7 @@ Your implementation meets ALL client requirements:
 
 ---
 
-**You're almost there!** Just add Mailgun to Vercel and start testing. Everything else is ready to go! 🚀
+**You're almost there!** Resend is configured and ready. Start testing email flows! 🚀
 
 ---
 

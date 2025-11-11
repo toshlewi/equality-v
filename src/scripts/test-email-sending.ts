@@ -1,4 +1,4 @@
-// Test script to test Mailgun email delivery
+// Test script to test Resend email delivery
 // Run: npm run test:email or tsx src/scripts/test-email-sending.ts
 
 require('dotenv').config({ path: '.env.local' });
@@ -6,12 +6,12 @@ import { sendEmail } from '../lib/email';
 
 async function testEmailSending() {
   try {
-    console.log('📧 Testing Mailgun email delivery...\n');
+    console.log('📧 Testing Resend email delivery...\n');
 
-    // Check if Mailgun is configured
-    if (!process.env.MAILGUN_API_KEY || !process.env.MAILGUN_DOMAIN) {
-      console.log('⚠️  Mailgun not configured.');
-      console.log('   Set MAILGUN_API_KEY and MAILGUN_DOMAIN in .env.local\n');
+    // Check if Resend is configured
+    if (!process.env.RESEND_API_KEY || !process.env.EMAIL_FROM) {
+      console.log('⚠️  Resend not configured.');
+      console.log('   Set RESEND_API_KEY and EMAIL_FROM in .env.local\n');
       return;
     }
 
@@ -79,7 +79,7 @@ async function testEmailSending() {
       location: 'Online',
       startDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
       endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000 + 2 * 60 * 60 * 1000), // 2 hours later
-      organizer: { name: 'Equality Vanguard', email: process.env.MAILGUN_FROM_EMAIL || 'noreply@equalityvanguard.org' }
+      organizer: { name: 'Equality Vanguard', email: process.env.EMAIL_FROM || 'noreply@equalityvanguard.org' }
     });
 
     const eventResult = await sendEmail({
@@ -142,7 +142,7 @@ async function testEmailSending() {
     console.log('📊 Email Test Summary');
     console.log('=============================================================================');
     console.log('Check your inbox at:', testEmail);
-    console.log('Check Mailgun Dashboard → Logs for delivery status');
+    console.log('Check Resend Dashboard → Logs for delivery status');
     console.log('');
 
   } catch (error) {

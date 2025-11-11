@@ -1,13 +1,7 @@
-import Mailgun from 'mailgun.js';
-import FormData from 'form-data';
+import { Resend } from 'resend';
 
-// Initialize Mailgun client
-const mailgun = new Mailgun(FormData);
-const mg = mailgun.client({
-  username: 'api',
-  key: process.env.MAILGUN_API_KEY!,
-  url: 'https://api.mailgun.net'
-});
+// Initialize Resend client
+const resend = new Resend(process.env.RESEND_API_KEY!);
 
 export interface EmailData {
   to: string | string[];
@@ -44,26 +38,34 @@ export async function sendEmail(emailData: EmailData): Promise<{ success: boolea
     const text = await renderTextTemplate(template, data);
 
     const emailOptions: any = {
-      from: `${process.env.MAILGUN_FROM_NAME} <${process.env.MAILGUN_FROM_EMAIL}>`,
-      to: Array.isArray(to) ? to.join(', ') : to,
+      from: process.env.EMAIL_FROM || 'noreply@equalityvanguard.org',
+      to: Array.isArray(to) ? to : [to],
       subject,
       html,
       text
     };
 
     if (attachments && attachments.length > 0) {
-      emailOptions.attachment = attachments.map(att => ({
+      emailOptions.attachments = attachments.map(att => ({
         filename: att.filename,
-        data: att.data,
+        content: att.data,
         contentType: att.contentType
       }));
     }
 
-    const response = await mg.messages.create(process.env.MAILGUN_DOMAIN!, emailOptions);
+    const response = await resend.emails.send(emailOptions);
+    
+    if (response.error) {
+      console.error('Resend API error:', response.error);
+      return {
+        success: false,
+        error: response.error.message || 'Failed to send email'
+      };
+    }
     
     return {
       success: true,
-      messageId: response.id
+      messageId: response.data?.id
     };
   } catch (error) {
     console.error('Error sending email:', error);
@@ -137,12 +139,14 @@ export async function sendBulkEmails(bulkData: BulkEmailData): Promise<{ success
 
 /**
  * Track email delivery
+ * Note: Resend provides webhook events for delivery tracking
+ * This function can be used to query email status if needed
  */
 export async function trackDelivery(messageId: string): Promise<any> {
   try {
-    const response = await mg.events.get(process.env.MAILGUN_DOMAIN!, {
-      'message-id': messageId
-    });
+    // Resend uses webhooks for delivery tracking
+    // You can query the email status using the Resend API if needed
+    const response = await resend.emails.get(messageId);
     return response;
   } catch (error) {
     console.error('Error tracking email delivery:', error);
@@ -152,6 +156,7 @@ export async function trackDelivery(messageId: string): Promise<any> {
 
 /**
  * Handle bounced emails
+ * Note: Resend provides webhook events for bounces, complaints, and delivery failures
  */
 export async function handleBounce(email: string): Promise<void> {
   try {
@@ -161,6 +166,7 @@ export async function handleBounce(email: string): Promise<void> {
     // TODO: Update user status in database
     // TODO: Remove from active mailing lists
     // TODO: Log bounce event
+    // TODO: Set up Resend webhook handler for bounce events
   } catch (error) {
     console.error('Error handling bounce:', error);
   }

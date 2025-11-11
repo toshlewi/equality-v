@@ -32,45 +32,29 @@ cd /home/toshlewi/equality-v/equality-v
 npm install googleapis
 ```
 
-### Action 2: Update Vercel Environment Variables
+### Action 2: Verify Resend Configuration in Vercel
 
 Go to: https://vercel.com/toshlewi/equality-v/settings/environment-variables
 
-**Add these 4 variables** (All Environments):
+**Verify these 2 variables exist** (All Environments):
 
-1. **MAILGUN_API_KEY**
+1. **RESEND_API_KEY**
    ```
-   your_mailgun_api_key_here
+   re_7aX3SRd3_82GYRX9gHZxLLTJqSioSESfe
    ```
-   (Use the key from your Mailgun dashboard)
+   (Already configured)
 
-2. **MAILGUN_DOMAIN**
+2. **EMAIL_FROM**
    ```
-   sandbox10ca81ae73d1422b97aed0344c4d366c.mailgun.org
+   noreply@equalityvanguard.org
    ```
+   (Already configured)
 
-3. **MAILGUN_FROM_EMAIL**
-   ```
-   noreply@sandbox10ca81ae73d1422b97aed0344c4d366c.mailgun.org
-   ```
-
-4. **MAILGUN_FROM_NAME**
-   ```
-   Equality Vanguard
-   ```
-
-### Action 3: Add Authorized Recipients in Mailgun
-
-1. Go to: https://app.mailgun.com/app/sending/domains/sandbox10ca81ae73d1422b97aed0344c4d366c.mailgun.org
-2. Click "Authorized Recipients"
-3. Add your test email address
-4. Verify the confirmation email
-
-### Action 4: Commit and Push Changes
+### Action 3: Commit and Push Changes
 
 ```bash
 git add .
-git commit -m "Add Google Calendar integration and googleapis package"
+git commit -m "Migrate email service to Resend and add Google Calendar integration"
 git push origin integrations
 ```
 

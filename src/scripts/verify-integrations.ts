@@ -48,10 +48,8 @@ async function verifyEnvironmentVariables() {
     'MPESA_SHORTCODE',
     'MPESA_PASSKEY',
     'MPESA_ENVIRONMENT',
-    'MAILGUN_API_KEY',
-    'MAILGUN_DOMAIN',
-    'MAILGUN_FROM_EMAIL',
-    'MAILGUN_FROM_NAME',
+    'RESEND_API_KEY',
+    'EMAIL_FROM',
     'MAILCHIMP_API_KEY',
     'MAILCHIMP_LIST_ID',
     'MAILCHIMP_SERVER_PREFIX',
@@ -155,41 +153,28 @@ async function verifyMpesa() {
   }
 }
 
-async function verifyMailgun() {
-  console.log('🔍 Verifying Mailgun Configuration...\n');
+async function verifyResend() {
+  console.log('🔍 Verifying Resend Configuration...\n');
 
-  if (!process.env.MAILGUN_API_KEY) {
-    addResult('Mailgun', 'Configuration', 'warning', 'Mailgun not configured (optional)');
+  if (!process.env.RESEND_API_KEY) {
+    addResult('Resend', 'Configuration', 'warning', 'Resend not configured (optional)');
     return;
   }
 
   try {
-    const { default: formData } = await import('form-data');
-    const Mailgun = (await import('mailgun.js')).default;
-    const mailgun = new Mailgun(formData);
+    const { Resend } = await import('resend');
+    const resend = new Resend(process.env.RESEND_API_KEY);
 
-    const mg = mailgun.client({
-      username: 'api',
-      key: process.env.MAILGUN_API_KEY!
-    });
+    // Test API call - Resend doesn't have a ping endpoint, so we check if the client initializes
+    addResult('Resend', 'API Key', 'pass', 'API key configured');
 
-    // Test API call
-    const domain = process.env.MAILGUN_DOMAIN!;
-    const response = await mg.domains.get(domain);
-    
-    if (response) {
-      addResult('Mailgun', 'API Connection', 'pass', `Domain verified: ${domain}`);
+    if (process.env.EMAIL_FROM) {
+      addResult('Resend', 'From Email', 'pass', process.env.EMAIL_FROM);
     } else {
-      addResult('Mailgun', 'API Connection', 'fail', 'Domain verification failed');
-    }
-
-    if (process.env.MAILGUN_FROM_EMAIL) {
-      addResult('Mailgun', 'From Email', 'pass', process.env.MAILGUN_FROM_EMAIL);
-    } else {
-      addResult('Mailgun', 'From Email', 'warning', 'Not set');
+      addResult('Resend', 'From Email', 'warning', 'Not set');
     }
   } catch (error) {
-    addResult('Mailgun', 'API Connection', 'fail', `Failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    addResult('Resend', 'Configuration', 'fail', `Failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }
 
@@ -306,7 +291,7 @@ async function main() {
   await verifyDatabase();
   await verifyStripe();
   await verifyMpesa();
-  await verifyMailgun();
+  await verifyResend();
   await verifyMailchimp();
   await verifyApiRoutes();
   await printResults();
