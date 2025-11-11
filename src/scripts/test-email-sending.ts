@@ -1,7 +1,10 @@
 // Test script to test Resend email delivery
 // Run: npm run test:email or tsx src/scripts/test-email-sending.ts
 
-require('dotenv').config({ path: '.env.local' });
+// IMPORTANT: Load environment variables BEFORE importing modules
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
+
 import { sendEmail } from '../lib/email';
 
 async function testEmailSending() {

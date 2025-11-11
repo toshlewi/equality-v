@@ -1,7 +1,17 @@
 import { Resend } from 'resend';
 
-// Initialize Resend client
-const resend = new Resend(process.env.RESEND_API_KEY!);
+// Initialize Resend client lazily to ensure env vars are loaded
+let resendClient: Resend | null = null;
+
+function getResendClient(): Resend {
+  if (!resendClient) {
+    if (!process.env.RESEND_API_KEY) {
+      throw new Error('RESEND_API_KEY environment variable is not set');
+    }
+    resendClient = new Resend(process.env.RESEND_API_KEY);
+  }
+  return resendClient;
+}
 
 export interface EmailData {
   to: string | string[];
@@ -53,6 +63,7 @@ export async function sendEmail(emailData: EmailData): Promise<{ success: boolea
       }));
     }
 
+    const resend = getResendClient();
     const response = await resend.emails.send(emailOptions);
     
     if (response.error) {
@@ -146,6 +157,7 @@ export async function trackDelivery(messageId: string): Promise<any> {
   try {
     // Resend uses webhooks for delivery tracking
     // You can query the email status using the Resend API if needed
+    const resend = getResendClient();
     const response = await resend.emails.get(messageId);
     return response;
   } catch (error) {
@@ -298,13 +310,14 @@ async function renderEventRegistration(data: any): Promise<string> {
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Event Registration Confirmation</title>
+  <title>Event registration confirmed — ${data.eventTitle}</title>
   <style>
     body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
     .container { max-width: 600px; margin: 0 auto; padding: 20px; }
     .header { background: #059669; color: white; padding: 20px; text-align: center; }
     .content { padding: 20px; background: #f0fdf4; }
-    .event-details { background: white; padding: 15px; border-radius: 8px; margin: 15px 0; }
+    .event-details { background: white; padding: 20px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #059669; }
+    .calendar-note { background: #e0f2fe; padding: 12px; border-radius: 6px; margin: 10px 0; font-size: 14px; }
     .footer { padding: 20px; text-align: center; font-size: 12px; color: #666; }
   </style>
 </head>
@@ -314,15 +327,16 @@ async function renderEventRegistration(data: any): Promise<string> {
       <h1>Event Registration Confirmed!</h1>
     </div>
     <div class="content">
-      <p>Dear ${data.name},</p>
-      <p>Your registration for the following event has been confirmed:</p>
+      <p>Hi ${data.name || data.attendeeName},</p>
+      <p>Your registration for <strong>${data.eventTitle}</strong> has been confirmed.</p>
       <div class="event-details">
         <h3>${data.eventTitle}</h3>
-        <p><strong>Date:</strong> ${data.eventDate}</p>
-        <p><strong>Time:</strong> ${data.eventTime}</p>
-        <p><strong>Location:</strong> ${data.eventLocation}</p>
-        <p><strong>Ticket Type:</strong> ${data.ticketType}</p>
-        <p><strong>Amount Paid:</strong> $${data.amount}</p>
+        <p><strong>Date/Time:</strong> ${data.eventDate}${data.eventTime ? ' at ' + data.eventTime : ''}</p>
+        <p><strong>Location:</strong> ${data.eventLocation || data.location}</p>
+        ${data.ticketCode ? `<p><strong>Ticket Code:</strong> ${data.ticketCode}</p>` : ''}
+      </div>
+      <div class="calendar-note">
+        📅 <strong>Add to Calendar:</strong> A calendar invite (.ics file) is attached to this email. Click to add this event to your calendar.
       </div>
       <p>We look forward to seeing you at the event!</p>
       <p>Best regards,<br>The Equality Vanguard Team</p>
@@ -337,12 +351,13 @@ async function renderEventRegistration(data: any): Promise<string> {
 }
 
 async function renderDonationReceipt(data: any): Promise<string> {
+  const paymentType = data.paymentType || 'donation';
   return `
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Donation Receipt</title>
+  <title>Receipt — ${paymentType} (${data.amount} ${data.currency || 'USD'})</title>
   <style>
     body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
     .container { max-width: 600px; margin: 0 auto; padding: 20px; }
@@ -357,37 +372,36 @@ async function renderDonationReceipt(data: any): Promise<string> {
 <body>
   <div class="container">
     <div class="header">
-      <h1>Thank You for Your Donation!</h1>
+      <h1>Payment Receipt</h1>
     </div>
     <div class="content">
-      <p>Dear ${data.donorName},</p>
-      <p>Thank you for your generous donation to Equality Vanguard!</p>
+      <p>Dear ${data.donorName || data.name},</p>
+      <p>Thank you for your ${paymentType}!</p>
       <div class="receipt">
         <div class="receipt-header">
-          <h3>Donation Receipt</h3>
-          <p><strong>Receipt Number:</strong> ${data.receiptNumber || 'N/A'}</p>
-        </div>
-        <div class="receipt-row">
-          <span><strong>Organization:</strong></span>
-          <span>${data.organizationName || 'Equality Vanguard'}</span>
-        </div>
-        <div class="receipt-row">
-          <span><strong>Amount:</strong></span>
-          <span>${data.currency || '$'}${data.amount}</span>
+          <h3>${paymentType.charAt(0).toUpperCase() + paymentType.slice(1)} Receipt</h3>
         </div>
         <div class="receipt-row">
           <span><strong>Date:</strong></span>
-          <span>${data.donationDate || new Date().toLocaleDateString()}</span>
+          <span>${data.date || data.donationDate || new Date().toLocaleDateString()}</span>
         </div>
+        <div class="receipt-row">
+          <span><strong>Amount:</strong></span>
+          <span>${data.amount} ${data.currency || 'USD'}</span>
+        </div>
+        <div class="receipt-row">
+          <span><strong>Reference:</strong></span>
+          <span>${data.reference || data.transactionId || data.receiptNumber || 'N/A'}</span>
+        </div>
+        ${data.membershipStart ? `<div class="receipt-row"><span><strong>Membership Start:</strong></span><span>${data.membershipStart}</span></div>` : ''}
+        ${data.membershipEnd ? `<div class="receipt-row"><span><strong>Membership End:</strong></span><span>${data.membershipEnd}</span></div>` : ''}
         ${data.taxDeductible ? `<div class="receipt-row"><span><strong>Tax Deductible:</strong></span><span>Yes</span></div>` : ''}
-        ${data.organizationTaxId ? `<div class="receipt-row"><span><strong>Tax ID:</strong></span><span>${data.organizationTaxId}</span></div>` : ''}
       </div>
-      <p>Your contribution helps us continue our mission of building a more equitable future.</p>
-      <p>This receipt serves as confirmation of your donation for tax purposes.</p>
+      <p>This receipt serves as confirmation of your payment.</p>
       <p>Best regards,<br>The Equality Vanguard Team</p>
     </div>
     <div class="footer">
-      <p>${data.organizationAddress || 'Equality Vanguard'} | Building a more equitable future</p>
+      <p>Equality Vanguard | Building a more equitable future</p>
     </div>
   </div>
 </body>
@@ -445,30 +459,30 @@ async function renderSubmissionReceived(data: any): Promise<string> {
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Submission Received</title>
+  <title>Equality Vanguard — We received your submission</title>
   <style>
     body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
     .container { max-width: 600px; margin: 0 auto; padding: 20px; }
     .header { background: #7c3aed; color: white; padding: 20px; text-align: center; }
     .content { padding: 20px; background: #faf5ff; }
+    .reference { background: white; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #7c3aed; }
     .footer { padding: 20px; text-align: center; font-size: 12px; color: #666; }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
-      <h1>Submission Received</h1>
+      <h1>We Received Your Submission</h1>
     </div>
     <div class="content">
-      <p>Dear ${data.submitterName},</p>
-      <p>Thank you for your submission to Equality Vanguard!</p>
-      <p><strong>Submission Details:</strong></p>
-      <ul>
-        <li>Type: ${data.submissionType}</li>
-        <li>Title: ${data.title}</li>
-        <li>Date Submitted: ${data.submissionDate}</li>
-      </ul>
-      <p>We have received your submission and it is currently under review. We will notify you once the review process is complete.</p>
+      <p>Hi ${data.name || data.submitterName || 'Friend'},</p>
+      <p>We received your <strong>${data.submissionType}</strong>.</p>
+      <div class="reference">
+        <p><strong>Reference:</strong> ${data.id || data.referenceId}</p>
+        <p><strong>Status:</strong> Pending review</p>
+        ${data.title ? `<p><strong>Title:</strong> ${data.title}</p>` : ''}
+      </div>
+      <p>Our team will review your submission and get back to you soon.</p>
       <p>Best regards,<br>The Equality Vanguard Team</p>
     </div>
     <div class="footer">
@@ -486,30 +500,31 @@ async function renderSubmissionApproved(data: any): Promise<string> {
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Submission Approved</title>
+  <title>Your submission is live on Equality Vanguard</title>
   <style>
     body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
     .container { max-width: 600px; margin: 0 auto; padding: 20px; }
     .header { background: #059669; color: white; padding: 20px; text-align: center; }
     .content { padding: 20px; background: #f0fdf4; }
+    .link-box { background: white; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #059669; }
+    .btn { display: inline-block; padding: 12px 24px; background: #059669; color: white; text-decoration: none; border-radius: 6px; margin: 10px 0; }
     .footer { padding: 20px; text-align: center; font-size: 12px; color: #666; }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
-      <h1>Submission Approved!</h1>
+      <h1>Your Submission is Live!</h1>
     </div>
     <div class="content">
-      <p>Dear ${data.submitterName},</p>
-      <p>Great news! Your submission has been approved and is now live on our platform.</p>
-      <p><strong>Submission Details:</strong></p>
-      <ul>
-        <li>Type: ${data.submissionType}</li>
-        <li>Title: ${data.title}</li>
-        <li>Approved Date: ${data.approvedDate}</li>
-      </ul>
-      <p>Thank you for contributing to our community!</p>
+      <p>Hi ${data.name || data.submitterName},</p>
+      <p>Great news! Your <strong>${data.submissionType}</strong> has been published.</p>
+      <div class="link-box">
+        ${data.title ? `<p><strong>${data.title}</strong></p>` : ''}
+        ${data.url ? `<p><a href="${data.url}" class="btn">View Your Published Content</a></p>` : ''}
+        ${data.url ? `<p style="font-size: 12px; color: #666;">Link: ${data.url}</p>` : ''}
+      </div>
+      <p>Thank you for contributing to our community and advancing gender justice!</p>
       <p>Best regards,<br>The Equality Vanguard Team</p>
     </div>
     <div class="footer">
@@ -649,13 +664,14 @@ async function renderApplicationConfirmation(data: any): Promise<string> {
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Application Received</title>
+  <title>We received your application for ${data.jobTitle}</title>
   <style>
     body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
     .container { max-width: 600px; margin: 0 auto; padding: 20px; }
     .header { background: #4f46e5; color: white; padding: 20px; text-align: center; }
     .content { padding: 20px; background: #f9fafb; }
-    .application-details { background: white; padding: 15px; border-radius: 8px; margin: 15px 0; }
+    .application-details { background: white; padding: 20px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #4f46e5; }
+    .timeline { background: #e0f2fe; padding: 15px; border-radius: 6px; margin: 15px 0; }
     .footer { padding: 20px; text-align: center; font-size: 12px; color: #666; }
   </style>
 </head>
@@ -665,16 +681,19 @@ async function renderApplicationConfirmation(data: any): Promise<string> {
       <h1>Application Received!</h1>
     </div>
     <div class="content">
-      <p>Dear ${data.applicantName},</p>
-      <p>Thank you for your interest in joining Equality Vanguard!</p>
+      <p>Hi ${data.applicantName || data.name},</p>
+      <p>We received your application for <strong>${data.jobTitle}</strong>.</p>
       <div class="application-details">
-        <h3>Application Details</h3>
         <p><strong>Position:</strong> ${data.jobTitle}</p>
-        <p><strong>Application Date:</strong> ${data.applicationDate}</p>
+        <p><strong>Application Date:</strong> ${data.applicationDate || new Date().toLocaleDateString()}</p>
         <p><strong>Status:</strong> Under Review</p>
       </div>
-      <p>We have received your application and our team will review it carefully. We will get back to you as soon as possible.</p>
-      <p>If you have any questions, please don't hesitate to contact us.</p>
+      <div class="timeline">
+        <h4>📋 Next Steps</h4>
+        <p><strong>Timeline:</strong> ${data.timeline || 'We will review your application within 2-3 weeks and contact shortlisted candidates.'}</p>
+        <p>Our team will carefully review your application and get back to you with an update.</p>
+      </div>
+      <p>Thank you for your interest in joining Equality Vanguard!</p>
       <p>Best regards,<br>The Equality Vanguard Team</p>
     </div>
     <div class="footer">
