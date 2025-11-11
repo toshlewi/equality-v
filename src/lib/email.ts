@@ -5,10 +5,19 @@ let resendClient: Resend | null = null;
 
 function getResendClient(): Resend {
   if (!resendClient) {
-    if (!process.env.RESEND_API_KEY) {
-      throw new Error('RESEND_API_KEY environment variable is not set');
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) {
+      // During build time, return a mock client to prevent build failures
+      if (process.env.NODE_ENV === 'production' && !process.env.RESEND_API_KEY) {
+        console.warn('RESEND_API_KEY not set - email functionality will be disabled');
+        // Return a mock client that won't be used during build
+        resendClient = new Resend('re_mock_key_for_build');
+      } else {
+        throw new Error('RESEND_API_KEY environment variable is not set');
+      }
+    } else {
+      resendClient = new Resend(apiKey);
     }
-    resendClient = new Resend(process.env.RESEND_API_KEY);
   }
   return resendClient;
 }

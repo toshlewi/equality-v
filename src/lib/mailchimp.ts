@@ -1,10 +1,12 @@
 import mailchimp from '@mailchimp/mailchimp_marketing';
 
-// Initialize Mailchimp
-mailchimp.setConfig({
-  apiKey: process.env.MAILCHIMP_API_KEY,
-  server: process.env.MAILCHIMP_SERVER_PREFIX || 'us1',
-});
+// Initialize Mailchimp only if API key is available
+if (process.env.MAILCHIMP_API_KEY) {
+  mailchimp.setConfig({
+    apiKey: process.env.MAILCHIMP_API_KEY,
+    server: process.env.MAILCHIMP_SERVER_PREFIX || 'us1',
+  });
+}
 
 export interface SubscriberData {
   email: string;
@@ -43,6 +45,13 @@ export interface ListMember {
 }
 
 /**
+ * Check if Mailchimp is configured
+ */
+export function isMailchimpConfigured(): boolean {
+  return !!(process.env.MAILCHIMP_API_KEY && process.env.MAILCHIMP_LIST_ID);
+}
+
+/**
  * Get subscriber hash for email
  */
 export function getSubscriberHash(email: string): string {
@@ -56,6 +65,11 @@ export async function addSubscriber(
   listId: string, 
   subscriberData: SubscriberData
 ): Promise<{ success: boolean; memberId?: string; error?: string }> {
+  if (!isMailchimpConfigured()) {
+    console.warn('Mailchimp not configured, skipping subscriber addition');
+    return { success: false, error: 'Mailchimp not configured' };
+  }
+
   try {
     const response = await mailchimp.lists.addListMember(listId, {
       email_address: subscriberData.email,
@@ -97,6 +111,10 @@ export async function getSubscriber(
   listId: string,
   subscriberHash: string
 ): Promise<{ success: boolean; subscriber?: ListMember; error?: string }> {
+  if (!isMailchimpConfigured()) {
+    return { success: false, error: 'Mailchimp not configured' };
+  }
+
   try {
     const response = await mailchimp.lists.getListMember(listId, subscriberHash);
     return {
@@ -130,6 +148,10 @@ export async function getSubscribers(
     search?: string;
   } = {}
 ): Promise<{ success: boolean; subscribers?: ListMember[]; total?: number; error?: string }> {
+  if (!isMailchimpConfigured()) {
+    return { success: false, error: 'Mailchimp not configured' };
+  }
+
   try {
     const params: any = {
       status: options.status || 'subscribed',
@@ -174,6 +196,10 @@ export async function updateSubscriber(
   subscriberHash: string,
   subscriberData: Partial<SubscriberData>
 ): Promise<{ success: boolean; error?: string }> {
+  if (!isMailchimpConfigured()) {
+    return { success: false, error: 'Mailchimp not configured' };
+  }
+
   try {
     await mailchimp.lists.updateListMember(listId, subscriberHash, {
       merge_fields: {
@@ -201,6 +227,10 @@ export async function removeSubscriber(
   listId: string,
   subscriberHash: string
 ): Promise<{ success: boolean; error?: string }> {
+  if (!isMailchimpConfigured()) {
+    return { success: false, error: 'Mailchimp not configured' };
+  }
+
   try {
     await mailchimp.lists.deleteListMember(listId, subscriberHash);
     return { success: true };
@@ -221,6 +251,10 @@ export async function addTags(
   subscriberHash: string,
   tags: string[]
 ): Promise<{ success: boolean; error?: string }> {
+  if (!isMailchimpConfigured()) {
+    return { success: false, error: 'Mailchimp not configured' };
+  }
+
   try {
     await mailchimp.lists.updateListMemberTags(listId, subscriberHash, {
       tags: tags.map(tag => ({ name: tag, status: 'active' }))
@@ -244,6 +278,10 @@ export async function removeTags(
   subscriberHash: string,
   tags: string[]
 ): Promise<{ success: boolean; error?: string }> {
+  if (!isMailchimpConfigured()) {
+    return { success: false, error: 'Mailchimp not configured' };
+  }
+
   try {
     await mailchimp.lists.updateListMemberTags(listId, subscriberHash, {
       tags: tags.map(tag => ({ name: tag, status: 'inactive' }))
@@ -265,6 +303,10 @@ export async function removeTags(
 export async function createCampaign(
   campaignData: CampaignData
 ): Promise<{ success: boolean; campaignId?: string; error?: string }> {
+  if (!isMailchimpConfigured()) {
+    return { success: false, error: 'Mailchimp not configured' };
+  }
+
   try {
     const response = await mailchimp.campaigns.create({
       type: 'regular',
