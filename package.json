@@ -23,6 +23,7 @@
     "test:mpesa-callback": "tsx src/scripts/test-mpesa-callback.ts",
     "test:email": "tsx src/scripts/test-email-sending.ts",
     "test:mailchimp": "tsx src/scripts/test-mailchimp-api.ts",
+    "test:notifications": "tsx src/scripts/test-notifications.ts",
     "verify:integrations": "tsx src/scripts/verify-integrations.ts",
     "test": "echo \"No tests specified\" && exit 0",
     "test:integration": "jest --testPathPattern=tests/integration",
