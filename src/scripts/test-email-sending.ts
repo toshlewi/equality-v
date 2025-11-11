@@ -7,6 +7,9 @@ dotenv.config({ path: '.env.local' });
 
 import { sendEmail } from '../lib/email';
 
+// Helper function to add delay between requests
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 async function testEmailSending() {
   try {
     console.log('📧 Testing Resend email delivery...\n');
@@ -20,7 +23,7 @@ async function testEmailSending() {
 
     const testEmail = process.env.ADMIN_EMAIL || 'test@example.com';
     console.log('Sending test email to:', testEmail);
-    console.log('');
+    console.log('Note: Adding 1-second delays between emails to avoid rate limits\n');
 
     // Test 1: Membership confirmation email
     console.log('Test 1: Membership Confirmation Email');
@@ -47,6 +50,9 @@ async function testEmailSending() {
     }
     console.log('');
 
+    // Wait 1 second to avoid rate limit
+    await delay(1000);
+
     // Test 2: Donation receipt email
     console.log('Test 2: Donation Receipt Email');
     const donationResult = await sendEmail({
@@ -71,6 +77,9 @@ async function testEmailSending() {
       console.log('   Error:', donationResult.error);
     }
     console.log('');
+
+    // Wait 1 second to avoid rate limit
+    await delay(1000);
 
     // Test 3: Event registration email with .ics attachment
     console.log('Test 3: Event Registration Email with Calendar Invite');
@@ -112,6 +121,9 @@ async function testEmailSending() {
       console.log('   Error:', eventResult.error);
     }
     console.log('');
+
+    // Wait 1 second to avoid rate limit
+    await delay(1000);
 
     // Test 4: Admin notification email
     console.log('Test 4: Admin Notification Email');

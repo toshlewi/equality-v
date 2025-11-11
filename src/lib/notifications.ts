@@ -30,7 +30,7 @@ export async function createNotification(data: NotificationData): Promise<{ succ
     await connectDB();
 
     const notification = new Notification({
-      recipient: data.userId,
+      userId: data.userId,
       type: data.type,
       title: data.title,
       message: data.message,
@@ -38,8 +38,13 @@ export async function createNotification(data: NotificationData): Promise<{ succ
       priority: data.priority || 'medium',
       category: data.category || 'general',
       actionUrl: data.actionUrl,
-      status: 'unread',
-      deliveryChannels: ['in_app']
+      read: false,
+      channels: {
+        inApp: true,
+        email: false,
+        sms: false,
+        push: false
+      }
     });
 
     await notification.save();
@@ -69,9 +74,9 @@ export async function getNotifications(filters: NotificationFilters): Promise<{ 
 
     const query: any = {};
     
-    if (filters.userId) query.recipient = filters.userId;
+    if (filters.userId) query.userId = filters.userId;
     if (filters.type) query.type = filters.type;
-    if (filters.status) query.status = filters.status;
+    if (filters.status) query.read = filters.status === 'read';
     if (filters.priority) query.priority = filters.priority;
     if (filters.category) query.category = filters.category;
 
@@ -82,7 +87,7 @@ export async function getNotifications(filters: NotificationFilters): Promise<{ 
       .sort({ createdAt: -1 })
       .limit(limit)
       .skip(offset)
-      .populate('recipient', 'name email role');
+      .populate('userId', 'name email role');
 
     const total = await Notification.countDocuments(query);
 
@@ -93,7 +98,7 @@ export async function getNotifications(filters: NotificationFilters): Promise<{ 
         type: notification.type,
         title: notification.title,
         message: notification.message,
-        status: notification.status,
+        status: notification.read ? 'read' : 'unread',
         priority: notification.priority,
         category: notification.category,
         actionUrl: notification.actionUrl,
@@ -121,10 +126,10 @@ export async function markAsRead(notificationId: string, userId: string): Promis
     const notification = await Notification.findOneAndUpdate(
       { 
         _id: notificationId, 
-        recipient: userId 
+        userId: userId 
       },
       { 
-        status: 'read',
+        read: true,
         readAt: new Date()
       },
       { new: true }
@@ -156,11 +161,11 @@ export async function markAllAsRead(userId: string): Promise<{ success: boolean;
 
     await Notification.updateMany(
       { 
-        recipient: userId,
-        status: 'unread'
+        userId: userId,
+        read: false
       },
       { 
-        status: 'read',
+        read: true,
         readAt: new Date()
       }
     );
@@ -184,7 +189,7 @@ export async function deleteNotification(notificationId: string, userId: string)
 
     const notification = await Notification.findOneAndDelete({
       _id: notificationId,
-      recipient: userId
+      userId: userId
     });
 
     if (!notification) {
@@ -212,8 +217,8 @@ export async function getUnreadCount(userId: string): Promise<{ success: boolean
     await connectDB();
 
     const count = await Notification.countDocuments({
-      recipient: userId,
-      status: 'unread'
+      userId: userId,
+      read: false
     });
 
     return {
@@ -245,7 +250,7 @@ export async function createAdminNotification(data: Omit<NotificationData, 'user
 
     // Create notification for each admin
     const notifications = adminUsers.map(admin => ({
-      recipient: admin._id.toString(),
+      userId: admin._id,
       type: data.type,
       title: data.title,
       message: data.message,
@@ -253,8 +258,13 @@ export async function createAdminNotification(data: Omit<NotificationData, 'user
       priority: data.priority || 'medium',
       category: data.category || 'admin',
       actionUrl: data.actionUrl,
-      status: 'unread',
-      deliveryChannels: ['in_app', 'email']
+      read: false,
+      channels: {
+        inApp: true,
+        email: true,
+        sms: false,
+        push: false
+      }
     }));
 
     await Notification.insertMany(notifications);
@@ -288,7 +298,7 @@ export async function createRoleNotification(
 
     // Create notification for each user
     const notifications = users.map(user => ({
-      recipient: user._id.toString(),
+      userId: user._id,
       type: data.type,
       title: data.title,
       message: data.message,
@@ -296,8 +306,13 @@ export async function createRoleNotification(
       priority: data.priority || 'medium',
       category: data.category || 'general',
       actionUrl: data.actionUrl,
-      status: 'unread',
-      deliveryChannels: ['in_app']
+      read: false,
+      channels: {
+        inApp: true,
+        email: false,
+        sms: false,
+        push: false
+      }
     }));
 
     await Notification.insertMany(notifications);
@@ -324,7 +339,7 @@ export async function cleanupOldNotifications(daysOld: number = 30): Promise<{ s
 
     const result = await Notification.deleteMany({
       createdAt: { $lt: cutoffDate },
-      status: 'read'
+      read: true
     });
 
     return {
